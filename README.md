@@ -31,9 +31,9 @@ a flexible and light tampermonkey plugin for xuexiqingguo.
 
 2. 点击 `开始学习`，等待完成学习
 
-3. 信息显示
+3. 完成学习
 
-![信息显示](./done.png)
+![完成学习](./done.png)
 
 ### 已知问题
 

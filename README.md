@@ -8,7 +8,7 @@
 
 有趣的 `学习强国` 油猴插件。
 
-a flexible and light tampermonkey plugin for xuexiqingguo.
+a flexible and light tampermonkey plugin for xuexiqiangguo.
 
 ### 用法 Usage
 

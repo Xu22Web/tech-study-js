@@ -1,9 +1,11 @@
 # tech-study.js
 
-# 描述 description
+### 描述 Description
 
-学习强国油猴插件 a flexible and light Tampermonkey plugin for xuexiqingguo
+有趣的学习强国油猴插件。
 
-# 用法 usage
+a flexible and light Tampermonkey plugin for xuexiqingguo.
 
-复制 `tech-study.js` 文件内容，新建油猴脚本使用
+### 用法 Usage
+
+复制 `tech-study.js` 文件内容，新建油猴脚本使用。

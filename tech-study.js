@@ -2,7 +2,7 @@
 // @name         不学习何以强国
 // @namespace    http://tampermonkey.net/
 // @version      20220810
-// @description  问题反馈位置： https://github.com/TechXueXi/techxuexi-js/issues 。读文章,看视频，做习题。
+// @description  问题反馈位置： https://github.com/Xu22Web/tech-study-js/issues 。读文章,看视频，做习题。
 // @author       原作者 techxuexi 荷包蛋。
 // @match        https://www.xuexi.cn
 // @match        https://www.xuexi.cn/*

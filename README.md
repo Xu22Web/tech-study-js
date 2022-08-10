@@ -35,6 +35,6 @@ a flexible and light tampermonkey plugin for xuexiqingguo.
 
 ![完成学习](./done.png)
 
-### 已知问题 issues
+### 已知问题 Issues
 
 答题练习有时会发生错误，因此增加了暂停答题，切换手动作答，后续会优化。

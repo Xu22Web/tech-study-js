@@ -16,14 +16,14 @@ a flexible and light tampermonkey plugin for xuexiqingguo.
 2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 `tech-study.js` 脚本复制粘贴进编辑框保存。
 3. 开启这个脚本，然后进入网页强国 `www.xuexi.cn` ，登录网页。
 
-### 优化
+### 优化 Promote
 
 1. 优化整体交互设计，新增一体式扫码登录
 2. 新增用户信息显示，包括昵称、头像、总分以及当天分数
 3. 新增任务进度显示，优化显示逻辑
 4. 修复部分小 bug，优化答题逻辑
 
-### 使用流程
+### 使用流程 Process
 
 1. 登录
 
@@ -35,6 +35,6 @@ a flexible and light tampermonkey plugin for xuexiqingguo.
 
 ![完成学习](./done.png)
 
-### 已知问题
+### 已知问题 issues
 
 答题练习有时会发生错误，因此增加了暂停答题，切换手动作答，后续会优化。

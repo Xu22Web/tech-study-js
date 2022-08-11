@@ -816,7 +816,6 @@ $(document).ready(async () => {
           temp.video.muted = true;
         }
         if (temp.video.paused) {
-          temp.video.paused = false;
           console.log('正在尝试播放视频');
           if (randNum == 0) {
             // 尝试使用js的方式播放

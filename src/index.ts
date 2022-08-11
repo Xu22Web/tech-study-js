@@ -1,263 +1,15 @@
-import css from './css/index.css?raw';
-// ==UserScript==
-// @name         不学习何以强国
-// @namespace    http://tampermonkey.net/
-// @version      20220810
-// @description  问题反馈位置： https://github.com/Xu22Web/tech-study-js/issues 。读文章,看视频，做习题。
-// @author       原作者 techxuexi 荷包蛋。
-// @match        https://www.xuexi.cn
-// @match        https://www.xuexi.cn/*
-// @match        https://pc.xuexi.cn/points/exam-practice.html
-// @match        https://pc.xuexi.cn/points/exam-weekly-detail.html?id=*
-// @match        https://pc.xuexi.cn/points/exam-weekly-list.html
-// @match        https://pc.xuexi.cn/points/exam-paper-detail.html?id=*
-// @match        https://pc.xuexi.cn/points/exam-paper-list.html
-// @require      https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js
-// @require      https://cdn.jsdelivr.net/npm/blueimp-md5@2.9.0
-// @require      https://at.alicdn.com/t/font_3029437_1ig5vp3wlvx.js
-// @grant        GM_addStyle
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
-// @grant        GM_openInTab
-// ==/UserScript==
-
-// 嵌入样式
-const study_css = `
-:root{
-  --themeColor: #fa3333;
-}
-.icon {
-  width: 1em; height: 1em;
-  vertical-align: -0.15em;
-  fill: currentColor;
-  overflow: hidden;
-}
-.egg_manual_btn {
-  transition: 0.5s;
-  outline: none;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #e3484b;
-  color: rgb(255, 255, 255);
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-}
-.egg_auto_btn {
-  transition: 0.5s;
-  outline: none;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #666777;
-  color: rgb(255, 255, 255);
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-}
-.egg_setting_box {
-  position: fixed;
-  top: 70px;
-  left: 5px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 0 9px #666777;
-}
-.egg_setting_item {
-  margin-top: 5px;
-  min-height: 30px;
-  min-width: 200px;
-  font-size: 16px;
-  display: flex;
-  justify-items: center;
-  justify-content: space-between;
-}
-.egg_info {
-  flex-direction: column;
-}
-.egg_userinfo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.egg_login_status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.egg_login_status button {
-  outline: none;
-  padding: 4px 8px;
-  background: #ccc;
-  font-size: 14px;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-}
-.egg_login_status.active { 
-  flex-grow: 1;
-}
-.egg_login_status.active button {
-  background: var(--themeColor);
-  padding: 8px 24px;
-}
-.egg_userinfo .egg_user {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5px 0;
-}
-.egg_userinfo .egg_user .egg_sub_nickname,
-.egg_userinfo .egg_user .egg_avatar_img {
-   height: 50px;
-   width: 50px;
-   border-radius: 50%;
-   background: var(--themeColor);
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   text-overflow: ellipsis;
-   overflow: hidden;
-   white-space: nowrap;
-   font-size:20px;
-   color: white;
-}
-.egg_userinfo .egg_user .egg_name {
-   padding-left: 5px;
-   text-overflow: ellipsis;
-   overflow: hidden;
-   white-space: nowrap;
-   max-width: 100px;
-}
-.egg_scoreinfo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 8px;
-}
-.egg_scoreinfo .egg_totalscore,
-.egg_scoreinfo .egg_todayscore {
-  font-size: 12px;
-}
-.egg_scoreinfo span {
-  color: var(--themeColor);
-  padding-left: 4px;
-  font-weight: bold;
-}
-.egg_setting_item label {
-  flex-grow: 1;
-}
-.egg_progress {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 0;
-}
-.egg_progress .egg_track {
-  background: #ccc;
-  height:5px;
-  border-radius: 10px;
-  flex: 1 1 auto;
-  overflow: hidden;
-}
-.egg_progress .egg_track .egg_bar {
-  height:5px;
-  background: var(--themeColor);
-  border-radius: 10px;
-  width: 0;
-  transition:width 0.5s;
-}
-.egg_progress .egg_percent {
-  font-size: 12px;
-  padding-left: 5px;
-  width: 35px;
-}  
-input[type='checkbox'].egg_setting_switch {
-  cursor: pointer;
-  margin: 0;
-  outline: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  position: relative;
-  width: 42px;
-  height: 22px;
-  background: #ccc;
-  border-radius: 50px;
-  transition: background 0.3s;
-  --border-padding: 5px;
-}
-input[type='checkbox'].egg_setting_switch::after {
-  content: '';
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 2px #999;
-  transition: 0.4s;
-  position: absolute;
-  top: calc(50% - (1rem / 2));
-  position: absolute;
-  left: var(--border-padding);
-}
-input[type='checkbox'].egg_setting_switch:checked {
-  background: var(--themeColor);
-}
-input[type='checkbox'].egg_setting_switch:checked::after {
-  left: calc(100% - var(--border-padding) - 1rem);
-}
-.egg_start_btn {
-  justify-content: center;
-}
-.egg_study_btn {
-  outline: none;
-  background: var(--themeColor);
-  padding: 8px 24px;
-  font-size: 14px;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.egg_study_btn:hover {
-  opacity: .8;
-}
-@keyframes fade {
-  from {
-    opacity: .8;
-   
-  }
-  to {
-    opacity: .4;
-    background: #ccc;
-  }
-}
-.egg_study_btn.loading {
-  animation: fade 2s ease infinite alternate;
-}
-.egg_study_btn.disabled {
-  background: #ccc;
-}
-`;
+import study_css from './css/index.css?raw';
 GM_addStyle(study_css);
 
 /* Config·配置 */
-// 重要新闻列表（主）
-const NewsUrl1 = 'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json';
-// 学习时评新闻列表
-const NewsUrl2 = 'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json';
-// 新闻视频列表
-const VideosUrl1 = 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json';
-// 新闻视频列表
-const VideosUrl2 = 'https://www.xuexi.cn/lgdata/1742g60067k.json';
+// // 重要新闻列表（主）
+// const NewsUrl1 = 'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json';
+// // 学习时评新闻列表
+// const NewsUrl2 = 'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json';
+// // 新闻视频列表
+// const VideosUrl1 = 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json';
+// // 新闻视频列表
+// const VideosUrl2 = 'https://www.xuexi.cn/lgdata/1742g60067k.json';
 // 主页
 const indexMatch = [
   'https://www.xuexi.cn',
@@ -306,13 +58,13 @@ const API_CONFIG = {
 // 每周答题当前页码
 let examWeeklyPageNo = 1;
 // 每周答题总页码
-let examWeeklyTotalPageCount = null;
+let examWeeklyTotalPageCount = -1;
 // 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
 let examWeeklyReverse = true;
 // 专项练习当前页码
 let examPaperPageNo = 1;
 // 专项练习总页码
-let examPaperTotalPageCount = null;
+let examPaperTotalPageCount = -1;
 // 专 项答题开启逆序答题: false: 顺序答题; true: 逆序答题
 let examPaperReverse = true;
 // 每周答题，专项练习 请求rate 限制 每 3000ms 一次
@@ -321,7 +73,7 @@ const ratelimitms = 3000;
 
 /* Tools·工具函数  */
 // 获取cookie
-function getCookie(name) {
+function getCookie(name: string) {
   // 获取当前所有cookie
   const strCookies = document.cookie;
   // 截取变成cookie数组
@@ -338,7 +90,7 @@ function getCookie(name) {
   return null;
 }
 // 删除cookie
-function delCookie(name) {
+function delCookie(name: string) {
   const exp = new Date();
   exp.setTime(exp.getTime() - 1);
   // 获取cookie是否存在
@@ -348,9 +100,9 @@ function delCookie(name) {
   }
 }
 // 防抖
-function debounce(callback, delay) {
-  let timer = -1;
-  return function (...args) {
+function debounce(callback: (...args: any[]) => void, delay: number) {
+  let timer: any;
+  return function (this: any, ...args: any[]) {
     if (timer !== -1) {
       clearTimeout(timer);
     }
@@ -360,7 +112,7 @@ function debounce(callback, delay) {
   };
 }
 // 选择器
-function $$(selector) {
+function $$(selector: string) {
   return document.querySelectorAll(selector);
 }
 // 默认情况下, chrome 只允许 window.close 关闭 window.open 打开的窗口,所以我们就要用window.open命令,在原地网页打开自身窗口再关上,就可以成功关闭了
@@ -368,12 +120,12 @@ function closeWin() {
   try {
     window.opener = window;
     var win = window.open('', '_self');
-    win.close();
-    top.close();
+    win?.close();
+    top?.close();
   } catch (e) {}
 }
 // 等待窗口关闭
-function waitingClose(newPage) {
+function waitingClose(newPage: Tampermonkey.OpenTabObject) {
   return new Promise((resolve) => {
     let doing = setInterval(function () {
       if (newPage.closed) {
@@ -384,7 +136,7 @@ function waitingClose(newPage) {
   });
 }
 // 等待时间
-function waitingTime(time) {
+function waitingTime(time: number) {
   if (!Number.isInteger(time)) {
     time = 1000;
   }
@@ -395,7 +147,7 @@ function waitingTime(time) {
   });
 }
 // 暂停锁
-function pauseLock(callback) {
+function pauseLock(callback?: (res: string) => void) {
   return new Promise((resolve) => {
     const doing = setInterval(() => {
       if (!pause) {
@@ -416,7 +168,7 @@ function pauseLock(callback) {
   });
 }
 // 暂停学习锁
-function pauseStudyLock(callback) {
+function pauseStudyLock(callback?: (res: string) => void) {
   return new Promise((resolve) => {
     const doing = setInterval(() => {
       if (!pauseStudy) {
@@ -437,7 +189,12 @@ function pauseStudyLock(callback) {
   });
 }
 // 创建元素节点
-function creatElementNode(eleName, props, attrs, children) {
+function creatElementNode(
+  eleName: string,
+  props?: { [key: string]: any } | null,
+  attrs?: { [key: string]: any } | null,
+  children?: Node | Node[]
+) {
   // 元素
   let ele;
   // 格式化元素名
@@ -474,7 +231,7 @@ function creatElementNode(eleName, props, attrs, children) {
   for (const key in props) {
     if (props[key] instanceof Object) {
       for (const subkey in props[key]) {
-        ele[key][subkey] = props[key][subkey];
+        ele[<keyof typeof ele>key][subkey] = props[key][subkey];
       }
     } else {
       ele[key] = props[key];
@@ -548,7 +305,7 @@ function creatElementNode(eleName, props, attrs, children) {
   return ele;
 }
 // 创建文字节点
-function createTextNode(...text) {
+function createTextNode(...text: string[]) {
   if (text && text.length === 1) {
     return document.createTextNode(text[0]);
   }
@@ -647,9 +404,9 @@ async function getTodayVideos() {
   }
 }
 // 专项练习数据
-async function getExamPaper(pageNo) {
+async function getExamPaper(pageNo: number) {
   // 链接
-  const url = API_CONFIG.paperList.replace('{pageNo}', pageNo);
+  const url = API_CONFIG.paperList.replace('{pageNo}', String(pageNo));
   // 获取重要新闻
   const res = await fetch(url, {
     method: 'GET',
@@ -671,9 +428,9 @@ async function getExamPaper(pageNo) {
   return [];
 }
 // 每周答题数据
-async function getExamWeekly(pageNo) {
+async function getExamWeekly(pageNo: number) {
   // 链接
-  const url = API_CONFIG.weeklyList.replace('{pageNo}', pageNo);
+  const url = API_CONFIG.weeklyList.replace('{pageNo}', String(pageNo));
   // 获取重要新闻
   const res = await fetch(url, {
     method: 'GET',
@@ -696,7 +453,7 @@ async function getExamWeekly(pageNo) {
 }
 
 // 保存答案
-async function saveAnswer(key, value) {
+async function saveAnswer(key: string, value: string) {
   // 内容
   const content = JSON.stringify([{ title: key, content: value }]);
   return new Promise(function (resolve) {
@@ -721,7 +478,7 @@ async function saveAnswer(key, value) {
 }
 
 // 获取答案
-async function getAnswer(key) {
+async function getAnswer(key: string) {
   return new Promise(function (resolve) {
     $.ajax({
       type: 'POST',
@@ -746,7 +503,11 @@ async function getAnswer(key) {
 // 获取当前日期
 const currDate = new Date().toISOString().split('T')[0];
 // 任务进度
-const tasks = [];
+const tasks: {
+  status: boolean;
+  currentScore: number;
+  dayMaxScore: number;
+}[] = [];
 // 获取URL
 const url = window.location.href;
 // 设置
@@ -762,11 +523,11 @@ let userInfo;
 // 新闻数
 let newsNum = 6;
 // 新闻
-let news = [];
+let news: any[] = [];
 // 视频数
 let videoNum = 6;
 // 视频
-let videos = [];
+let videos: any[] = [];
 
 // dom加载
 $(document).ready(async () => {
@@ -816,7 +577,7 @@ $(document).ready(async () => {
           temp.video.muted = true;
         }
         if (temp.video.paused) {
-          temp.video.paused = false;
+          temp.video.play();
           console.log('正在尝试播放视频');
           if (randNum == 0) {
             // 尝试使用js的方式播放
@@ -826,7 +587,7 @@ $(document).ready(async () => {
             randNum++;
           } else {
             try {
-              temp.pauseButton.click(); // 尝试点击播放按钮播放
+              temp.pauseButton?.click(); // 尝试点击播放按钮播放
             } catch (e) {}
             randNum--;
           }
@@ -858,23 +619,30 @@ $(document).ready(async () => {
 
 // 获取video标签
 function getVideoTag() {
-  let iframe = $$('iframe')[0];
-  let video = null;
-  let pauseButton = null;
+  // 窗口
+  let iframe = <HTMLIFrameElement>$$('iframe')[0];
+  // 视频
+  let video: HTMLVideoElement | null = null;
+  // 暂停按钮
+  let pauseButton: HTMLButtonElement | null = null;
+  // 用户代理
   var u = navigator.userAgent;
   if (u.indexOf('Mac') > -1) {
     // Mac
     if (iframe !== null && iframe.innerHTML) {
       // 如果有iframe,说明外面的video标签是假的
-      video = iframe.contentWindow.document.getElementsByTagName('video')[0];
-      pauseButton =
-        iframe.contentWindow.document.getElementsByClassName(
+      video = <HTMLVideoElement>(
+        iframe.contentWindow?.document.getElementsByTagName('video')[0]
+      );
+      pauseButton = <HTMLButtonElement>(
+        iframe.contentWindow?.document.getElementsByClassName(
           'prism-play-btn'
-        )[0];
+        )[0]
+      );
     } else {
       // 否则这个video标签是真的
-      video = $$('video')[0];
-      pauseButton = $$('.prism-play-btn')[0];
+      video = <HTMLVideoElement>$$('video')[0];
+      pauseButton = <HTMLButtonElement>$$('.prism-play-btn')[0];
     }
     return {
       video: video,
@@ -883,15 +651,18 @@ function getVideoTag() {
   } else {
     if (iframe) {
       // 如果有iframe,说明外面的video标签是假的
-      video = iframe.contentWindow.document.getElementsByTagName('video')[0];
-      pauseButton =
-        iframe.contentWindow.document.getElementsByClassName(
+      video = <HTMLVideoElement>(
+        iframe.contentWindow?.document.getElementsByTagName('video')[0]
+      );
+      pauseButton = <HTMLButtonElement>(
+        iframe.contentWindow?.document.getElementsByClassName(
           'prism-play-btn'
-        )[0];
+        )[0]
+      );
     } else {
       // 否则这个video标签是真的
-      video = $$('video')[0];
-      pauseButton = $$('.prism-play-btn')[0];
+      video = <HTMLVideoElement>$$('video')[0];
+      pauseButton = <HTMLButtonElement>$$('.prism-play-btn')[0];
     }
     return {
       video: video,
@@ -902,7 +673,7 @@ function getVideoTag() {
 
 // 读新闻或者看视频
 // type:0为新闻，1为视频
-async function reading(type) {
+async function reading(type: number) {
   // 看文章或者视频
   let time = 1;
   if (type == 0) {
@@ -947,10 +718,14 @@ async function reading(type) {
   // 关闭文章或视频页面
 }
 // 创建学习提示
-async function createTip(text, delay) {
-  return new Promise((resolve, reject) => {
+async function createTip(text?: string, delay?: number) {
+  return new Promise<{
+    destroy(): void;
+    hide(): void;
+    show(): void;
+  }>((resolve, reject) => {
     // 提示
-    let tipInfo = creatElementNode(
+    let tipInfo: HTMLElement | null = creatElementNode(
       'div',
       {
         style: {
@@ -970,32 +745,33 @@ async function createTip(text, delay) {
       { id: 'studyTip' }
     );
     // 插入节点
-    document.body.append(tipInfo);
+    document.body.append(<HTMLElement>tipInfo);
+    // 操作
+    const operate = {
+      destroy() {
+        tipInfo?.remove();
+        tipInfo = null;
+      },
+      hide() {
+        if (tipInfo) {
+          tipInfo.style.display = 'none';
+        }
+      },
+      show() {
+        if (tipInfo) {
+          tipInfo.style.display = 'block';
+        }
+      },
+    };
+    // 存在延时
     if (delay && delay >= 0) {
       setTimeout(() => {
-        // 操作
-        const operate = {
-          destroy() {
-            tipInfo.remove();
-            tipInfo = null;
-          },
-          hide() {
-            if (tipInfo) {
-              tipInfo.style.display = 'none';
-            }
-          },
-          show() {
-            if (tipInfo) {
-              tipInfo.style.display = 'block';
-            }
-          },
-        };
         operate.hide();
         resolve(operate);
       }, delay);
       return;
     }
-    resolve(false);
+    resolve(operate);
   });
 }
 
@@ -1141,7 +917,7 @@ async function doExamPractice() {
 }
 
 // fix code = 429
-async function waitingDependStartTime(startTime) {
+async function waitingDependStartTime(startTime: number) {
   let remainms = Date.now() - startTime;
   if (remainms < ratelimitms) {
     await waitingTime(ratelimitms - remainms + 1000);
@@ -1361,10 +1137,12 @@ function doExamPaper() {
 }
 // 获取答题按钮
 function getNextButton() {
-  return new Promise(function (resolve) {
+  return new Promise<HTMLButtonElement>(function (resolve) {
     let nextInterVal = setInterval(() => {
       // 答题按钮
-      const nextAll = [...$$('.ant-btn')].filter((next) => next.textContent);
+      const nextAll: HTMLButtonElement[] = [...(<any>$$('.ant-btn'))].filter(
+        (next) => next.textContent
+      );
       if (nextAll.length) {
         clearInterval(nextInterVal); // 停止定时器
         resolve(nextAll[0]);
@@ -1374,6 +1152,9 @@ function getNextButton() {
 }
 // 暂停答题
 function pauseExam() {
+  const manualButton = <HTMLButtonElement>(
+    document.querySelector('#manualButton')
+  );
   console.log('自动答题失败，切换为手动');
   pause = true;
   manualButton.innerText = '开启自动答题';
@@ -1382,7 +1163,7 @@ function pauseExam() {
 
 // 答题过程(整合)
 async function doingExam() {
-  let nextButton;
+  let nextButton: HTMLButtonElement;
   let shouldSaveAnswer = false;
   while (true) {
     // 先等等再开始做题
@@ -1392,23 +1173,23 @@ async function doingExam() {
     nextButton = await getNextButton();
     // 结束
     const finish = ['再练一次', '再来一组', '查看解析'];
-    if (finish.includes(nextButton.textContent)) {
+    if (finish.includes(String(nextButton.textContent))) {
       break;
     }
     // 点击提示
-    $$('.tips')[0]?.click();
+    (<HTMLButtonElement>$$('.tips')[0])?.click();
     // 所有提示
-    const allTips = $$('font[color=red]');
+    const allTips = <NodeListOf<HTMLElement>>$$('font[color=red]');
     // 等待一段时间
     await waitingTime(1500);
     // 选项按钮
-    const allbuttons = $$('.q-answer');
+    const allbuttons = <NodeListOf<HTMLButtonElement>>$$('.q-answer');
     // 获取所有填空
     const blanks = $$('input[type=text][class=blank]');
 
     // 获取问题类型
     const questionType = $$('.q-header')[0].textContent
-      ? $$('.q-header')[0].textContent.substr(0, 3)
+      ? $$('.q-header')[0].textContent?.substr(0, 3)
       : '';
 
     switch (questionType) {
@@ -1421,12 +1202,12 @@ async function doingExam() {
             // 如果没有提示，先获取看看有没有答案
             try {
               // 尝试点击视频播放按钮,播不播都没关系
-              $$('.outter')[0].click();
+              (<HTMLButtonElement>$$('.outter')[0]).click();
             } catch (e) {}
             // 生成秘钥
             let key = getKey();
             // 尝试获取答案
-            let answerData = await getAnswer(key);
+            let answerData: any = await getAnswer(key);
             if (answerData.status == 0 || answerData == 'error') {
               // 没答案，暂停答题
               pauseExam();
@@ -1468,8 +1249,8 @@ async function doingExam() {
             // 若提示数量比填空的数量多
             // 直接将所有答案整合填进去
             let answer = '';
-            for (let i = 0; i < allTips.length; allTips++) {
-              answer += allTips[i].textContent();
+            for (let i = 0; i < allTips.length; i++) {
+              answer += allTips[i].textContent;
             }
             for (let j = 0; j < blanks.length; j++) {
               blanks[j].setAttribute('value', answer.trim());
@@ -1493,13 +1274,14 @@ async function doingExam() {
             }
           } else {
             try {
+              const video = <HTMLVideoElement>$$('video')[0];
               // 尝试点击视频播放按钮,不过播不播都没关系
-              $$('video')[0].play();
+              video?.play();
             } catch (e) {}
             // 生成秘钥
             const key = getKey();
             // 尝试获取答案
-            let answerData = await getAnswer(key);
+            let answerData: any = await getAnswer(key);
             if (answerData.status == 0 || answerData == 'error') {
               // 暂停答题
               pauseExam();
@@ -1530,17 +1312,17 @@ async function doingExam() {
         if (allTips.length) {
           for (let i = 0; i < allTips.length; i++) {
             let tip = allTips[i];
-            let answer = tip.textContent.trim();
+            let answer = tip.textContent?.trim();
             let hasButton = false;
             if (answer && answer.length > 0) {
               for (let j = 0; j < allbuttons.length; j++) {
                 // 获取按钮
                 let selectButton = allbuttons[j];
                 // 获取按钮的上的答案
-                const buttonAnswer = selectButton.textContent.trim();
+                const buttonAnswer = selectButton.textContent?.trim();
                 if (
                   buttonAnswer == answer ||
-                  buttonAnswer.indexOf(answer) != -1 ||
+                  buttonAnswer?.indexOf(answer) != -1 ||
                   answer.indexOf(buttonAnswer) != -1
                 ) {
                   hasButton = true;
@@ -1571,7 +1353,7 @@ async function doingExam() {
           // 生成秘钥
           const key = getKey();
           // 尝试获取答案
-          let answerData = await getAnswer(key);
+          let answerData: any = await getAnswer(key);
           if (answerData.status == 0 || answerData == 'error') {
             // 暂停答题
             pauseExam();
@@ -1592,10 +1374,10 @@ async function doingExam() {
                   // 获取按钮
                   let selectButton = allbuttons[j];
                   // 获取按钮的上的答案
-                  const buttonAnswer = selectButton.textContent.trim();
+                  const buttonAnswer = selectButton.textContent?.trim();
                   if (
                     buttonAnswer == answer ||
-                    buttonAnswer.indexOf(answer) != -1 ||
+                    buttonAnswer?.indexOf(answer) != -1 ||
                     answer.indexOf(buttonAnswer) != -1
                   ) {
                     hasButton = true;
@@ -1629,17 +1411,17 @@ async function doingExam() {
       }
       case '单选题': {
         if (allTips.length === 1) {
-          const answer = allTips[0].textContent.trim();
+          const answer = allTips[0].textContent?.trim();
           // 长度存在
           if (answer && answer.length > 0) {
             let hasButton = false;
             for (let i = 0; i < allbuttons.length; i++) {
               const radioButton = allbuttons[i];
-              const buttonAnswer = radioButton.textContent.trim();
+              const buttonAnswer = radioButton.textContent?.trim();
               // 对比答案
               if (
                 buttonAnswer == answer ||
-                buttonAnswer.indexOf(answer) != -1 ||
+                buttonAnswer?.indexOf(answer) != -1 ||
                 answer.indexOf(buttonAnswer) != -1
               ) {
                 hasButton = true;
@@ -1665,9 +1447,12 @@ async function doingExam() {
           }
         } else if (allTips.length > 1) {
           // 答案
-          const answerText = [];
+          const answerText: string[] = [];
           for (let i = 0; i < allTips.length; i++) {
-            answerText.push(allTips[i].textContent.trim());
+            const text = allTips[i].textContent?.trim();
+            if (text) {
+              answerText.push(text);
+            }
           }
           // 答案
           const answers = [
@@ -1683,13 +1468,13 @@ async function doingExam() {
             let hasButton = false;
             for (let i = 0; i < allbuttons.length; i++) {
               const radioButton = allbuttons[i];
-              const buttonAnswer = radioButton.textContent.trim();
+              const buttonAnswer = radioButton.textContent?.trim();
               // 对比答案
               if (
                 answers.some(
                   (answer) =>
                     buttonAnswer == answer ||
-                    buttonAnswer.indexOf(answer) != -1 ||
+                    buttonAnswer?.indexOf(answer) != -1 ||
                     answer.indexOf(buttonAnswer) != -1
                 )
               ) {
@@ -1718,7 +1503,7 @@ async function doingExam() {
           // 生成秘钥
           const key = getKey();
           // 尝试获取答案
-          let answerData = await getAnswer(key);
+          let answerData: any = await getAnswer(key);
           if (answerData.status == 0 || answerData == 'error') {
             // 暂停答题
             pauseExam();
@@ -1735,11 +1520,11 @@ async function doingExam() {
               let hasButton = false;
               for (let i = 0; i < allbuttons.length; i++) {
                 const radioButton = allbuttons[i];
-                const buttonAnswer = radioButton.textContent.trim();
+                const buttonAnswer = radioButton.textContent?.trim();
                 // 对比答案
                 if (
                   buttonAnswer == answer ||
-                  buttonAnswer.indexOf(answer) != -1 ||
+                  buttonAnswer?.indexOf(answer) != -1 ||
                   answer.indexOf(buttonAnswer) != -1
                 ) {
                   hasButton = true;
@@ -1780,7 +1565,7 @@ async function doingExam() {
       if (shouldSaveAnswer && $$('.answer')[0]) {
         // 如果应该保存答案
         const key = getKey(); // 获取key
-        const answerTemp = $$('.answer')[0].innerText;
+        const answerTemp = (<HTMLElement>$$('.answer')[0]).innerText;
         const reg = new RegExp(' ', 'g');
         let answer = '';
         try {
@@ -1801,7 +1586,7 @@ async function doingExam() {
       if (nextButton.textContent === '下一题') {
         // 如果应该保存答案
         const key = getKey(); // 获取key
-        const answerTemp = $$('.answer')[0].innerText;
+        const answerTemp = (<HTMLElement>$$('.answer')[0]).innerText;
         const reg = new RegExp(' ', 'g');
         let answer = '';
         try {
@@ -1832,7 +1617,7 @@ async function doingExam() {
 // 获取关键字
 function getKey() {
   // 获取题目的文本内容
-  let key = $$('.q-body')[0].innerText;
+  let key = (<HTMLElement>$$('.q-body')[0]).innerText;
   // 外部引用md5加密
   key = md5(key);
   console.log(key);
@@ -1841,7 +1626,7 @@ function getKey() {
 // 去除答题验证
 function cancelVerify() {
   try {
-    let verifyBox = document.getElementById('nc_mask');
+    let verifyBox = <HTMLElement>document.getElementById('nc_mask');
     verifyBox.id = 'egg_nc_mask';
     verifyBox.innerHTML = '';
     verifyBox.remove();
@@ -1879,11 +1664,13 @@ function createManualButton() {
     }
   );
   // 插入节点
-  title.parentNode.insertBefore(manualButton, title.nextSibling);
+  title.parentNode?.insertBefore(manualButton, title.nextSibling);
 }
 // 点击手动学习按钮
 function clickManualButton() {
-  const manualButton = document.querySelector('#manualButton');
+  const manualButton = <HTMLButtonElement>(
+    document.querySelector('#manualButton')
+  );
   pause = !pause;
   if (pause) {
     manualButton.innerText = '开启自动答题';
@@ -1895,7 +1682,7 @@ function clickManualButton() {
 }
 // 加载用户信息
 async function loadUserInfo() {
-  const egg_userinfo = $('.egg_userinfo');
+  const egg_userinfo = <HTMLElement>document.querySelector('.egg_userinfo');
   egg_userinfo.innerHTML = '';
   // 登录状态
   const loginStatus = creatElementNode('div', null, {
@@ -1906,7 +1693,7 @@ async function loadUserInfo() {
     userInfo = await getUserInfo();
     if (userInfo) {
       const { avatarMediaUrl, nick } = userInfo;
-      const avatarItems = [];
+      const avatarItems: Node[] = [];
       if (avatarMediaUrl) {
         // 图片
         const img = creatElementNode('img', null, {
@@ -1951,7 +1738,7 @@ async function loadUserInfo() {
       {
         type: 'button',
         onclick() {
-          const logged = $$("a[class='logged-link']")[0];
+          const logged = <HTMLButtonElement>$$("a[class='logged-link']")[0];
           logged.click();
         },
       }
@@ -1986,8 +1773,12 @@ async function loadScoreInfo() {
     // 获取当天总分
     const todayScore = await getTodayScore();
     // 更新分数
-    const totalScoreSpan = $$('.egg_scoreinfo .egg_totalscore span')[0];
-    const todayScoreSpan = $$('.egg_scoreinfo .egg_todayscore span')[0];
+    const totalScoreSpan = <HTMLElement>(
+      $$('.egg_scoreinfo .egg_totalscore span')[0]
+    );
+    const todayScoreSpan = <HTMLElement>(
+      $$('.egg_scoreinfo .egg_todayscore span')[0]
+    );
     totalScoreSpan.innerText = totalScore;
     todayScoreSpan.innerText = todayScore;
   }
@@ -2051,9 +1842,11 @@ async function loadTaskList() {
       // 修复每周答题、专项练习做完,进度条显示异常
       if (rate > 0) {
         // 进度条
-        const bar = taskProgressList[i].querySelector('.egg_bar');
+        const bar = <HTMLElement>taskProgressList[i].querySelector('.egg_bar');
         // 百分比
-        const percent = taskProgressList[i].querySelector('.egg_percent');
+        const percent = <HTMLElement>(
+          taskProgressList[i].querySelector('.egg_percent')
+        );
         // 长度
         bar.style.width = `${rate.toFixed(2)}%`;
         // 文字
@@ -2072,7 +1865,7 @@ async function refreshMenu() {
 // 渲染菜单
 async function renderMenu() {
   // 设置项
-  const settingItems = [];
+  const settingItems: Node[] = [];
 
   // 用户信息
   const userinfo = creatElementNode('div', null, { class: 'egg_userinfo' });
@@ -2170,8 +1963,8 @@ async function renderMenu() {
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[i] ? 'checked' : '',
-      onchange(e) {
-        const { checked } = e.target;
+      onchange(e: Event) {
+        const { checked } = <HTMLInputElement>e.target;
         handleCheckChange(checked);
       },
     });
@@ -2217,8 +2010,8 @@ async function renderMenu() {
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[currentIndex] ? 'checked' : '',
-      onchange: (e) => {
-        const { checked } = e.target;
+      onchange: (e: Event) => {
+        const { checked } = <HTMLInputElement>e.target;
         handleCheckChange(checked);
       },
     });
@@ -2292,7 +2085,7 @@ async function renderMenu() {
 
 // 是否显示目录
 function showMenu(isShow = true) {
-  let items = document.getElementsByClassName('egg_menu');
+  let items = <NodeListOf<HTMLButtonElement>>$$('egg_menu');
   for (let i = 0; i < items.length; i++) {
     items[i].style.display = isShow ? 'block' : 'none';
   }
@@ -2311,13 +2104,13 @@ function loginStatus() {
 
 // 登录窗口
 async function loginWindow() {
-  const settingBox = $$('.egg_setting_box')[0];
+  const settingBox = <HTMLElement>$$('.egg_setting_box')[0];
   if (settingBox) {
-    let iframe = settingBox.querySelector('iframe');
+    let iframe = <HTMLIFrameElement>settingBox.querySelector('iframe');
     settingBox.style.width = '200px';
     settingBox.style.overflow = 'hidden';
     if (!iframe) {
-      iframe = creatElementNode('iframe', {
+      iframe = <HTMLIFrameElement>creatElementNode('iframe', {
         style: {
           width: '400px',
           height: '320px',
@@ -2366,8 +2159,8 @@ async function study() {
     }
     if (settings[1] && !tasks[1].status) {
       // 检查视频
-      const temp1 = parseInt(tasks[1].dayMaxScore - tasks[1].currentScore);
-      const temp2 = parseInt(tasks[3].dayMaxScore - tasks[3].currentScore);
+      const temp1 = ~~(tasks[1].dayMaxScore - tasks[1].currentScore);
+      const temp2 = ~~(tasks[3].dayMaxScore - tasks[3].currentScore);
       videoNum = temp1 > temp2 ? temp1 : temp2; // 还需要看多少个视频
       console.log('2.看视频');
       // 暂停
@@ -2397,9 +2190,11 @@ async function study() {
         // 进度条对象
         const taskProgressList = $$('.egg_progress');
         // 进度条
-        const bar = taskProgressList[3].querySelector('.egg_bar');
+        const bar = <HTMLElement>taskProgressList[3].querySelector('.egg_bar');
         // 百分比
-        const percent = taskProgressList[3].querySelector('.egg_percent');
+        const percent = <HTMLElement>(
+          taskProgressList[3].querySelector('.egg_percent')
+        );
         // 长度
         bar.style.width = `100%`;
         // 文字
@@ -2421,9 +2216,11 @@ async function study() {
       // 进度条对象
       const taskProgressList = $$('.egg_progress');
       // 进度条
-      const bar = taskProgressList[3].querySelector('.egg_bar');
+      const bar = <HTMLElement>taskProgressList[3].querySelector('.egg_bar');
       // 百分比
-      const percent = taskProgressList[3].querySelector('.egg_percent');
+      const percent = <HTMLElement>(
+        taskProgressList[3].querySelector('.egg_percent')
+      );
       // 长度
       bar.style.width = `100%`;
       // 文字
@@ -2434,7 +2231,7 @@ async function study() {
 // 暂停任务
 function pauseTask() {
   // 开始按钮
-  const startButton = document.getElementById('startButton');
+  const startButton = <HTMLButtonElement>document.getElementById('startButton');
   pauseStudy = true;
   startButton.innerText = '继续学习';
   startButton.classList.remove('loading');
@@ -2444,7 +2241,7 @@ function pauseTask() {
 // 继续任务
 function continueTask() {
   // 开始按钮
-  const startButton = document.getElementById('startButton');
+  const startButton = <HTMLButtonElement>document.getElementById('startButton');
   pauseStudy = false;
   startButton.innerText = '正在学习，点击暂停';
   startButton.classList.add('loading');
@@ -2454,7 +2251,7 @@ function continueTask() {
 // 完成任务
 function finishTask() {
   // 开始按钮
-  const startButton = document.getElementById('startButton');
+  const startButton = <HTMLButtonElement>document.getElementById('startButton');
   startButton.innerText = '已完成';
   startButton.classList.remove('loading');
   startButton.classList.add('disabled');
@@ -2467,7 +2264,9 @@ async function start() {
   console.log('检查是否登录...');
   if (login) {
     // 开始按钮
-    const startButton = document.getElementById('startButton');
+    const startButton = <HTMLButtonElement>(
+      document.getElementById('startButton')
+    );
     startButton.innerText = '正在学习，点击暂停';
     startButton.classList.add('loading');
     startButton.removeEventListener('click', start);

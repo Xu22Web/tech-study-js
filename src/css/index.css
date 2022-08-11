@@ -1,0 +1,222 @@
+:root {
+  --themeColor: #fa3333;
+}
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+.egg_manual_btn {
+  transition: 0.5s;
+  outline: none;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #e3484b;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+.egg_auto_btn {
+  transition: 0.5s;
+  outline: none;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #666777;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+.egg_setting_box {
+  position: fixed;
+  top: 70px;
+  left: 5px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 9px #666777;
+}
+.egg_setting_item {
+  margin-top: 5px;
+  min-height: 30px;
+  min-width: 200px;
+  font-size: 16px;
+  display: flex;
+  justify-items: center;
+  justify-content: space-between;
+}
+.egg_info {
+  flex-direction: column;
+}
+.egg_userinfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_login_status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.egg_login_status button {
+  outline: none;
+  padding: 4px 8px;
+  background: #ccc;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+.egg_login_status.active {
+  flex-grow: 1;
+}
+.egg_login_status.active button {
+  background: var(--themeColor);
+  padding: 8px 24px;
+}
+.egg_userinfo .egg_user {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 0;
+}
+.egg_userinfo .egg_user .egg_sub_nickname,
+.egg_userinfo .egg_user .egg_avatar_img {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background: var(--themeColor);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 20px;
+  color: white;
+}
+.egg_userinfo .egg_user .egg_name {
+  padding-left: 5px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100px;
+}
+.egg_scoreinfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+}
+.egg_scoreinfo .egg_totalscore,
+.egg_scoreinfo .egg_todayscore {
+  font-size: 12px;
+}
+.egg_scoreinfo span {
+  color: var(--themeColor);
+  padding-left: 4px;
+  font-weight: bold;
+}
+.egg_setting_item label {
+  flex-grow: 1;
+}
+.egg_progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+.egg_progress .egg_track {
+  background: #ccc;
+  height: 5px;
+  border-radius: 10px;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+.egg_progress .egg_track .egg_bar {
+  height: 5px;
+  background: var(--themeColor);
+  border-radius: 10px;
+  width: 0;
+  transition: width 0.5s;
+}
+.egg_progress .egg_percent {
+  font-size: 12px;
+  padding-left: 5px;
+  width: 35px;
+}
+input[type='checkbox'].egg_setting_switch {
+  cursor: pointer;
+  margin: 0;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  width: 42px;
+  height: 22px;
+  background: #ccc;
+  border-radius: 50px;
+  transition: background 0.3s;
+  --border-padding: 5px;
+}
+input[type='checkbox'].egg_setting_switch::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 2px #999;
+  transition: 0.4s;
+  position: absolute;
+  top: calc(50% - (1rem / 2));
+  position: absolute;
+  left: var(--border-padding);
+}
+input[type='checkbox'].egg_setting_switch:checked {
+  background: var(--themeColor);
+}
+input[type='checkbox'].egg_setting_switch:checked::after {
+  left: calc(100% - var(--border-padding) - 1rem);
+}
+.egg_start_btn {
+  justify-content: center;
+}
+.egg_study_btn {
+  outline: none;
+  background: var(--themeColor);
+  padding: 8px 24px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.egg_study_btn:hover {
+  opacity: 0.8;
+}
+@keyframes fade {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0.4;
+    background: #ccc;
+  }
+}
+.egg_study_btn.loading {
+  animation: fade 2s ease infinite alternate;
+}
+.egg_study_btn.disabled {
+  background: #ccc;
+}

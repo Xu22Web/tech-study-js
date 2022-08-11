@@ -1803,7 +1803,7 @@ async function doingExam() {
       await waitingTime(2000);
       nextButton = await getNextButton();
       // 答错了
-      if (nextButton.textContent === '下一题') {
+      if (nextButton.textContent === '下一题' && $$('.answer')[0]) {
         // 如果应该保存答案
         const key = getKey(); // 获取key
         const answerTemp = $$('.answer')[0].innerText;

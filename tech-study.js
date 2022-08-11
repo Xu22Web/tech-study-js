@@ -1039,7 +1039,7 @@ function getVideos() {
     const need = videoNum < 6 ? videoNum : 6;
     console.log(`还需要看${need}个视频`);
     // 获取重要视频
-    const data = await getTodayNews();
+    const data = await getTodayVideos();
     if (data && data.length) {
       if (need == 6) {
         // 如果今天还没学过，则优先找今天的视频

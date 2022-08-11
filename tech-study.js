@@ -1012,8 +1012,8 @@ function getNews() {
         // 如果今天还没学过，则优先找今天的新闻
         for (let i = 0; i < need; i++) {
           // 如果有当天日期的,则加入
-          if (data[j].auditTime.indexOf(currDate) != -1) {
-            news.push(data[j]);
+          if (data[i].auditTime.indexOf(currDate) != -1) {
+            news.push(data[i]);
           } else {
             // 否则跳出循环
             break;
@@ -1045,8 +1045,8 @@ function getVideos() {
         // 如果今天还没学过，则优先找今天的视频
         for (let i = 0; i < need; i++) {
           // 如果有当天日期的,则加入
-          if (data[j].auditTime.indexOf(currDate) != -1) {
-            videos.push(data[j]);
+          if (data[i].auditTime.indexOf(currDate) != -1) {
+            videos.push(data[i]);
           } else {
             // 否则跳出循环
             break;

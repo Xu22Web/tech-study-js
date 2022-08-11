@@ -2364,7 +2364,7 @@ async function study() {
     if (settings[0] && !tasks[0].status) {
       // 还需要看多少个新闻
       newsNum = tasks[0].dayMaxScore - tasks[0].currentScore;
-      console.log('1.看新闻');
+      console.log('任务一：看新闻');
       // 暂停
       await pauseStudyLock();
       // 看新闻
@@ -2376,7 +2376,7 @@ async function study() {
       const temp2 = parseInt(tasks[3].dayMaxScore - tasks[3].currentScore);
       // 还需要看多少个视频
       videoNum = temp1 > temp2 ? temp1 : temp2;
-      console.log('2.看视频');
+      console.log('任务二：看视频');
       // 暂停
       await pauseStudyLock();
       // 看视频
@@ -2384,7 +2384,7 @@ async function study() {
     }
     // 检查每日答题
     if (settings[2] && !tasks[2].status) {
-      console.log('3.做每日答题');
+      console.log('任务三：做每日答题');
       // 暂停
       await pauseStudyLock();
       // 做每日答题
@@ -2392,7 +2392,7 @@ async function study() {
     }
     // 检查每周答题
     if (settings[3] && !tasks[3].status) {
-      console.log('4.做每周答题');
+      console.log('任务四：做每周答题');
       // 暂停
       await pauseStudyLock();
       // 做每周答题

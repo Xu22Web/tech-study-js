@@ -1379,6 +1379,8 @@ function getNextButton() {
 }
 // 暂停答题
 function pauseExam() {
+  // 按钮
+  const manualButton = document.querySelector('#manualButton');
   console.log('自动答题失败，切换为手动');
   pause = true;
   manualButton.innerText = '开启自动答题';
@@ -1473,8 +1475,8 @@ async function doingExam() {
             // 若提示数量比填空的数量多
             // 直接将所有答案整合填进去
             let answer = '';
-            for (let i = 0; i < allTips.length; allTips++) {
-              answer += allTips[i].textContent();
+            for (let i = 0; i < allTips.length; i++) {
+              answer += allTips[i].textContent;
             }
             for (let j = 0; j < blanks.length; j++) {
               blanks[j].setAttribute('value', answer.trim());
@@ -2297,7 +2299,7 @@ async function renderMenu() {
 
 // 是否显示目录
 function showMenu(isShow = true) {
-  let items = document.getElementsByClassName('egg_menu');
+  let items = $$('.egg_menu');
   for (let i = 0; i < items.length; i++) {
     items[i].style.display = isShow ? 'block' : 'none';
   }

@@ -1084,10 +1084,11 @@ async function readNews() {
     await waitingTime(1500);
     // 刷新菜单数据
     await refreshMenu();
-    if (settings[0] && !tasks[0].status) {
-      console.log('任务未完成，继续看新闻！');
-      await readNews();
-    }
+  }
+  // 任务完成状况
+  if (settings[0] && !tasks[0].status) {
+    console.log('任务未完成，继续看新闻！');
+    await readNews();
   }
 }
 // 看学习视频
@@ -1112,6 +1113,7 @@ async function watchVideo() {
     // 刷新菜单数据
     await refreshMenu();
   }
+  // 任务完成状况
   if (settings[1] && !tasks[1].status) {
     console.log('任务未完成，继续看视频！');
     await watchVideo();
@@ -1134,6 +1136,7 @@ async function doExamPractice() {
   await waitingTime(1500);
   // 刷新菜单数据
   await refreshMenu();
+  // 任务完成状况
   if (settings[2] && !tasks[2].status) {
     console.log('任务未完成，继续完成每日答题！');
     await doExamPractice();
@@ -1244,6 +1247,7 @@ function doExamWeekly() {
         await waitingTime(1500);
         // 刷新菜单数据
         await refreshMenu();
+        // 任务完成状况
         if (settings[3] && !tasks[3].status) {
           console.log('任务未完成，继续完成每周答题！');
           resolve(await doExamWeekly());
@@ -1346,6 +1350,7 @@ function doExamPaper() {
         await waitingTime(1500);
         // 刷新菜单数据
         await refreshMenu();
+        // 任务完成状况
         if (settings[4] && !tasks[4].status) {
           console.log('任务未完成，继续专项练习！');
           resolve(await doExamPaper());
@@ -1992,7 +1997,7 @@ async function loadScoreInfo() {
     todayScoreSpan.innerText = todayScore;
   }
 }
-// 初始化配置
+// 加载任务列表
 async function loadTaskList() {
   // 原始任务进度
   const taskProgress = await getTaskList();
@@ -2357,7 +2362,8 @@ async function study() {
   if (tasks.length) {
     // 检查新闻
     if (settings[0] && !tasks[0].status) {
-      newsNum = tasks[0].dayMaxScore - tasks[0].currentScore; // 还需要看多少个新闻
+      // 还需要看多少个新闻
+      newsNum = tasks[0].dayMaxScore - tasks[0].currentScore;
       console.log('1.看新闻');
       // 暂停
       await pauseStudyLock();
@@ -2368,7 +2374,8 @@ async function study() {
       // 检查视频
       const temp1 = parseInt(tasks[1].dayMaxScore - tasks[1].currentScore);
       const temp2 = parseInt(tasks[3].dayMaxScore - tasks[3].currentScore);
-      videoNum = temp1 > temp2 ? temp1 : temp2; // 还需要看多少个视频
+      // 还需要看多少个视频
+      videoNum = temp1 > temp2 ? temp1 : temp2;
       console.log('2.看视频');
       // 暂停
       await pauseStudyLock();

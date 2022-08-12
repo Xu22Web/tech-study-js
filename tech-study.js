@@ -306,17 +306,21 @@ const API_CONFIG = {
 // 每周答题当前页码
 let examWeeklyPageNo = 1;
 // 每周答题总页码
-let examWeeklyTotalPageCount = null;
+let examWeeklyTotalPageCount = 0;
 // 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
 let examWeeklyReverse = true;
 // 专项练习当前页码
 let examPaperPageNo = 1;
 // 专项练习总页码
-let examPaperTotalPageCount = null;
+let examPaperTotalPageCount = 0;
 // 专 项答题开启逆序答题: false: 顺序答题; true: 逆序答题
 let examPaperReverse = true;
 // 每周答题，专项练习 请求rate 限制 每 3000ms 一次
 const ratelimitms = 3000;
+// 单次最大新闻数
+const maxNewsNum = 6;
+// 单次最大视频数
+const maxVideoNum = 6;
 /* Config End·配置结束 */
 
 /* Tools·工具函数  */
@@ -759,12 +763,8 @@ let pauseStudy = false;
 let login = Boolean(getCookie('token'));
 // 用户信息
 let userInfo;
-// 新闻数
-let newsNum = 6;
 // 新闻
 let news = [];
-// 视频数
-let videoNum = 6;
 // 视频
 let videos = [];
 
@@ -1001,8 +1001,10 @@ async function createTip(text, delay) {
 // 获取新闻列表
 function getNews() {
   return new Promise(async (resolve) => {
+    // 新闻数
+    const newsNum = tasks[0].dayMaxScore - tasks[0].currentScore;
     // 需要学习的新闻数量
-    const need = newsNum < 6 ? newsNum : 6;
+    const need = newsNum < maxNewsNum ? newsNum : maxNewsNum;
     console.log('还需要看' + need + '个新闻');
     // 获取重要新闻
     const data = await getTodayNews();
@@ -1034,8 +1036,13 @@ function getNews() {
 // 获取视频列表
 function getVideos() {
   return new Promise(async (resolve) => {
+    // 还需要看多少个视频
+    const temp1 = ~~(tasks[1].dayMaxScore - tasks[1].currentScore);
+    const temp2 = ~~(tasks[3].dayMaxScore - tasks[3].currentScore);
+    // 视频数
+    const videoNum = temp1 > temp2 ? temp1 : temp2;
     // 需要学习的视频数量
-    const need = videoNum < 6 ? videoNum : 6;
+    const need = videoNum < maxVideoNum ? videoNum : maxVideoNum;
     console.log(`还需要看${need}个视频`);
     // 获取重要视频
     const data = await getTodayVideos();
@@ -1072,7 +1079,7 @@ async function readNews() {
     await pauseStudyLock();
     GM_setValue('readingUrl', news[i].url);
     console.log('正在看第' + (i + 1) + '个新闻');
-    let newPage = GM_openInTab(news[i].url, {
+    const newPage = GM_openInTab(news[i].url, {
       active: true,
       insert: true,
       setParent: true,
@@ -1100,7 +1107,7 @@ async function watchVideo() {
     await pauseStudyLock();
     GM_setValue('watchingUrl', videos[i].url);
     console.log('正在观看第' + (i + 1) + '个视频');
-    let newPage = GM_openInTab(videos[i].url, {
+    const newPage = GM_openInTab(videos[i].url, {
       active: true,
       insert: true,
       setParent: true,
@@ -1208,7 +1215,7 @@ async function findExamWeekly() {
           // 增加页码
           examWeeklyPageNo += examWeeklyReverse ? -1 : 1;
           if (
-            examWeeklyTotalPageCount == null ||
+            examWeeklyTotalPageCount == 0 ||
             examWeeklyPageNo > examWeeklyTotalPageCount ||
             examWeeklyPageNo < 1
           ) {
@@ -1308,7 +1315,7 @@ async function findExamPaper() {
           // 增加页码 (若开启逆序翻页, 则减少页码)
           examPaperPageNo += examPaperReverse ? -1 : 1;
           if (
-            examPaperTotalPageCount == null ||
+            examPaperTotalPageCount == 0 ||
             examPaperPageNo > examPaperTotalPageCount ||
             examPaperPageNo < 1
           ) {

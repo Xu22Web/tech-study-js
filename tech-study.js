@@ -1077,8 +1077,10 @@ async function readNews() {
   for (let i = 0; i < news.length; i++) {
     // 暂停
     await pauseStudyLock();
+    // 链接
     GM_setValue('readingUrl', news[i].url);
     console.log('正在看第' + (i + 1) + '个新闻');
+    // 新页面
     const newPage = GM_openInTab(news[i].url, {
       active: true,
       insert: true,
@@ -1090,6 +1092,10 @@ async function readNews() {
     await waitingTime(1500);
     // 刷新菜单数据
     await refreshMenu();
+    // 任务完成跳出循环
+    if (settings[0] && tasks[0].status) {
+      break;
+    }
   }
   // 任务完成状况
   if (settings[0] && !tasks[0].status) {
@@ -1105,8 +1111,10 @@ async function watchVideo() {
   for (let i = 0; i < videos.length; i++) {
     // 暂停
     await pauseStudyLock();
+    // 链接
     GM_setValue('watchingUrl', videos[i].url);
     console.log('正在观看第' + (i + 1) + '个视频');
+    // 页面
     const newPage = GM_openInTab(videos[i].url, {
       active: true,
       insert: true,
@@ -1118,6 +1126,10 @@ async function watchVideo() {
     await waitingTime(1500);
     // 刷新菜单数据
     await refreshMenu();
+    // 任务完成跳出循环
+    if (settings[1] && tasks[1].status) {
+      break;
+    }
   }
   // 任务完成状况
   if (settings[1] && !tasks[1].status) {
@@ -1243,6 +1255,7 @@ function doExamWeekly() {
         // 暂停
         await pauseStudyLock();
         console.log('正在做每周答题');
+        // 新页面
         const newPage = GM_openInTab(
           URL_CONFIG.examWeekly.replace('{id}', examWeeklyId),
           { active: true, insert: true, setParent: true }
@@ -1342,6 +1355,7 @@ function doExamPaper() {
         // 暂停
         await pauseStudyLock();
         console.log('正在做专项练习');
+        // 新页面
         const newPage = GM_openInTab(
           URL_CONFIG.examPaper.replace('{id}', examPaperId),
           {
@@ -2370,8 +2384,6 @@ async function study() {
   if (tasks.length) {
     // 检查新闻
     if (settings[0] && !tasks[0].status) {
-      // 还需要看多少个新闻
-      newsNum = tasks[0].dayMaxScore - tasks[0].currentScore;
       console.log('任务一：看新闻');
       // 暂停
       await pauseStudyLock();

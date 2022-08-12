@@ -1392,9 +1392,13 @@ function getNextButton() {
       const nextAll = [...$$('.ant-btn')].filter((next) => next.textContent);
       if (nextAll.length) {
         clearInterval(nextInterVal); // 停止定时器
+        if (nextAll.length == 2) {
+          resolve(nextAll[1]);
+          return;
+        }
         resolve(nextAll[0]);
       }
-    }, 800);
+    }, 500);
   });
 }
 // 暂停答题
@@ -1405,6 +1409,10 @@ function pauseExam() {
   pause = true;
   manualButton.innerText = '开启自动答题';
   manualButton.className = 'egg_manual_btn';
+  createTip(
+    '已暂停，只需答题后手动开启自动答题，请勿进行其他操作（如：下一题，确认等）！',
+    10000
+  );
 }
 
 // 答题过程(整合)
@@ -1418,7 +1426,7 @@ async function doingExam() {
     await pauseLock();
     nextButton = await getNextButton();
     // 结束
-    const finish = ['再练一次', '再来一组', '查看解析'];
+    const finish = ['再练一次', '再来一组', '查看解析', '交卷'];
     if (finish.includes(nextButton.textContent)) {
       break;
     }

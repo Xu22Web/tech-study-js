@@ -2399,11 +2399,6 @@ async function study() {
       await readNews();
     }
     if (settings[1] && !tasks[1].status) {
-      // 检查视频
-      const temp1 = parseInt(tasks[1].dayMaxScore - tasks[1].currentScore);
-      const temp2 = parseInt(tasks[3].dayMaxScore - tasks[3].currentScore);
-      // 还需要看多少个视频
-      videoNum = temp1 > temp2 ? temp1 : temp2;
       console.log('任务二：看视频');
       // 暂停
       await pauseStudyLock();

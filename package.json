@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "nodemon bin/index.ts"
   },
+  "bin": {
+    "tech-study": "./bin/index.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Xu22Web/tech-study-js.git"

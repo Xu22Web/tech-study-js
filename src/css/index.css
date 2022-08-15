@@ -1,5 +1,6 @@
 :root {
   --themeColor: #fa3333;
+  font-size: 10px;
 }
 .icon {
   width: 1em;
@@ -8,46 +9,41 @@
   fill: currentColor;
   overflow: hidden;
 }
-.egg_manual_btn {
+.egg_btn {
   transition: 0.5s;
   outline: none;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
+  padding: 1.2em 2rem;
+  border-radius: 1.2rem;
   cursor: pointer;
-  background-color: #e3484b;
-  color: rgb(255, 255, 255);
-  font-size: 18px;
+  font-size: 1.8rem;
   font-weight: bold;
   text-align: center;
+  color: rgb(255, 255, 255);
+  background: #666777;
 }
-.egg_auto_btn {
-  transition: 0.5s;
-  outline: none;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #666777;
-  color: rgb(255, 255, 255);
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
+.egg_btn.manual {
+  background: #e3484b;
 }
 .egg_setting_box {
   position: fixed;
-  top: 70px;
-  left: 5px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 0 9px #666777;
+  top: 7rem;
+  left: 0.5rem;
+  padding: 1.2rem 2rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0 1rem #666777;
+  width: 20rem;
+  overflow: hidden;
+}
+.egg_setting_box.active {
+  width: 24rem;
 }
 .egg_setting_item {
-  margin-top: 5px;
-  min-height: 30px;
-  min-width: 200px;
-  font-size: 16px;
+  margin-top: 0.5rem;
+  min-height: 3rem;
+  min-width: 20rem;
+  font-size: 1.6rem;
   display: flex;
   justify-items: center;
   justify-content: space-between;
@@ -67,11 +63,11 @@
 }
 .egg_login_status button {
   outline: none;
-  padding: 4px 8px;
+  padding: 0.4rem 0.8rem;
   background: #ccc;
-  font-size: 14px;
+  font-size: 1.4rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 1rem;
   color: white;
   cursor: pointer;
 }
@@ -80,18 +76,18 @@
 }
 .egg_login_status.active button {
   background: var(--themeColor);
-  padding: 8px 24px;
+  padding: 0.8rem 2.4rem;
 }
 .egg_userinfo .egg_user {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px 0;
+  padding: 0.5rem 0;
 }
 .egg_userinfo .egg_user .egg_sub_nickname,
 .egg_userinfo .egg_user .egg_avatar_img {
-  height: 50px;
-  width: 50px;
+  height: 5rem;
+  width: 5rem;
   border-radius: 50%;
   background: var(--themeColor);
   display: flex;
@@ -100,29 +96,29 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 20px;
+  font-size: 2rem;
   color: white;
 }
 .egg_userinfo .egg_user .egg_name {
-  padding-left: 5px;
+  padding-left: 0.5rem;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  max-width: 100px;
+  max-width: 10rem;
 }
 .egg_scoreinfo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 8px;
+  padding-top: 0.8rem;
 }
 .egg_scoreinfo .egg_totalscore,
 .egg_scoreinfo .egg_todayscore {
-  font-size: 12px;
+  font-size: 1.2rem;
 }
 .egg_scoreinfo span {
   color: var(--themeColor);
-  padding-left: 4px;
+  padding-left: 0.4rem;
   font-weight: bold;
 }
 .egg_setting_item label {
@@ -132,26 +128,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
+  padding: 0.5rem 0;
 }
 .egg_progress .egg_track {
   background: #ccc;
-  height: 5px;
-  border-radius: 10px;
+  height: 0.5rem;
+  border-radius: 1rem;
   flex: 1 1 auto;
   overflow: hidden;
 }
 .egg_progress .egg_track .egg_bar {
-  height: 5px;
+  height: 0.5rem;
   background: var(--themeColor);
-  border-radius: 10px;
+  border-radius: 1rem;
   width: 0;
   transition: width 0.5s;
 }
 .egg_progress .egg_percent {
-  font-size: 12px;
-  padding-left: 5px;
-  width: 35px;
+  font-size: 1.2rem;
+  padding-left: 0.5rem;
+  width: 3.5rem;
 }
 input[type='checkbox'].egg_setting_switch {
   cursor: pointer;
@@ -161,24 +157,24 @@ input[type='checkbox'].egg_setting_switch {
   -webkit-appearance: none;
   -moz-appearance: none;
   position: relative;
-  width: 42px;
-  height: 22px;
+  width: 4.2rem;
+  height: 2.2rem;
   background: #ccc;
-  border-radius: 50px;
+  border-radius: 5rem;
   transition: background 0.3s;
-  --border-padding: 5px;
+  --border-padding: 0.5rem;
 }
 input[type='checkbox'].egg_setting_switch::after {
   content: '';
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
+  width: 1.4rem;
+  height: 1.4rem;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 2px #999;
+  box-shadow: 0 0 0.2rem #999;
   transition: 0.4s;
   position: absolute;
-  top: calc(50% - (1rem / 2));
+  top: calc(50% - (1.4rem / 2));
   position: absolute;
   left: var(--border-padding);
 }
@@ -186,7 +182,7 @@ input[type='checkbox'].egg_setting_switch:checked {
   background: var(--themeColor);
 }
 input[type='checkbox'].egg_setting_switch:checked::after {
-  left: calc(100% - var(--border-padding) - 1rem);
+  left: calc(100% - var(--border-padding) - 1.4rem);
 }
 .egg_start_btn {
   justify-content: center;
@@ -194,10 +190,10 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 .egg_study_btn {
   outline: none;
   background: var(--themeColor);
-  padding: 8px 24px;
-  font-size: 14px;
+  padding: 0.8rem 2.4rem;
+  font-size: 1.4rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 1rem;
   color: white;
   cursor: pointer;
   transition: all 0.3s;
@@ -219,4 +215,33 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 }
 .egg_study_btn.disabled {
   background: #ccc;
+}
+.egg_tip {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 0.5rem;
+  padding: 1.2rem 1.4rem;
+  border: none;
+  border-radius: 1rem;
+  background: #222222;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+.egg_frame iframe {
+  width: 40rem;
+  height: 32rem;
+  position: relative;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border: none;
+}
+.egg_menu.mobile .egg_frame iframe {
+  width: 20rem;
+  height: 20rem;
+  top: 0;
+}
+.egg_frame {
+  overflow: hidden;
 }

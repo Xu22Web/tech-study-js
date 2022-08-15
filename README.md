@@ -38,3 +38,20 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 ### 已知问题 Issues
 
 答题练习有时会发生错误，因此增加了暂停答题，切换手动作答，后续会优化。
+
+### 关于开发
+
+- 配置
+
+  `src/plugin.config.ts` 脚本配置
+
+  `src/css/index.css` 配置嵌入的 CSS 样式
+
+  `src/tech-study.ts` 配置脚本内容
+
+- 编译
+
+  ```
+  // 编译生成 'src/tech-study.js'
+  pnpm dev
+  ```

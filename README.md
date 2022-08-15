@@ -52,6 +52,6 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 - 编译
 
   ```
-  // 编译生成 'src/tech-study.js'
+  // 编译生成 'tech-study.js'
   pnpm dev
   ```

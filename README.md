@@ -52,6 +52,13 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 - 编译
 
   ```
-  // 编译生成 'tech-study.js'
+  # 编译生成 'tech-study.js'
   pnpm dev
+  ```
+
+- 功能
+
+  ```
+  # 直接引入模块`module`文本赋值给`var`，此类型`import`语句不会被编译到结果
+  import var from 'module?raw';
   ```

@@ -613,9 +613,9 @@ $(document).ready(async () => {
             }
         }, 800);
     }
-    else if (url.includes('exam') && url.includes('list')) {
+    else if (url.includes('exam') || url.includes('list')) {
         // 答题页面
-        let ready = setInterval(() => {
+        const ready = setInterval(() => {
             if ($$('.title')[0]) {
                 clearInterval(ready); // 停止定时器
                 // 创建“手动答题”按钮
@@ -1544,7 +1544,7 @@ async function doingExam() {
                 break;
             }
         }
-        if (nextButton.innerText === '确定') {
+        if (nextButton.innerText === '确 定') {
             // 需要提交答案
             if (shouldSaveAnswer) {
                 // 获取key
@@ -1559,7 +1559,13 @@ async function doingExam() {
                 if (questionType === '单选题' || questionType === '多选题') {
                     allBtns.forEach((choice) => {
                         if (choice.classList.contains('chosen')) {
-                            answers.push(choice.innerText);
+                            // 带字母的选项
+                            const answerTemp = choice.innerText;
+                            // 从字符串中拿出答案
+                            const [, answer] = answerTemp.split('. ');
+                            if (answer && answer.length) {
+                                answers.push(answer);
+                            }
                         }
                     });
                 }
@@ -1592,14 +1598,18 @@ async function doingExam() {
                 }
                 nextButton = await getNextButton();
                 // 每周、专项暂停
-                if (URL_CONFIG.examWeekly.includes(url) ||
-                    URL_CONFIG.examPaper.includes(url)) {
+                if (url.includes(URL_CONFIG.examWeekly.replace('{id}', '')) ||
+                    url.includes(URL_CONFIG.examPaper.replace('{id}', ''))) {
                     // 暂停答题
                     pauseExam();
                     // 暂停
                     await pauseLock();
                 }
             }
+        }
+        else if (nextButton.innerText === '下一题') {
+            // 等待一段时间
+            await waitingTime(2000);
             // 下一题
             nextButton.click();
         }

@@ -1190,7 +1190,7 @@ async function doingExam() {
     // 获取下一个按钮
     nextButton = await getNextButton();
     // 结束
-    const finish = ['再练一次', '再来一组', '查看解析', '交卷'];
+    const finish = ['再练一次', '再来一组', '查看解析'];
     if (finish.includes(nextButton.innerText)) {
       break;
     }
@@ -1636,9 +1636,12 @@ async function doingExam() {
           await pauseLock();
         }
       }
-    } else if (nextButton.innerText === '下一题') {
+    } else if (
+      nextButton.innerText === '下一题' ||
+      nextButton.innerText === '交卷'
+    ) {
       // 等待一段时间
-      await waitingTime(2000);
+      await waitingTime(2500);
       // 下一题
       nextButton.click();
     } else {

@@ -41,13 +41,17 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 
 ### 关于开发
 
-- 配置
+- 脚本配置
 
-  `src/plugin.config.ts` 脚本配置
+  `src/plugin.config.ts`
 
-  `src/css/index.css` 配置嵌入的 CSS 样式
+- CSS 文件
 
-  `src/tech-study.ts` 配置脚本内容
+  `src/css/index.css`
+
+- 脚本内容
+
+  `src/tech-study.ts`
 
 - 编译
 

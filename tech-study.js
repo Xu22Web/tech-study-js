@@ -1608,7 +1608,7 @@ async function doingExam() {
             }
         }
         else if (nextButton.innerText === '下一题' ||
-            nextButton.innerText === '交卷') {
+            nextButton.innerText === '交 卷') {
             // 等待一段时间
             await waitingTime(2500);
             // 下一题

@@ -13,7 +13,7 @@
   transition: 0.5s;
   outline: none;
   border: none;
-  padding: 1.2em 2rem;
+  padding: 1.2rem 2rem;
   border-radius: 1.2rem;
   cursor: pointer;
   font-size: 1.8rem;
@@ -218,8 +218,8 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 }
 .egg_tip {
   position: fixed;
-  bottom: 1.5rem;
-  left: 0.5rem;
+  bottom: 2rem;
+  left: 2rem;
   padding: 1.2rem 1.4rem;
   border: none;
   border-radius: 1rem;
@@ -227,6 +227,13 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   color: #ffffff;
   font-size: 1.4rem;
   font-weight: bold;
+  transition: all 0.8s ease;
+  opacity: 0;
+  transform: scale(0.9) translateY(10px);
+}
+.egg_tip.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 .egg_frame iframe {
   width: 40rem;

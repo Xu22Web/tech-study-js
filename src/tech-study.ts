@@ -554,7 +554,7 @@ $(document).ready(async () => {
     initSetting();
     if (!settings[5]) {
       // 创建学习提示
-      await createTip('开始读文章');
+      createTip('开始读文章');
     }
     reading(0);
   } else if (
@@ -565,7 +565,7 @@ $(document).ready(async () => {
     initSetting();
     if (!settings[5]) {
       // 创建学习提示
-      await createTip('开始读看视频');
+      createTip('开始读看视频');
     }
     reading(1);
     let randNum = 0;
@@ -679,7 +679,7 @@ async function reading(type) {
   let secendTime = 12;
   // 滚动长度
   const scrollLength = document.body.scrollHeight / 2;
-  const readingInterval = setInterval(async () => {
+  const readingInterval = setInterval(() => {
     time--;
     if (!settings[5]) {
       $$('#studyTip')[0].innerText = time + ' 秒后关闭页面';

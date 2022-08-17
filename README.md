@@ -35,9 +35,13 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 
 ![完成学习](./done.png)
 
-### 已知问题 Issues
+### 更新与维护
 
-答题练习有时会发生错误，因此增加了暂停答题，切换手动作答，后续会优化。
+1. 答题练习时，若发生错误，因此增加了暂停答题，切换手动作答，完毕后，自动提交题库。
+
+2. 答题练习时，若提示答案或题库答案与实际答案不符，答错后，自动提交题库。
+
+3. 由于官网支持的学习项目限制，不包含 APP 的订阅、发表观点等模块。
 
 ### 关于开发
 
@@ -63,6 +67,10 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 - 功能
 
   ```
-  # 直接引入模块`module`文本赋值给`var`，此类型`import`语句不会被编译到结果
+  # 包含`?raw`结尾的`import`语句
   import var from 'module?raw';
   ```
+
+  1. 模块`module`文本赋值到`var`
+
+  2. 此类型`import`语句不会被编译到结果

@@ -6,9 +6,9 @@
 
 ### 描述 Description
 
-有趣的 `学习强国` 油猴插件。
+- 灵活且貌似轻量的 `学习强国` 油猴插件。
 
-a flexible and light tampermonkey plugin for xuexiqiangguo.
+- a flexible and light tampermonkey plugin for xuexiqiangguo.
 
 ### 用法 Usage
 

@@ -2,12 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import ts from 'typescript';
 import config from '../src/plugin.config';
-// console.log(config);
-
+import chalk from 'chalk';
 // 文件夹名
 const sourceFileDir = 'src';
+// 文件名
+const fileName = 'tech-study.ts';
 // 文件路径
-const sourceFilePath = path.resolve(sourceFileDir, 'tech-study.ts');
+const sourceFilePath = path.resolve(sourceFileDir, fileName);
 // 项目配置
 const programOptions = {
   rootNames: [sourceFilePath],
@@ -80,9 +81,13 @@ const customTransformers: ts.CustomTransformers = {
   before: [transformerFactory],
 };
 // 编译生成
-const emitResults = program.emit(
+program.emit(
   sourceFile,
   (name, text) => {
+    // 编译结果信息
+    console.log(chalk.white("已生成 'tech-study.js'"));
+    // 注释
+    console.log(chalk.white('正在生成 配置注释'));
     const data: string[] = [];
     data.push('// ==UserScript==');
     for (const key in config) {
@@ -97,11 +102,16 @@ const emitResults = program.emit(
     }
     data.push('// ==/UserScript==');
     data.push(text.replace('export {};', ''));
+    // 注释
+    console.log(chalk.white('已生成 配置注释'));
     fs.writeFileSync(path.resolve(name), data.join('\n'), {});
+    // 编译结果信息
+    console.log(chalk.white("写入文件 'tech-study.js'"));
   },
   undefined,
   false,
   customTransformers
 );
+
 // 编译结果信息
-console.log(emitResults);
+console.log(chalk.white("编译生成结束 'tech-study.js'"));

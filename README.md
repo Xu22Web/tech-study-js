@@ -37,7 +37,7 @@ a flexible and light tampermonkey plugin for xuexiqiangguo.
 
 ### 更新与维护 Update and Maintenance
 
-1. 答题练习时，若发生错误，因此增加了暂停答题，切换手动作答，完毕后，自动提交题库。
+1. 答题练习时，若发生错误，增加暂停切换手动作答，完毕后，自动提交题库。
 
 2. 答题练习时，若提示答案或题库答案与实际答案不符，答错后，自动提交题库。
 

@@ -2214,7 +2214,7 @@ async function study() {
       await pauseStudyLock();
       // 做每周答题
       const res = await doExamWeekly();
-      if (res == 'noTest') {
+      if (res === 'noTest') {
         // 如果是全都完成了，已经没有能做的了
         tasks[3].status = true;
         // 修复每周答题做完,进度条显示异常
@@ -2238,16 +2238,16 @@ async function study() {
     await pauseStudyLock();
     // 做专项练习
     const res = await doExamPaper();
-    if (res == 'noTest') {
+    if (res === 'noTest') {
       // 如果是全都完成了，已经没有能做的了
       tasks[4].status = true;
       // 修复专项练习做完,进度条显示异常
       // 进度条对象
       const taskProgressList = $$('.egg_progress');
       // 进度条
-      const bar = taskProgressList[3].querySelector('.egg_bar');
+      const bar = taskProgressList[4].querySelector('.egg_bar');
       // 百分比
-      const percent = taskProgressList[3].querySelector('.egg_percent');
+      const percent = taskProgressList[4].querySelector('.egg_percent');
       // 长度
       bar.style.width = `100%`;
       // 文字

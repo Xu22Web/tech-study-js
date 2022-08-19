@@ -548,7 +548,7 @@ $(document).ready(async () => {
     }, 800);
   } else if (
     typeof GM_getValue('readingUrl') === 'string' &&
-    url == GM_getValue('readingUrl')
+    url === GM_getValue('readingUrl')
   ) {
     // 初始化设置
     initSetting();
@@ -559,7 +559,7 @@ $(document).ready(async () => {
     reading(0);
   } else if (
     typeof GM_getValue('watchingUrl') === 'string' &&
-    url == GM_getValue('watchingUrl')
+    url === GM_getValue('watchingUrl')
   ) {
     // 初始化设置
     initSetting();
@@ -576,7 +576,7 @@ $(document).ready(async () => {
         }
         if (temp.video.paused) {
           console.log('正在尝试播放视频');
-          if (randNum == 0) {
+          if (randNum === 0) {
             // 尝试使用js的方式播放
             try {
               temp.video.play(); // 尝试使用js的方式播放
@@ -667,7 +667,7 @@ function getVideoTag() {
 async function reading(type) {
   // 看文章或者视频
   let time = 1;
-  if (type == 0) {
+  if (type === 0) {
     // 80-100秒后关闭页面，看文章
     time = ~~(Math.random() * (100 - 80 + 1) + 80);
   } else {
@@ -692,12 +692,13 @@ async function reading(type) {
       secendTime = -1;
     }
     if (time <= 0) {
-      if (type == 0) {
+      if (type === 0) {
         GM_setValue('readingUrl', null);
       } else {
         GM_setValue('watchingUrl', null);
       }
       clearInterval(readingInterval);
+      // 关闭窗口
       closeWin();
     }
   }, 1000);
@@ -764,11 +765,11 @@ function getNews() {
     // 获取重要新闻
     const data = await getTodayNews();
     if (data && data.length) {
-      if (need == 6) {
+      if (need === 6) {
         // 如果今天还没学过，则优先找今天的新闻
         for (let i = 0; i < need; i++) {
           // 如果有当天日期的,则加入
-          if (data[i].auditTime.indexOf(currDate) != -1) {
+          if (data[i].auditTime.includes(currDate)) {
             news.push(data[i]);
           } else {
             // 否则跳出循环
@@ -802,11 +803,11 @@ function getVideos() {
     // 获取重要视频
     const data = await getTodayVideos();
     if (data && data.length) {
-      if (need == 6) {
+      if (need === 6) {
         // 如果今天还没学过，则优先找今天的视频
         for (let i = 0; i < need; i++) {
           // 如果有当天日期的,则加入
-          if (data[i].auditTime.indexOf(currDate) != -1) {
+          if (data[i].auditTime.includes(currDate)) {
             videos.push(data[i]);
           } else {
             // 否则跳出循环
@@ -964,7 +965,7 @@ async function findExamWeekly() {
           }
           for (let j = 0; j < examWeeks.length; j++) {
             // 遍历查询有没有没做过的
-            if (examWeeks[j].status != 2) {
+            if (examWeeks[j].status !== 2) {
               // status： 1为"开始答题" , 2为"重新答题"
               // 如果不是"重新答题"，则可以做
               examWeeklyId = examWeeks[j].id;
@@ -977,12 +978,11 @@ async function findExamWeekly() {
             break;
           }
         }
-        if (!continueFind) {
-        } else {
+        if (continueFind) {
           // 增加页码
           examWeeklyPageNo += examWeeklyReverse ? -1 : 1;
           if (
-            examWeeklyTotalPageCount == 0 ||
+            examWeeklyTotalPageCount === 0 ||
             examWeeklyPageNo > examWeeklyTotalPageCount ||
             examWeeklyPageNo < 1
           ) {
@@ -1006,7 +1006,7 @@ function doExamWeekly() {
     // 查找有没有没做过的每周测试，有则返回ID
     // examWeeklyId = 147;// 测试题目
     findExamWeekly().then(async (examWeeklyId) => {
-      if (examWeeklyId != null) {
+      if (examWeeklyId !== null) {
         // 暂停
         await pauseStudyLock();
         console.log('正在做每周答题');
@@ -1070,7 +1070,7 @@ async function findExamPaper() {
         }
         for (let j = 0; j < examPapers.length; j++) {
           // 遍历查询有没有没做过的
-          if (examPapers[j].status != 2) {
+          if (examPapers[j].status !== 2) {
             // status： 1为"开始答题" , 2为"重新答题"
             // 如果不是"重新答题"，则可以做
             examPaperId = examPapers[j].id;
@@ -1078,12 +1078,11 @@ async function findExamPaper() {
             break;
           }
         }
-        if (!continueFind) {
-        } else {
+        if (continueFind){
           // 增加页码 (若开启逆序翻页, 则减少页码)
           examPaperPageNo += examPaperReverse ? -1 : 1;
           if (
-            examPaperTotalPageCount == 0 ||
+            examPaperTotalPageCount === 0 ||
             examPaperPageNo > examPaperTotalPageCount ||
             examPaperPageNo < 1
           ) {
@@ -1106,7 +1105,7 @@ function doExamPaper() {
   return new Promise((resolve) => {
     // 查找有没有没做过的专项练习，有则返回ID
     findExamPaper().then(async (examPaperId) => {
-      if (examPaperId != null) {
+      if (examPaperId !== null) {
         // 暂停
         await pauseStudyLock();
         console.log('正在做专项练习');
@@ -1147,7 +1146,7 @@ function getNextButton() {
       const nextAll = $$('.ant-btn').filter((next) => next.innerText);
       if (nextAll.length) {
         clearInterval(nextInterVal); // 停止定时器
-        if (nextAll.length == 2) {
+        if (nextAll.length === 2) {
           resolve(nextAll[1]);
           return;
         }
@@ -1346,7 +1345,7 @@ async function doingExam() {
                   const choiceText = choice.innerText;
                   // 答案对应选项
                   if (
-                    choiceText == answer ||
+                    choiceText === answer ||
                     choiceText.includes(answer) ||
                     answer.includes(choiceText)
                   ) {
@@ -1402,7 +1401,7 @@ async function doingExam() {
                 // 选项文本
                 const choiceText = choice.innerText;
                 if (
-                  choiceText == answer ||
+                  choiceText === answer ||
                   choiceText.includes(answer) ||
                   answer.includes(choiceText)
                 ) {
@@ -1457,7 +1456,7 @@ async function doingExam() {
                 const choiceText = choice.innerText;
                 // 对比答案
                 if (
-                  choiceText == answer ||
+                  choiceText === answer ||
                   choiceText.includes(answer) ||
                   answer.includes(choiceText)
                 ) {
@@ -1497,7 +1496,7 @@ async function doingExam() {
                 if (
                   answers.some(
                     (answer) =>
-                      choiceText == answer ||
+                      choiceText === answer ||
                       choiceText.includes(answer) ||
                       answer.includes(choiceText)
                   )
@@ -1541,7 +1540,7 @@ async function doingExam() {
               const choiceText = choice.innerText;
               // 对比答案
               if (
-                choiceText == answer ||
+                choiceText === answer ||
                 choiceText.includes(answer) ||
                 answer.includes(choiceText)
               ) {
@@ -2148,7 +2147,9 @@ function loginStatus() {
 
 // 登录窗口
 async function loginWindow() {
+  // iframe
   const frame = $$('.egg_frame')[0];
+  // 配置
   const settingBox = $$('.egg_setting_box')[0];
   if (frame) {
     let iframe = frame.querySelector('iframe');
@@ -2160,14 +2161,16 @@ async function loginWindow() {
     // 登录页面
     iframe.src = URL_CONFIG.login;
     // 刷新
-    const refresh = window.setInterval(() => {
+    const timer = window.setInterval(() => {
+      console.log('登录刷新');
       // 登录刷新
       iframe.src = URL_CONFIG.login;
     }, 100000);
+    // 登录状态
     const res = await loginStatus();
     if (res) {
       // 登录成功
-      window.clearInterval(refresh);
+      window.clearInterval(timer);
       console.log('登录成功！');
       window.location.reload();
       return;
@@ -2213,10 +2216,10 @@ async function study() {
       await pauseStudyLock();
       // 做每周答题
       const res = await doExamWeekly();
+      // 无题可做
       if (res === 'noTest') {
         // 如果是全都完成了，已经没有能做的了
         tasks[3].status = true;
-        // 修复每周答题做完,进度条显示异常
         // 进度条对象
         const taskProgressList = $$('.egg_progress');
         // 进度条
@@ -2237,10 +2240,10 @@ async function study() {
     await pauseStudyLock();
     // 做专项练习
     const res = await doExamPaper();
+    // 无题可做
     if (res === 'noTest') {
       // 如果是全都完成了，已经没有能做的了
       tasks[4].status = true;
-      // 修复专项练习做完,进度条显示异常
       // 进度条对象
       const taskProgressList = $$('.egg_progress');
       // 进度条

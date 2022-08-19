@@ -565,9 +565,8 @@ $(document).ready(async () => {
     initSetting();
     if (!settings[5]) {
       // 创建学习提示
-      createTip('开始读看视频');
+      createTip('开始看视频');
     }
-    reading(1);
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
       let temp = getVideoTag();

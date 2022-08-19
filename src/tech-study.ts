@@ -1601,7 +1601,7 @@ async function doingExam() {
         // 存在答案
         if (answer.length) {
           // 答案
-          console.log(`上传了手工答案 key:${key} answer:${answer}}`);
+          console.log(`上传了手工答案 key:${key} answer:${answer}`);
           await saveAnswer(key, answer);
         }
       }
@@ -1620,7 +1620,7 @@ async function doingExam() {
         const [, answer] = answerTemp.split('：');
         if (answer && answer.length) {
           answer.replaceAll(' ', ';');
-          console.log(`上传了错题答案 key:${key} answer:${answer}}`);
+          console.log(`上传了错题答案 key:${key} answer:${answer}`);
           await saveAnswer(key, answer);
         }
         nextButton = await getNextButton();

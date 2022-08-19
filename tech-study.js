@@ -1989,15 +1989,15 @@ async function renderMenu() {
 }
 // 是否显示目录
 function showMenu(isShow = true) {
-    let items = $$('.egg_menu');
-    for (let i = 0; i < items.length; i++) {
-        items[i].style.display = isShow ? 'block' : 'none';
-    }
+    // 菜单
+    const menu = $$('.egg_menu')[0];
+    menu.style.display = isShow ? 'block' : 'none';
 }
 // 登录状态
 function loginStatus() {
     return new Promise((resolve) => {
         const timer = setInterval(() => {
+            // 获取token
             if (getCookie('token')) {
                 clearInterval(timer);
                 resolve(true);
@@ -2090,7 +2090,7 @@ async function study() {
     }
     // 检查专项练习
     if (settings[4] && !tasks[4].status) {
-        console.log('5.做专项练习');
+        console.log('任务五：做专项练习');
         // 暂停
         await pauseStudyLock();
         // 做专项练习

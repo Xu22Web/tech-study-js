@@ -772,6 +772,10 @@ function getNews() {
                     if (data[i].auditTime.includes(currDate)) {
                         news.push(data[i]);
                     }
+                    else {
+                        // 否则跳出循环
+                        break;
+                    }
                 }
             }
             // 数量补足需要数量
@@ -807,6 +811,10 @@ function getVideos() {
                     // 如果有当天日期的,则加入
                     if (data[i].auditTime.includes(currDate)) {
                         videos.push(data[i]);
+                    }
+                    else {
+                        // 否则跳出循环
+                        break;
                     }
                 }
             }

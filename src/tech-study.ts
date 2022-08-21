@@ -771,6 +771,9 @@ function getNews() {
           // 如果有当天日期的,则加入
           if (data[i].auditTime.includes(currDate)) {
             news.push(data[i]);
+          } else {
+            // 否则跳出循环
+            break;
           }
         }
       }
@@ -806,6 +809,9 @@ function getVideos() {
           // 如果有当天日期的,则加入
           if (data[i].auditTime.includes(currDate)) {
             videos.push(data[i]);
+          } else {
+            // 否则跳出循环
+            break;
           }
         }
       }
@@ -1072,7 +1078,7 @@ async function findExamPaper() {
             break;
           }
         }
-        if (continueFind) {
+        if (continueFind){
           // 增加页码 (若开启逆序翻页, 则减少页码)
           examPaperPageNo += examPaperReverse ? -1 : 1;
           if (

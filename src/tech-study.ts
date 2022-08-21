@@ -410,7 +410,7 @@ async function getTodayVideos() {
 async function getExamPaper(pageNo) {
   // 链接
   const url = API_CONFIG.paperList.replace('{pageNo}', pageNo);
-  // 获取重要新闻
+  // 获取专项练习
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'include',
@@ -434,7 +434,7 @@ async function getExamPaper(pageNo) {
 async function getExamWeekly(pageNo) {
   // 链接
   const url = API_CONFIG.weeklyList.replace('{pageNo}', pageNo);
-  // 获取重要新闻
+  // 获取每周答题
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'include',
@@ -771,9 +771,6 @@ function getNews() {
           // 如果有当天日期的,则加入
           if (data[i].auditTime.includes(currDate)) {
             news.push(data[i]);
-          } else {
-            // 否则跳出循环
-            break;
           }
         }
       }
@@ -809,9 +806,6 @@ function getVideos() {
           // 如果有当天日期的,则加入
           if (data[i].auditTime.includes(currDate)) {
             videos.push(data[i]);
-          } else {
-            // 否则跳出循环
-            break;
           }
         }
       }
@@ -1078,7 +1072,7 @@ async function findExamPaper() {
             break;
           }
         }
-        if (continueFind){
+        if (continueFind) {
           // 增加页码 (若开启逆序翻页, 则减少页码)
           examPaperPageNo += examPaperReverse ? -1 : 1;
           if (

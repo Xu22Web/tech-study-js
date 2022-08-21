@@ -508,8 +508,6 @@ async function getAnswer(key) {
 /* API请求函数结束 */
 
 /* 变量 */
-// 获取当前日期
-const currDate = new Date().toISOString().split('T')[0];
 // 任务进度
 const tasks: { dayMaxScore: number; currentScore: number; status: boolean }[] =
   [];
@@ -765,18 +763,6 @@ function getNews() {
     // 获取重要新闻
     const data = await getTodayNews();
     if (data && data.length) {
-      if (need === 6) {
-        // 如果今天还没学过，则优先找今天的新闻
-        for (let i = 0; i < need; i++) {
-          // 如果有当天日期的,则加入
-          if (data[i].auditTime.includes(currDate)) {
-            news.push(data[i]);
-          } else {
-            // 否则跳出循环
-            break;
-          }
-        }
-      }
       // 数量补足需要数量
       while (news.length < need) {
         // 随便取
@@ -803,18 +789,6 @@ function getVideos() {
     // 获取重要视频
     const data = await getTodayVideos();
     if (data && data.length) {
-      if (need === 6) {
-        // 如果今天还没学过，则优先找今天的视频
-        for (let i = 0; i < need; i++) {
-          // 如果有当天日期的,则加入
-          if (data[i].auditTime.includes(currDate)) {
-            videos.push(data[i]);
-          } else {
-            // 否则跳出循环
-            break;
-          }
-        }
-      }
       // 数量补足需要数量
       while (videos.length < need) {
         // 随便取

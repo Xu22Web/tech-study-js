@@ -1457,7 +1457,7 @@ async function doingExam() {
                                     break;
                                 }
                             }
-                            // 答案选项不对应
+                            // 存在选项
                             if (hasButton) {
                                 break;
                             }
@@ -1497,7 +1497,7 @@ async function doingExam() {
                                 break;
                             }
                         }
-                        // 答案选项不对应
+                        // 存在选项
                         if (hasButton) {
                             break;
                         }

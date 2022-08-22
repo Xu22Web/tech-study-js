@@ -1052,7 +1052,7 @@ async function findExamPaper() {
             break;
           }
         }
-        if (continueFind){
+        if (continueFind) {
           // 增加页码 (若开启逆序翻页, 则减少页码)
           examPaperPageNo += examPaperReverse ? -1 : 1;
           if (
@@ -1484,7 +1484,7 @@ async function doingExam() {
                   break;
                 }
               }
-              // 答案选项不对应
+              // 存在选项
               if (hasButton) {
                 break;
               }
@@ -1527,7 +1527,7 @@ async function doingExam() {
                 break;
               }
             }
-            // 答案选项不对应
+            // 存在选项
             if (hasButton) {
               break;
             }

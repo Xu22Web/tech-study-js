@@ -112,7 +112,7 @@ function closeWin() {
 // 等待窗口关闭
 function waitingClose(newPage) {
   return new Promise((resolve) => {
-    let doing = setInterval(function () {
+    let doing = setInterval(() => {
       if (newPage.closed) {
         clearInterval(doing); // 停止定时器
         resolve('done');
@@ -126,7 +126,7 @@ function waitingTime(time) {
     time = 1000;
   }
   return new Promise((resolve) => {
-    setTimeout(function () {
+    setTimeout(() => {
       resolve('done');
     }, time);
   });
@@ -518,10 +518,12 @@ let news: { url: string }[] = [];
 // 视频
 let videos: { url: string }[] = [];
 
-// dom加载
-$(document).ready(async () => {
+// load
+window.addEventListener('load', () => {
+  console.log('加载脚本');
   // 主页
   if (indexMatch.includes(url)) {
+    console.log('进入主页面！');
     let ready = setInterval(() => {
       if ($$('.text-wrap')[0]) {
         // 停止定时器
@@ -585,7 +587,12 @@ $(document).ready(async () => {
         console.log('等待加载');
       }
     }, 800);
-  } else if (url.includes('exam') || url.includes('list')) {
+  } else if (
+    url.includes(URL_CONFIG.examPaper) ||
+    url.includes(URL_CONFIG.examPractice) ||
+    url.includes(URL_CONFIG.examWeekly)
+  ) {
+    console.log('进入答题页面！');
     // 答题页面
     const ready = setInterval(() => {
       if ($$('.title')[0]) {
@@ -599,6 +606,7 @@ $(document).ready(async () => {
       }
     }, 500);
   } else {
+    console.log('此页面不支持加载学习脚本！');
   }
 });
 
@@ -1140,7 +1148,6 @@ async function doingExam() {
   let nextButton;
   // 保存答案
   let shouldSaveAnswer = false;
-
   while (true) {
     // 先等等再开始做题
     await waitingTime(2500);
@@ -1168,7 +1175,9 @@ async function doingExam() {
       .innerText
       ? $$('.q-header')[0].innerText.substring(0, 3)
       : '';
+    console.log(questionType);
 
+    // 题型分类作答
     switch (questionType) {
       case '填空题': {
         // 根据提示作答
@@ -1638,11 +1647,10 @@ async function doingExam() {
           console.log(`上传了错题答案 key:${key} answer:${answer}`);
           await saveAnswer(key, answer);
         }
-        nextButton = await getNextButton();
         // 每周、专项暂停
         if (
-          url.includes(URL_CONFIG.examWeekly.replace('{id}', '')) ||
-          url.includes(URL_CONFIG.examPaper.replace('{id}', ''))
+          url.includes(URL_CONFIG.examWeekly) ||
+          url.includes(URL_CONFIG.examPaper)
         ) {
           // 暂停答题
           pauseExam();
@@ -1651,14 +1659,13 @@ async function doingExam() {
         }
       }
     }
+    // 获取按钮
+    nextButton = await getNextButton();
     if (nextButton.innerText === '下一题' || nextButton.innerText === '交 卷') {
       // 等待一段时间
       await waitingTime(2500);
       // 下一题
       nextButton.click();
-    } else {
-      // 已经做完，跳出循环
-      break;
     }
   }
   closeWin();

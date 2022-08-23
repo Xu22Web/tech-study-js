@@ -3,7 +3,7 @@
 // @namespace   http://tampermonkey.net/
 // @version   20220817
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
-// @author   原作者 techxuexi 荷包蛋。现作者：Noah
+// @author   原作者：techxuexi 荷包蛋。现作者：Noah
 // @match   https://www.xuexi.cn
 // @match   https://www.xuexi.cn/*
 // @match   https://pc.xuexi.cn/points/exam-practice.html
@@ -11,9 +11,7 @@
 // @match   https://pc.xuexi.cn/points/exam-weekly-list.html
 // @match   https://pc.xuexi.cn/points/exam-paper-detail.html?id=*
 // @match   https://pc.xuexi.cn/points/exam-paper-list.html
-// @require   https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js
 // @require   https://cdn.jsdelivr.net/npm/blueimp-md5@2.9.0
-// @require   https://at.alicdn.com/t/font_3029437_1ig5vp3wlvx.js
 // @grant   GM_addStyle
 // @grant   GM_setValue
 // @grant   GM_getValue
@@ -130,7 +128,7 @@ function closeWin() {
 // 等待窗口关闭
 function waitingClose(newPage) {
     return new Promise((resolve) => {
-        let doing = setInterval(function () {
+        let doing = setInterval(() => {
             if (newPage.closed) {
                 clearInterval(doing); // 停止定时器
                 resolve('done');
@@ -144,7 +142,7 @@ function waitingTime(time) {
         time = 1000;
     }
     return new Promise((resolve) => {
-        setTimeout(function () {
+        setTimeout(() => {
             resolve('done');
         }, time);
     });
@@ -537,10 +535,12 @@ let userInfo;
 let news = [];
 // 视频
 let videos = [];
-// dom加载
-$(document).ready(async () => {
+// load
+window.addEventListener('load', () => {
+    console.log('加载脚本');
     // 主页
     if (indexMatch.includes(url)) {
+        console.log('进入主页面！');
         let ready = setInterval(() => {
             if ($$('.text-wrap')[0]) {
                 // 停止定时器
@@ -608,7 +608,10 @@ $(document).ready(async () => {
             }
         }, 800);
     }
-    else if (url.includes('exam') || url.includes('list')) {
+    else if (url.includes(URL_CONFIG.examPaper) ||
+        url.includes(URL_CONFIG.examPractice) ||
+        url.includes(URL_CONFIG.examWeekly)) {
+        console.log('进入答题页面！');
         // 答题页面
         const ready = setInterval(() => {
             if ($$('.title')[0]) {
@@ -623,6 +626,7 @@ $(document).ready(async () => {
         }, 500);
     }
     else {
+        console.log('此页面不支持加载学习脚本！');
     }
 });
 // 获取video标签
@@ -1160,6 +1164,8 @@ async function doingExam() {
             .innerText
             ? $$('.q-header')[0].innerText.substring(0, 3)
             : '';
+        console.log(questionType);
+        // 题型分类作答
         switch (questionType) {
             case '填空题': {
                 // 根据提示作答
@@ -1620,10 +1626,9 @@ async function doingExam() {
                     console.log(`上传了错题答案 key:${key} answer:${answer}`);
                     await saveAnswer(key, answer);
                 }
-                nextButton = await getNextButton();
                 // 每周、专项暂停
-                if (url.includes(URL_CONFIG.examWeekly.replace('{id}', '')) ||
-                    url.includes(URL_CONFIG.examPaper.replace('{id}', ''))) {
+                if (url.includes(URL_CONFIG.examWeekly) ||
+                    url.includes(URL_CONFIG.examPaper)) {
                     // 暂停答题
                     pauseExam();
                     // 暂停
@@ -1631,15 +1636,13 @@ async function doingExam() {
                 }
             }
         }
+        // 获取按钮
+        nextButton = await getNextButton();
         if (nextButton.innerText === '下一题' || nextButton.innerText === '交 卷') {
             // 等待一段时间
             await waitingTime(2500);
             // 下一题
             nextButton.click();
-        }
-        else {
-            // 已经做完，跳出循环
-            break;
         }
     }
     closeWin();

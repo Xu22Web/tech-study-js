@@ -1172,8 +1172,6 @@ async function doingExam() {
       .innerText
       ? $$('.q-header')[0].innerText.substring(0, 3)
       : '';
-    console.log(questionType);
-
     // 题型分类作答
     switch (questionType) {
       case '填空题': {

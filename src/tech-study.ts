@@ -1309,7 +1309,7 @@ async function doingExam() {
                   // 选项
                   let choice = allBtns[j];
                   // 选项文本
-                  const choiceText = choice.innerText;
+                  const choiceText = choice.innerText.trim();
                   // 答案对应选项
                   if (
                     choiceText === answer ||
@@ -1383,7 +1383,7 @@ async function doingExam() {
                 // 选项
                 const choice = allBtns[j];
                 // 选项文本
-                const choiceText = choice.innerText;
+                const choiceText = choice.innerText.trim();
                 if (
                   choiceText === answer ||
                   choiceText.includes(answer) ||
@@ -1452,7 +1452,7 @@ async function doingExam() {
                 // 选项
                 const choice = allBtns[i];
                 // 选项文本
-                const choiceText = choice.innerText;
+                const choiceText = choice.innerText.trim();
                 // 对比答案
                 if (
                   choiceText === answer ||
@@ -1499,7 +1499,7 @@ async function doingExam() {
                 // 选项
                 const choice = allBtns[i];
                 // 选项文本
-                const choiceText = choice.innerText;
+                const choiceText = choice.innerText.trim();
                 // 对比答案
                 if (
                   answers.some(
@@ -1547,7 +1547,7 @@ async function doingExam() {
               // 选项
               const choice = allBtns[i];
               // 选项文本
-              const choiceText = choice.innerText;
+              const choiceText = choice.innerText.trim();
               // 对比答案
               if (
                 choiceText === answer ||

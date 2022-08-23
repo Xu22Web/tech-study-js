@@ -1135,10 +1135,7 @@ function pauseExam() {
     pause = true;
     manualButton.innerText = '开启自动答题';
     manualButton.classList.add('manual');
-    createTip(
-      '已暂停，只需答题后手动开启自动答题，请勿进行其他操作（如：下一题，确认等）！',
-      10000
-    );
+    createTip('已暂停，请答题后手动开启自动答题！', 10000);
   }
 }
 

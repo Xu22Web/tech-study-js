@@ -58,7 +58,7 @@
 
   ```
   # 编译生成 'tech-study.js'
-  pnpm dev
+  pnpm build
   ```
 
 - 功能

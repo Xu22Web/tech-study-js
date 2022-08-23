@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import ts from 'typescript';
-import config from '../src/plugin.config';
+import ora from 'ora';
 import chalk from 'chalk';
-// 文件夹名
-const sourceFileDir = 'src';
-// 文件名
-const fileName = 'tech-study.ts';
+import SCRIPT_CONFIG from '../src/config/script';
+import COMPILE_CONFIG from '../src/config/compile';
+// 根目录 文件名
+const { rootDir, file } = COMPILE_CONFIG;
 // 文件路径
-const sourceFilePath = path.resolve(sourceFileDir, fileName);
+const sourceFilePath = path.resolve(rootDir, file);
 // 项目配置
 const programOptions = {
   rootNames: [sourceFilePath],
@@ -18,7 +18,6 @@ const programOptions = {
     outDir: '.',
   },
 };
-
 // 处理流程工厂
 const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
   return (node) => {
@@ -39,7 +38,7 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
           // 提取模块相对路径
           const [, relativefilePath] = res;
           // 获取实际路径
-          const filePath = path.resolve(sourceFileDir, relativefilePath);
+          const filePath = path.resolve(rootDir, relativefilePath);
           // 获取文本信息
           const content = fs.readFileSync(filePath, {
             encoding: 'utf8',
@@ -71,7 +70,8 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
     return ts.visitNode(node, visitor);
   };
 };
-
+// 开始编译
+const loading = ora('准备编译生成脚本文件！');
 // 创建项目
 const program = ts.createIncrementalProgram(programOptions);
 // 根据项目配置获取源文件
@@ -80,38 +80,44 @@ const sourceFile = program.getSourceFile(sourceFilePath);
 const customTransformers: ts.CustomTransformers = {
   before: [transformerFactory],
 };
+// 编译开始
+loading.start('正在编译生成...');
+// 导出文件
+let outFile;
 // 编译生成
 program.emit(
   sourceFile,
   (name, text) => {
-    // 编译结果信息
-    console.log(chalk.white("已生成 'tech-study.js'"));
+    outFile = path.resolve(name);
     // 注释
-    console.log(chalk.white('正在生成 配置注释'));
+    loading.start(`正在生成 ${chalk.blueBright('UserScript')} 配置注释...`);
+    // 脚本数据
     const data: string[] = [];
     data.push('// ==UserScript==');
-    for (const key in config) {
-      if (typeof config[key] === 'string') {
-        data.push(`// @${key}   ${config[key]}`);
+    for (const key in SCRIPT_CONFIG) {
+      if (typeof SCRIPT_CONFIG[key] === 'string') {
+        data.push(`// @${key}   ${SCRIPT_CONFIG[key]}`);
       }
-      if (Array.isArray(config[key])) {
-        for (const i in config[key]) {
-          data.push(`// @${key}   ${config[key][i]}`);
+      if (Array.isArray(SCRIPT_CONFIG[key])) {
+        for (const i in SCRIPT_CONFIG[key]) {
+          data.push(`// @${key}   ${SCRIPT_CONFIG[key][i]}`);
         }
       }
     }
     data.push('// ==/UserScript==');
-    data.push(text.replace('export {};', ''));
     // 注释
-    console.log(chalk.white('已生成 配置注释'));
-    fs.writeFileSync(path.resolve(name), data.join('\n'), {});
-    // 编译结果信息
-    console.log(chalk.white("写入文件 'tech-study.js'"));
+    loading.start(`已生成 ${chalk.blueBright('UserScript')} 配置注释！`);
+    // 删除导出
+    data.push(text.replace('export {};', ''));
+    // 写入文件
+    loading.start(`正在导出文件 ${chalk.blueBright('tech-study.js')}...`);
+    fs.writeFileSync(outFile, data.join('\n'));
+    // 写入文件完成
+    loading.start(`已导出 ${chalk.blueBright('tech-study.js')}`);
   },
   undefined,
   false,
   customTransformers
 );
-
 // 编译结果信息
-console.log(chalk.white("编译生成结束 'tech-study.js'"));
+loading.succeed(`导出文件： ${chalk.blueBright(outFile)}`);

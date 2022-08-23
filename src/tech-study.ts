@@ -13,9 +13,9 @@ const URL_CONFIG = {
   // 每日答题页面
   examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
   // 每周答题页面
-  examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html?id={id}',
+  examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
   // 专项练习页面
-  examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html?id={id}',
+  examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
   // 登录界面
   login:
     'https://login.xuexi.cn/login/xuexiWeb?appid=dingoankubyrfkttorhpou&goto=https%3A%2F%2Foa.xuexi.cn&type=1&state=ffdea2ded23f45ab%2FKQreTlDFe1Id3B7BVdaaYcTMp6lsTBB%2Fs3gGevuMKfvpbABDEl9ymG3bbOgtpSN&check_login=https%3A%2F%2Fpc-api.xuexi.cn',
@@ -37,10 +37,9 @@ const API_CONFIG = {
   todayVideos: 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
   // 每周答题列表
   weeklyList:
-    'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more?pageSize=50&pageNo={pageNo}',
+    'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
   // 专项练习列表
-  paperList:
-    'https://pc-proxy-api.xuexi.cn/api/exam/service/paper/pc/list?pageSize=50&pageNo={pageNo}',
+  paperList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/paper/pc/list',
   // 文本服务器保存答案
   answerSave: 'https://a6.qikekeji.com/txt/data/save',
   // 文本服务器获取答案
@@ -409,7 +408,7 @@ async function getTodayVideos() {
 // 专项练习数据
 async function getExamPaper(pageNo) {
   // 链接
-  const url = API_CONFIG.paperList.replace('{pageNo}', pageNo);
+  const url = `${API_CONFIG.paperList}?pageSize=50&pageNo=${pageNo}`;
   // 获取专项练习
   const res = await fetch(url, {
     method: 'GET',
@@ -433,7 +432,7 @@ async function getExamPaper(pageNo) {
 // 每周答题数据
 async function getExamWeekly(pageNo) {
   // 链接
-  const url = API_CONFIG.weeklyList.replace('{pageNo}', pageNo);
+  const url = `${API_CONFIG.weeklyList}?pageSize=50&pageNo=${pageNo}`;
   // 获取每周答题
   const res = await fetch(url, {
     method: 'GET',
@@ -459,51 +458,42 @@ async function getExamWeekly(pageNo) {
 async function saveAnswer(key, value) {
   // 内容
   const content = JSON.stringify([{ title: key, content: value }]);
-  return new Promise((resolve) => {
-    $.ajax({
-      type: 'POST',
-      url: API_CONFIG.answerSave,
-      data: {
-        txt_name: key,
-        txt_content: content,
-        password: '',
-        v_id: '',
-      },
-      dataType: 'json',
-      success(data) {
-        resolve(data);
-      },
-      error() {
-        resolve(null);
-      },
-    });
+  // 链接
+  const url = `${API_CONFIG.answerSave}?txt_name=${key}&txt_content=${content}&password=&v_id=`;
+  const res = await fetch(url, {
+    method: 'GET',
+    mode: 'cors',
   });
+  if (res && res.ok) {
+    try {
+      const data = await res.json();
+      console.log(data);
+      return data;
+    } catch (err) {
+      return null;
+    }
+  }
+  return null;
 }
 
 // 获取答案
 async function getAnswer(key) {
-  return new Promise<{
-    status: number;
-    data: {
-      txt_content: string;
-    };
-  } | null>((resolve) => {
-    $.ajax({
-      type: 'POST',
-      url: API_CONFIG.answerDetail,
-      data: {
-        txt_name: key,
-        password: '',
-      },
-      dataType: 'json',
-      success(data) {
-        resolve(data);
-      },
-      error() {
-        resolve(null);
-      },
-    });
+  // 链接
+  const url = `${API_CONFIG.answerDetail}?txt_name=${key}&password=`;
+  const res = await fetch(url, {
+    method: 'GET',
+    mode: 'cors',
   });
+  if (res && res.ok) {
+    try {
+      const data = await res.json();
+      console.log(data);
+      return data;
+    } catch (err) {
+      return null;
+    }
+  }
+  return null;
 }
 /* API请求函数结束 */
 
@@ -986,7 +976,7 @@ function doExamWeekly() {
         console.log('正在做每周答题');
         // 新页面
         const newPage = GM_openInTab(
-          URL_CONFIG.examWeekly.replace('{id}', examWeeklyId),
+          `${URL_CONFIG.examWeekly}?id=${examWeeklyId}`,
           { active: true, insert: true, setParent: true }
         );
         // 等待窗口关闭
@@ -1033,7 +1023,6 @@ async function findExamPaper() {
   console.log('正在寻找未完成的专项练习');
   while (continueFind) {
     let startTime = Date.now();
-
     await getExamPaper(examPaperPageNo).then(async (data) => {
       if (data) {
         let examPapers = data.list; // 获取专项练习的列表
@@ -1085,7 +1074,7 @@ function doExamPaper() {
         console.log('正在做专项练习');
         // 新页面
         const newPage = GM_openInTab(
-          URL_CONFIG.examPaper.replace('{id}', examPaperId),
+          `${URL_CONFIG.examPaper}?id=${examPaperId}`,
           {
             active: true,
             insert: true,
@@ -1152,8 +1141,6 @@ async function doingExam() {
   // 保存答案
   let shouldSaveAnswer = false;
 
-  const currentPage = $$('.pager span')[0]?.innerText;
-
   while (true) {
     // 先等等再开始做题
     await waitingTime(2500);
@@ -1179,7 +1166,7 @@ async function doingExam() {
     // 问题类型
     const questionType: '填空题' | '单选题' | '多选题' = $$('.q-header')[0]
       .innerText
-      ? $$('.q-header')[0].innerText.substr(0, 3)
+      ? $$('.q-header')[0].innerText.substring(0, 3)
       : '';
 
     switch (questionType) {
@@ -1307,10 +1294,12 @@ async function doingExam() {
               const tip = allTips[i];
               // 答案
               const answer = tip.innerText;
-              // 是否答案完全对应选项
-              let hasButton = false;
               // 答案存在
               if (answer && answer.length) {
+                // 是否答案完全对应选项
+                let hasButton = false;
+                // 包含答案最短长度选项
+                let minLengthChoice: HTMLButtonElement | undefined;
                 // 按钮
                 for (let j = 0; j < allBtns.length; j++) {
                   // 选项
@@ -1325,12 +1314,27 @@ async function doingExam() {
                   ) {
                     // 对应
                     hasButton = true;
-                    // 选择
-                    if (!$(choice).hasClass('chosen')) {
-                      choice.click();
+                    // 最小长度选项有值
+                    if (minLengthChoice) {
+                      // 最短长度选项与当前选项比较长度
+                      if (
+                        minLengthChoice.innerText.length > choiceText.length
+                      ) {
+                        minLengthChoice = choice;
+                      }
+                    } else {
+                      // 最小长度选项赋值
+                      minLengthChoice = choice;
                     }
-                    break;
                   }
+                }
+                // 存在选项
+                if (hasButton && minLengthChoice) {
+                  // 选择
+                  if (!minLengthChoice.classList.contains('chosen')) {
+                    minLengthChoice.click();
+                  }
+                  break;
                 }
                 // 存在不匹配
                 if (!hasButton) {
@@ -1365,10 +1369,12 @@ async function doingExam() {
           for (let i = 0; i < answerData.length; i++) {
             // 答案
             const answer = answerData[i];
-            // 是否答案完全对应选项
-            let hasButton = false;
             // 答案存在
             if (answer && answer.length) {
+              // 是否答案完全对应选项
+              let hasButton = false;
+              // 包含答案最短长度选项
+              let minLengthChoice: HTMLButtonElement | undefined;
               for (let j = 0; j < allBtns.length; j++) {
                 // 选项
                 const choice = allBtns[j];
@@ -1381,12 +1387,25 @@ async function doingExam() {
                 ) {
                   // 对应
                   hasButton = true;
-                  // 选择
-                  if (!choice.classList.contains('chosen')) {
-                    choice.click();
+                  // 最小长度选项有值
+                  if (minLengthChoice) {
+                    // 最短长度选项与当前选项比较长度
+                    if (minLengthChoice.innerText.length > choiceText.length) {
+                      minLengthChoice = choice;
+                    }
+                  } else {
+                    // 最小长度选项赋值
+                    minLengthChoice = choice;
                   }
-                  break;
                 }
+              }
+              // 存在选项
+              if (hasButton && minLengthChoice) {
+                // 选择
+                if (!minLengthChoice.classList.contains('chosen')) {
+                  minLengthChoice.click();
+                }
+                break;
               }
               // 存在不匹配
               if (!hasButton) {
@@ -1419,10 +1438,12 @@ async function doingExam() {
           if (allTips.length === 1) {
             // 答案
             const answer = allTips[0].innerText;
-            // 是否答案完全对应选项
-            let hasButton = false;
             // 答案存在
             if (answer && answer.length) {
+              // 是否答案完全对应选项
+              let hasButton = false;
+              // 包含答案最短长度选项
+              let minLengthChoice: HTMLButtonElement | undefined;
               for (let i = 0; i < allBtns.length; i++) {
                 // 选项
                 const choice = allBtns[i];
@@ -1436,22 +1457,31 @@ async function doingExam() {
                 ) {
                   // 对应
                   hasButton = true;
-                  // 选择
-                  if (!choice.classList.contains('chosen')) {
-                    choice.click();
+                  // 最小长度选项有值
+                  if (minLengthChoice) {
+                    // 最短长度选项与当前选项比较长度
+                    if (minLengthChoice.innerText.length > choiceText.length) {
+                      minLengthChoice = choice;
+                    }
+                  } else {
+                    // 最小长度选项赋值
+                    minLengthChoice = choice;
                   }
-                  break;
                 }
               }
               // 存在选项
-              if (hasButton) {
+              if (hasButton && minLengthChoice) {
+                // 选择
+                if (!minLengthChoice.classList.contains('chosen')) {
+                  minLengthChoice.click();
+                }
                 break;
               }
             }
           } else {
             // 答案
             const answerText: string[] = [];
-            const seperator = ['', ' ', '，', ';', ',', '、'];
+            const seperator = ['', ' ', '，', ';', ',', '、', '-'];
             for (let i = 0; i < allTips.length; i++) {
               answerText.push(allTips[i].innerText);
             }
@@ -1507,6 +1537,8 @@ async function doingExam() {
           if (answer && answer.length) {
             // 是否答案完全对应选项
             let hasButton = false;
+            // 包含答案最短长度选项
+            let minLengthChoice: HTMLButtonElement | undefined;
             for (let i = 0; i < allBtns.length; i++) {
               // 选项
               const choice = allBtns[i];
@@ -1520,20 +1552,28 @@ async function doingExam() {
               ) {
                 // 对应
                 hasButton = true;
-                // 选择
-                if (!choice.classList.contains('chosen')) {
-                  choice.click();
+                // 最小长度选项有值
+                if (minLengthChoice) {
+                  // 最短长度选项与当前选项比较长度
+                  if (minLengthChoice.innerText.length > choiceText.length) {
+                    minLengthChoice = choice;
+                  }
+                } else {
+                  // 最小长度选项赋值
+                  minLengthChoice = choice;
                 }
-                break;
               }
             }
             // 存在选项
-            if (hasButton) {
+            if (hasButton && minLengthChoice) {
+              // 选择
+              if (!minLengthChoice.classList.contains('chosen')) {
+                minLengthChoice.click();
+              }
               break;
             }
           }
         }
-
         // 暂停答题
         pauseExam();
         // 暂停
@@ -1543,7 +1583,9 @@ async function doingExam() {
         break;
       }
     }
-
+    // 获取下一个按钮
+    nextButton = await getNextButton();
+    // 确认
     if (nextButton.innerText === '确 定') {
       // 需要提交答案
       if (shouldSaveAnswer) {
@@ -1608,10 +1650,8 @@ async function doingExam() {
           await pauseLock();
         }
       }
-    } else if (
-      nextButton.innerText === '下一题' ||
-      nextButton.innerText === '交 卷'
-    ) {
+    }
+    if (nextButton.innerText === '下一题' || nextButton.innerText === '交 卷') {
       // 等待一段时间
       await waitingTime(2500);
       // 下一题
@@ -1629,7 +1669,7 @@ function getKey() {
   let content = $$('.q-body')[0].innerText;
   // 外部引用md5加密
   const key = md5(content);
-  console.log(`获取 key:${key}}`);
+  console.log(`获取 key:${key}`);
   return key;
 }
 

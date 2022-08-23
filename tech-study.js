@@ -473,20 +473,32 @@ async function getExamWeekly(pageNo) {
     }
     return [];
 }
-// 保存答案
-async function saveAnswer(key, value) {
-    // 内容
-    const content = JSON.stringify([{ title: key, content: value }]);
-    // 链接
-    const url = `${API_CONFIG.answerSave}?txt_name=${key}&txt_content=${content}&password=&v_id=`;
-    const res = await fetch(url, {
-        method: 'GET',
+// 获取答案
+async function getAnswer(key) {
+    // 数据
+    const data = {
+        txt_name: key,
+        password: '',
+    };
+    // 请求体
+    const body = Object.keys(data)
+        .map((key) => {
+        return `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`;
+    })
+        .join('&');
+    // 请求
+    const res = await fetch(API_CONFIG.answerDetail, {
+        method: 'POST',
         mode: 'cors',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+        },
+        body,
     });
     if (res && res.ok) {
         try {
             const data = await res.json();
-            console.log(data);
             return data;
         }
         catch (err) {
@@ -495,18 +507,36 @@ async function saveAnswer(key, value) {
     }
     return null;
 }
-// 获取答案
-async function getAnswer(key) {
-    // 链接
-    const url = `${API_CONFIG.answerDetail}?txt_name=${key}&password=`;
-    const res = await fetch(url, {
-        method: 'GET',
+// 保存答案
+async function saveAnswer(key, value) {
+    // 内容
+    const content = JSON.stringify([{ title: key, content: value }]);
+    // 数据
+    const data = {
+        txt_name: key,
+        txt_content: content,
+        password: '',
+        v_id: '',
+    };
+    // 请求体
+    const body = Object.keys(data)
+        .map((key) => {
+        return `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`;
+    })
+        .join('&');
+    // 请求
+    const res = await fetch(API_CONFIG.answerSave, {
+        method: 'POST',
         mode: 'cors',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+        },
+        body,
     });
     if (res && res.ok) {
         try {
             const data = await res.json();
-            console.log(data);
             return data;
         }
         catch (err) {
@@ -1153,6 +1183,8 @@ async function doingExam() {
         $$('.tips')[0]?.click();
         // 所有提示
         const allTips = $$('font[color=red]');
+        // 答案
+        const answers = allTips.map((tip) => tip.innerText.trim());
         // 等待一段时间
         await waitingTime(1500);
         // 选项按钮
@@ -1168,14 +1200,14 @@ async function doingExam() {
         switch (questionType) {
             case '填空题': {
                 // 根据提示作答
-                if (allTips.length) {
+                if (answers.length) {
                     // 填空数量和提示数量一致
-                    if (allTips.length === blanks.length) {
+                    if (answers.length === blanks.length) {
                         // 错误
                         let error = false;
-                        for (let i = 0; i < allTips.length; i++) {
+                        for (let i = 0; i < answers.length; i++) {
                             // 将答案填写到对应的空中
-                            const answer = allTips[i].innerText;
+                            const answer = answers[i];
                             // 答案存在
                             if (answer && answer.length) {
                                 // 输入事件
@@ -1197,12 +1229,9 @@ async function doingExam() {
                             break;
                         }
                     }
-                    else if (allTips.length > 1 && blanks.length === 1) {
+                    else if (answers.length > 1 && blanks.length === 1) {
                         // 直接将所有答案整合填进去
-                        let answer = '';
-                        for (let i = 0; i < allTips.length; i++) {
-                            answer += allTips[i].innerText;
-                        }
+                        const answer = answers.join('');
                         // 答案存在
                         if (answer && answer.length) {
                             // 输入事件
@@ -1229,7 +1258,9 @@ async function doingExam() {
                     // 格式化
                     const answerData = JSON.parse(data.data.txt_content);
                     // 答案
-                    const answers = answerData[0].content.split(';');
+                    const answers = answerData[0].content
+                        .split(';')
+                        .map((ans) => ans.trim());
                     // 答案和空数量相同
                     if (answers.length === blanks.length) {
                         for (let i = 0; i < answers.length; i++) {
@@ -1265,13 +1296,13 @@ async function doingExam() {
             }
             case '多选题': {
                 // 根据提示作答
-                if (allTips.length) {
+                if (answers.length) {
                     // 题目
                     const content = $$('.q-body')[0].innerText;
                     // 空格
                     const blanks = content.match(/（）/g);
                     // 空和选项数量相同
-                    if (allBtns.length === allTips.length ||
+                    if (allBtns.length === answers.length ||
                         blanks.length === allBtns.length) {
                         // 全选
                         allBtns.forEach((choice) => {
@@ -1282,15 +1313,13 @@ async function doingExam() {
                         });
                         break;
                     }
-                    else if (allBtns.length > allTips.length) {
+                    else if (allBtns.length > answers.length) {
                         //  错误
                         let error = false;
                         // 提示
-                        for (let i = 0; i < allTips.length; i++) {
-                            // 提示
-                            const tip = allTips[i];
+                        for (let i = 0; i < answers.length; i++) {
                             // 答案
-                            const answer = tip.innerText;
+                            const answer = answers[i];
                             // 答案存在
                             if (answer && answer.length) {
                                 // 是否答案完全对应选项
@@ -1355,14 +1384,18 @@ async function doingExam() {
                 let data = await getAnswer(key);
                 // 获取答案数据
                 if (data && data.status !== 0) {
-                    // 分割答案
-                    const answerData = JSON.parse(data.data.txt_content).split(';');
+                    // 格式化
+                    const answerData = JSON.parse(data.data.txt_content);
+                    // 答案
+                    const answers = answerData[0].content
+                        .split(';')
+                        .map((ans) => ans.trim());
                     //  错误
                     let error = false;
                     // 作答
-                    for (let i = 0; i < answerData.length; i++) {
+                    for (let i = 0; i < answers.length; i++) {
                         // 答案
-                        const answer = answerData[i];
+                        const answer = answers[i];
                         // 答案存在
                         if (answer && answer.length) {
                             // 是否答案完全对应选项
@@ -1427,11 +1460,11 @@ async function doingExam() {
             }
             case '单选题': {
                 // 根据提示作答
-                if (allTips.length) {
+                if (answers.length) {
                     // 提示为1
-                    if (allTips.length === 1) {
+                    if (answers.length === 1) {
                         // 答案
-                        const answer = allTips[0].innerText;
+                        const answer = answers[0];
                         // 答案存在
                         if (answer && answer.length) {
                             // 是否答案完全对应选项
@@ -1473,16 +1506,11 @@ async function doingExam() {
                         }
                     }
                     else {
-                        // 答案
-                        const answerText = [];
                         const seperator = ['', ' ', '，', ';', ',', '、', '-'];
-                        for (let i = 0; i < allTips.length; i++) {
-                            answerText.push(allTips[i].innerText);
-                        }
-                        // 答案
-                        const answers = seperator.map((s) => answerText.join(s));
+                        // 可能的答案
+                        const answersLike = seperator.map((s) => answers.join(s));
                         // 答案存在
-                        if (answers.every((answer) => answer.length)) {
+                        if (answersLike.every((answer) => answer.length)) {
                             // 是否答案完全对应选项
                             let hasButton = false;
                             for (let i = 0; i < allBtns.length; i++) {
@@ -1491,7 +1519,7 @@ async function doingExam() {
                                 // 选项文本
                                 const choiceText = choice.innerText.trim();
                                 // 对比答案
-                                if (answers.some((answer) => choiceText === answer ||
+                                if (answersLike.some((answer) => choiceText === answer ||
                                     choiceText.includes(answer) ||
                                     answer.includes(choiceText))) {
                                     // 对应
@@ -1517,7 +1545,7 @@ async function doingExam() {
                 const data = await getAnswer(key);
                 // 获取答案数据
                 if (data && data.status !== 0) {
-                    // 答案数据
+                    // 格式化
                     const answerData = JSON.parse(data.data.txt_content);
                     // 答案
                     const answer = answerData[0].content;

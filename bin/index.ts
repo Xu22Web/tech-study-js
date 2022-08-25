@@ -16,7 +16,19 @@ const importFilePaths: string[] = [];
  * @param filePath
  * @returns
  */
-const handleCompile = async (filePath: string) => {
+const handleCompile = async (
+  filePath: string
+): Promise<
+  | {
+      data: string;
+      compileName: string;
+      originName: string;
+      compiltPath: string;
+      originPath: string;
+      relativePath: string;
+    }
+  | undefined
+> => {
   // 后缀
   const ext = path.extname(filePath);
   // 完整路径
@@ -39,9 +51,7 @@ const handleCompile = async (filePath: string) => {
           return res;
         }
       }
-      return;
     }
-
     return;
   }
   // 是文件
@@ -56,13 +66,7 @@ const handleCompile = async (filePath: string) => {
     const customTransformers: ts.CustomTransformers = {
       before: [transformerFactory],
     };
-    return new Promise<{
-      data: string;
-      complieName: string;
-      originName: string;
-      compiltPath: string;
-      originPath: string;
-    }>((resolve) => {
+    return new Promise((resolve) => {
       // 编译生成
       program.emit(
         sourceFile,
@@ -70,14 +74,15 @@ const handleCompile = async (filePath: string) => {
           // 编译后的文件数据
           const data = text.replace(/export (\{.*\}|default .*);/g, '');
           // 编译后的文件名
-          const complieName = getFileName(name);
+          const compileName = getFileName(name);
           const compiltPath = path.resolve(name);
           resolve({
             data,
-            complieName,
+            compileName,
             compiltPath,
             originName: fileName,
             originPath: fullFilePath,
+            relativePath: filePath,
           });
         },
         undefined,
@@ -233,10 +238,10 @@ const main = async () => {
 
   if (res) {
     // 编译信息
-    const { originName, complieName, compiltPath, data } = res;
+    const { originName, compileName, compiltPath, data } = res;
     progress.succeed(
       `完成编译:${chalk.blueBright(originName)} -> ${chalk.blueBright(
-        complieName
+        compileName
       )}!`
     );
     // 数据
@@ -256,11 +261,11 @@ const main = async () => {
       const res = await handleCompile(filePath);
       if (res) {
         // 编译信息
-        const { originName: importOriginName, data: importData } = res;
+        const { relativePath: importRelativePath, data: importData } = res;
         progress.succeed(
-          `完成编译:${chalk.blueBright(importOriginName)} -> ${chalk.blueBright(
-            complieName
-          )}!`
+          `完成编译:${chalk.blueBright(
+            importRelativePath
+          )} -> ${chalk.blueBright(compileName)}!`
         );
         fullData.push(importData);
         continue;

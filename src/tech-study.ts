@@ -322,8 +322,8 @@ async function saveAnswer(key, value) {
 // 任务进度
 const tasks: { dayMaxScore: number; currentScore: number; status: boolean }[] =
   [];
-// 获取 URL origin
-const { href, origin } = window.location;
+// 获取 URL 
+const { href } = window.location;
 // 设置
 let settings = [true, true, true, true, true, false, false];
 // 是否暂停答题
@@ -343,7 +343,7 @@ let videos: { url: string }[] = [];
 window.addEventListener('load', () => {
   console.log('加载脚本');
   // 主页
-  if (URL_CONFIG.home === origin) {
+  if (URL_CONFIG.home.test(href) ) {
     console.log('进入主页面！');
     let ready = setInterval(() => {
       if ($$('.text-wrap')[0]) {

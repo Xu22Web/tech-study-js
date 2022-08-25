@@ -2,7 +2,8 @@
  * @description url配置
  */
 const URL_CONFIG = {
-  home: 'https://www.xuexi.cn',
+  // 主页
+  home: /^https\:\/\/www\.xuexi\.cn\/?$/,
   // 每日答题页面
   examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
   // 每周答题页面

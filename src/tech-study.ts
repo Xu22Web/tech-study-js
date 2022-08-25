@@ -1,51 +1,20 @@
+import URL_CONFIG from './config/url';
+import API_CONFIG from './config/api';
+import {
+  $$,
+  closeWin,
+  debounce,
+  hasMobile,
+  getCookie,
+  waitingTime,
+  waitingClose,
+  creatElementNode,
+  createTextNode,
+} from './utils';
 import css from './css/index.css?raw';
 // 嵌入样式
 GM_addStyle(css);
 /* Config·配置 */
-// 主页
-const indexMatch = [
-  'https://www.xuexi.cn',
-  'https://www.xuexi.cn/',
-  'https://www.xuexi.cn/index.html',
-];
-// url配置
-const URL_CONFIG = {
-  // 每日答题页面
-  examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
-  // 每周答题页面
-  examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
-  // 专项练习页面
-  examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
-  // 登录界面
-  login:
-    'https://login.xuexi.cn/login/xuexiWeb?appid=dingoankubyrfkttorhpou&goto=https%3A%2F%2Foa.xuexi.cn&type=1&state=ffdea2ded23f45ab%2FKQreTlDFe1Id3B7BVdaaYcTMp6lsTBB%2Fs3gGevuMKfvpbABDEl9ymG3bbOgtpSN&check_login=https%3A%2F%2Fpc-api.xuexi.cn',
-};
-// api配置
-const API_CONFIG = {
-  // 用户信息
-  userInfo: 'https://pc-api.xuexi.cn/open/api/user/info',
-  // 总分
-  totalScore: 'https://pc-api.xuexi.cn/open/api/score/get',
-  // 当天分数
-  todayScore: 'https://pc-api.xuexi.cn/open/api/score/today/query',
-  // 任务列表
-  taskList:
-    'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
-  // 新闻数据
-  todayNews: 'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
-  // 视频数据
-  todayVideos: 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
-  // 每周答题列表
-  weeklyList:
-    'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
-  // 专项练习列表
-  paperList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/paper/pc/list',
-  // 文本服务器保存答案
-  answerSave: 'https://a6.qikekeji.com/txt/data/save',
-  // 文本服务器获取答案
-  answerDetail: 'https://a6.qikekeji.com/txt/data/detail',
-};
-
 // 每周答题当前页码
 let examWeeklyPageNo = 1;
 // 每周答题总页码
@@ -67,256 +36,57 @@ const maxVideoNum = 6;
 /* Config End·配置结束 */
 
 /* Tools·工具函数  */
-// 获取cookie
-function getCookie(name) {
-  // 获取当前所有cookie
-  const strCookies = document.cookie;
-  // 截取变成cookie数组
-  const array = strCookies.split(';');
-  // 循环每个cookie
-  for (let i = 0; i < array.length; i++) {
-    // 将cookie截取成两部分
-    const item = array[i].split('=');
-    // 判断cookie的name 是否相等
-    if (item[0].trim() === name) {
-      return item[1].trim();
-    }
-  }
-  return null;
-}
-// 防抖
-function debounce(callback, delay) {
-  let timer = -1;
-  return function (this: any, ...args) {
-    if (timer !== -1) {
-      clearTimeout(timer);
-    }
-    timer = <any>setTimeout(() => {
-      callback.apply(this, args);
-    }, delay);
-  };
-}
-// 选择器
-function $$<T extends Element = any>(selector: string) {
-  return Array.from(document.querySelectorAll<T>(selector));
-}
-// 默认情况下, chrome 只允许 window.close 关闭 window.open 打开的窗口,所以我们就要用window.open命令,在原地网页打开自身窗口再关上,就可以成功关闭了
-function closeWin() {
-  try {
-    window.opener = window;
-    const win = window.open('', '_self');
-    win?.close();
-    top?.close();
-  } catch (e) {}
-}
-// 等待窗口关闭
-function waitingClose(newPage) {
-  return new Promise((resolve) => {
-    let doing = setInterval(() => {
-      if (newPage.closed) {
-        clearInterval(doing); // 停止定时器
-        resolve('done');
-      }
-    }, 1000);
-  });
-}
-// 等待时间
-function waitingTime(time) {
-  if (!Number.isInteger(time)) {
-    time = 1000;
-  }
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve('done');
-    }, time);
-  });
-}
 // 暂停锁
 function pauseLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
-    const doing = setInterval(() => {
-      if (!pause) {
-        // 停止定时器
-        clearInterval(doing);
-        console.log('答题等待结束！');
-        if (callback && callback instanceof Function) {
-          callback('done');
+    // 需要暂停
+    if (pause) {
+      const doing = setInterval(() => {
+        if (!pause) {
+          // 停止定时器
+          clearInterval(doing);
+          console.log('答题等待结束！');
+          if (callback && callback instanceof Function) {
+            callback('done');
+          }
+          resolve('done');
+          return;
         }
-        resolve('done');
-        return;
-      }
-      if (callback && callback instanceof Function) {
-        callback('pending');
-      }
-      console.log('答题等待...');
-    }, 500);
+        if (callback && callback instanceof Function) {
+          callback('pending');
+        }
+        console.log('答题等待...');
+      }, 500);
+      return;
+    }
+    resolve('done');
   });
 }
 // 暂停学习锁
 function pauseStudyLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
-    const doing = setInterval(() => {
-      if (!pauseStudy) {
-        // 停止定时器
-        clearInterval(doing);
-        console.log('学习等待结束！');
-        if (callback && callback instanceof Function) {
-          callback('done');
-        }
-        resolve('done');
-        return;
-      }
-      if (callback && callback instanceof Function) {
-        callback('pending');
-      }
-      console.log('学习等待...');
-    }, 500);
-  });
-}
-//  判断是否为移动端
-function hasMobile() {
-  let isMobile = false;
-  if (
-    navigator.userAgent.match(
-      /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
-    )
-  ) {
-    console.log('移动端');
-    isMobile = true;
-  }
-  if (document.body.clientWidth < 800) {
-    console.log('小尺寸设备端');
-    isMobile = true;
-  }
-  return isMobile;
-}
-// 创建元素节点
-function creatElementNode(
-  eleName: string,
-  props?: { [key: string]: any },
-  attrs?: { [key: string]: any },
-  children?: Node | Node[]
-): HTMLElement {
-  // 元素
-  let ele;
-  // 格式化元素名
-  const formatEleName = eleName.toLowerCase();
-  // 需要命名空间的svg元素
-  const specficSVGElement = [
-    'svg',
-    'use',
-    'circle',
-    'rect',
-    'line',
-    'marker',
-    'linearGradient',
-    'g',
-    'path',
-  ];
-  // 需要命名空间的html元素
-  const specficHTMLElement = 'html';
-  if (formatEleName === specficHTMLElement) {
-    // html元素命名空间
-    const ns = 'http://www.w3.org/1999/xhtml';
-    // 创建普通元素
-    ele = document.createElementNS(ns, formatEleName);
-  } else if (specficSVGElement.includes(formatEleName)) {
-    // svg元素命名空间
-    const ns = 'http://www.w3.org/2000/svg';
-    // 创建普通元素
-    ele = document.createElementNS(ns, formatEleName);
-  } else {
-    // 创建普通元素
-    ele = document.createElement(formatEleName);
-  }
-  // props属性设置
-  for (const key in props) {
-    if (props[key] instanceof Object) {
-      for (const subkey in props[key]) {
-        ele[key][subkey] = props[key][subkey];
-      }
-    } else {
-      ele[key] = props[key];
-    }
-  }
-  // attrs属性设置
-  for (const key in attrs) {
-    // 属性值
-    const value = attrs[key];
-    // 处理完的key
-    const formatKey = key.toLowerCase();
-    // xlink命名空间
-    if (formatKey.startsWith('xlink:')) {
-      // xlink属性命名空间
-      const attrNS = 'http://www.w3.org/1999/xlink';
-      if (value) {
-        ele.setAttributeNS(attrNS, key, value);
-      } else {
-        ele.removeAttributeNS(attrNS, key);
-      }
-    } else if (formatKey.startsWith('on')) {
-      // 事件监听
-      const [, eventType] = key.toLowerCase().split('on');
-      // 事件类型
-      if (eventType) {
-        // 回调函数
-        if (value instanceof Function) {
-          ele.addEventListener(eventType, value);
-
-          // 回调函数数组
-        } else if (value instanceof Array) {
-          for (const i in value) {
-            // 回调函数
-            if (value[i] instanceof Function) {
-              ele.addEventListener(eventType, value[i]);
-            }
+    // 需要暂停
+    if (pauseStudy) {
+      const doing = setInterval(() => {
+        if (!pauseStudy) {
+          // 停止定时器
+          clearInterval(doing);
+          console.log('学习等待结束！');
+          if (callback && callback instanceof Function) {
+            callback('done');
           }
+          resolve('done');
+          return;
         }
-      }
-    } else {
-      // 特殊属性
-      const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
-      if (specificAttrs.includes(key) && value) {
-        ele.setAttribute(key, '');
-      } else {
-        if (value) {
-          ele.setAttribute(key, value);
-        } else {
-          ele.removeAttribute(key);
+        if (callback && callback instanceof Function) {
+          callback('pending');
         }
-      }
+        console.log('学习等待...');
+      }, 500);
+      return;
     }
-  }
-  // 子节点
-  if (children) {
-    if (children instanceof Array) {
-      if (children.length === 1) {
-        ele.append(children[0]);
-      } else {
-        // 文档碎片
-        const fragment = document.createDocumentFragment();
-        for (const i in children) {
-          fragment.append(children[i]);
-        }
-        ele.append(fragment);
-      }
-    } else {
-      ele.append(children);
-    }
-  }
-  return ele;
-}
-// 创建文字节点
-function createTextNode(...text) {
-  if (text && text.length === 1) {
-    return document.createTextNode(text[0]);
-  }
-  const fragment = document.createDocumentFragment();
-  for (const i in text) {
-    const textEle = document.createTextNode(text[i]);
-    fragment.append(textEle);
-  }
-  return fragment;
+    resolve('done');
+  });
 }
 /* Tools End·工具函数结束 */
 
@@ -327,7 +97,8 @@ async function getUserInfo() {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const { data } = await res.json();
       return data;
@@ -340,7 +111,8 @@ async function getTotalScore() {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const { data } = await res.json();
       // 总分
@@ -355,7 +127,8 @@ async function getTodayScore() {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const { data } = await res.json();
       // 当天总分
@@ -370,7 +143,8 @@ async function getTaskList() {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const { data } = await res.json();
       // 进度和当天总分
@@ -385,7 +159,8 @@ async function getTodayNews() {
   const res = await fetch(API_CONFIG.todayNews, {
     method: 'GET',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const data = await res.json();
       return data;
@@ -398,7 +173,8 @@ async function getTodayVideos() {
   const res = await fetch(API_CONFIG.todayVideos, {
     method: 'GET',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const data = await res.json();
       return data;
@@ -414,7 +190,8 @@ async function getExamPaper(pageNo) {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const data = await res.json();
       const paperJson = decodeURIComponent(
@@ -438,7 +215,8 @@ async function getExamWeekly(pageNo) {
     method: 'GET',
     credentials: 'include',
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const data = await res.json();
       const paperJson = decodeURIComponent(
@@ -467,7 +245,7 @@ async function getAnswer(key) {
     })
     .join('&');
   // 请求
-  const res = await fetch(API_CONFIG.answerDetail, {
+  const res = await fetch(API_CONFIG.answerSearch[0], {
     method: 'POST',
     mode: 'cors',
     headers: {
@@ -476,15 +254,29 @@ async function getAnswer(key) {
     },
     body,
   });
-  if (res && res.ok) {
-    try {
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      return null;
+  // 请求成功
+  if (res.ok) {
+    const data: {
+      status: number;
+      data: { txt_content: string; txt_name: string };
+    } = await res.json();
+    // 状态
+    const { status } = data;
+    if (status !== 0) {
+      try {
+        // 答案列表
+        const answerList: { content: string; title: string }[] = JSON.parse(
+          data.data.txt_content
+        );
+        // 答案
+        const answers = answerList[0].content
+          .split(';')
+          .map((ans) => ans.trim());
+        return answers;
+      } catch (error) {}
     }
   }
-  return null;
+  return [];
 }
 // 保存答案
 async function saveAnswer(key, value) {
@@ -513,7 +305,8 @@ async function saveAnswer(key, value) {
     },
     body,
   });
-  if (res && res.ok) {
+  // 请求成功
+  if (res.ok) {
     try {
       const data = await res.json();
       return data;
@@ -529,8 +322,8 @@ async function saveAnswer(key, value) {
 // 任务进度
 const tasks: { dayMaxScore: number; currentScore: number; status: boolean }[] =
   [];
-// 获取URL
-const url = window.location.href;
+// 获取 URL origin
+const { href, origin } = window.location;
 // 设置
 let settings = [true, true, true, true, true, false, false];
 // 是否暂停答题
@@ -538,7 +331,7 @@ let pause = false;
 // 是否暂停学习
 let pauseStudy = false;
 // 初始化登录状态
-let login = Boolean(getCookie('token'));
+let login = !!getCookie('token');
 // 用户信息
 let userInfo;
 // 新闻
@@ -550,7 +343,7 @@ let videos: { url: string }[] = [];
 window.addEventListener('load', () => {
   console.log('加载脚本');
   // 主页
-  if (indexMatch.includes(url)) {
+  if (URL_CONFIG.home === origin) {
     console.log('进入主页面！');
     let ready = setInterval(() => {
       if ($$('.text-wrap')[0]) {
@@ -566,7 +359,7 @@ window.addEventListener('load', () => {
     }, 800);
   } else if (
     typeof GM_getValue('readingUrl') === 'string' &&
-    url === GM_getValue('readingUrl')
+    href === GM_getValue('readingUrl')
   ) {
     // 初始化设置
     initSetting();
@@ -577,7 +370,7 @@ window.addEventListener('load', () => {
     reading(0);
   } else if (
     typeof GM_getValue('watchingUrl') === 'string' &&
-    url === GM_getValue('watchingUrl')
+    href === GM_getValue('watchingUrl')
   ) {
     // 初始化设置
     initSetting();
@@ -616,9 +409,9 @@ window.addEventListener('load', () => {
       }
     }, 800);
   } else if (
-    url.includes(URL_CONFIG.examPaper) ||
-    url.includes(URL_CONFIG.examPractice) ||
-    url.includes(URL_CONFIG.examWeekly)
+    href.includes(URL_CONFIG.examPaper) ||
+    href.includes(URL_CONFIG.examPractice) ||
+    href.includes(URL_CONFIG.examWeekly)
   ) {
     console.log('进入答题页面！');
     // 答题页面
@@ -627,8 +420,6 @@ window.addEventListener('load', () => {
         clearInterval(ready); // 停止定时器
         // 创建“手动答题”按钮
         createManualButton();
-        // 去除答题验证
-        // cancelVerify();
         // 开始答题
         doingExam();
       }
@@ -830,12 +621,12 @@ function getVideos() {
 // 阅读文章
 async function readNews() {
   await getNews();
-  for (let i = 0; i < news.length; i++) {
+  for (const i in news) {
     // 暂停
     await pauseStudyLock();
     // 链接
     GM_setValue('readingUrl', news[i].url);
-    console.log('正在看第' + (i + 1) + '个新闻');
+    console.log('正在看第' + (Number(i) + 1) + '个新闻');
     // 新页面
     const newPage = GM_openInTab(news[i].url, {
       active: true,
@@ -864,12 +655,12 @@ async function watchVideo() {
   // 获取视频
   await getVideos();
   // 观看视频
-  for (let i = 0; i < videos.length; i++) {
+  for (const i in videos) {
     // 暂停
     await pauseStudyLock();
     // 链接
     GM_setValue('watchingUrl', videos[i].url);
-    console.log('正在观看第' + (i + 1) + '个视频');
+    console.log('正在观看第' + (Number(i) + 1) + '个视频');
     // 页面
     const newPage = GM_openInTab(videos[i].url, {
       active: true,
@@ -957,13 +748,13 @@ async function findExamWeekly() {
           console.log('每周答题,开启逆序模式,从最早的题目开始答题');
           data.list.reverse();
         }
-        for (let i = 0; i < data.list.length; i++) {
+        for (const i in data.list) {
           let examWeeks = data.list[i].practices; // 获取每周的测试列表
           if (examWeeklyReverse) {
             // 若开启逆序, 则反转每周的测试列表
             examWeeks.reverse();
           }
-          for (let j = 0; j < examWeeks.length; j++) {
+          for (const j in examWeeks) {
             // 遍历查询有没有没做过的
             if (examWeeks[j].status !== 2) {
               // status： 1为"开始答题" , 2为"重新答题"
@@ -1067,12 +858,12 @@ async function findExamPaper() {
           console.log('专项练习,开启逆序模式,从最早的题目开始答题');
           examPapers.reverse();
         }
-        for (let j = 0; j < examPapers.length; j++) {
+        for (const i in examPapers) {
           // 遍历查询有没有没做过的
-          if (examPapers[j].status !== 2) {
+          if (examPapers[i].status !== 2) {
             // status： 1为"开始答题" , 2为"重新答题"
             // 如果不是"重新答题"，则可以做
-            examPaperId = examPapers[j].id;
+            examPaperId = examPapers[i].id;
             continueFind = false;
             break;
           }
@@ -1140,11 +931,11 @@ function doExamPaper() {
 // 获取答题按钮
 function getNextButton() {
   return new Promise((resolve) => {
-    let nextInterVal = setInterval(() => {
+    const timer = setInterval(() => {
       // 答题按钮
       const nextAll = $$('.ant-btn').filter((next) => next.innerText);
       if (nextAll.length) {
-        clearInterval(nextInterVal); // 停止定时器
+        clearInterval(timer); // 停止定时器
         if (nextAll.length === 2) {
           resolve(nextAll[1]);
           return;
@@ -1155,18 +946,148 @@ function getNextButton() {
   });
 }
 // 暂停答题
-function pauseExam() {
+async function pauseExam() {
   // 按钮
   const manualButton = $$<HTMLButtonElement>('#manualButton')[0];
   if (manualButton) {
     console.log('自动答题失败，切换为手动');
     pause = true;
+    // 暂停
+    await pauseLock();
     manualButton.innerText = '开启自动答题';
     manualButton.classList.add('manual');
     createTip('已暂停，请答题后手动开启自动答题！', 10000);
   }
 }
-
+// 等待验证
+function waitVerify() {
+  return new Promise((resolve) => {
+    // 滑动验证
+    const mask = $$('#nc_mask')[0];
+    if (mask && getComputedStyle(mask).display !== 'none') {
+      // 定时器
+      const timer = setInterval(() => {
+        // 滑动验证
+        const mask = $$('#nc_mask')[0];
+        if (!mask || getComputedStyle(mask).display === 'none') {
+          console.log('学习等待结束！');
+          clearInterval(timer);
+          resolve(true);
+        }
+        console.log('等待滑动验证...');
+      }, 100);
+      return;
+    }
+    resolve(true);
+    return;
+  });
+}
+// 处理选项
+function handleChoiceBtn(answers: string[]) {
+  // 选项按钮
+  const allBtns = $$<HTMLButtonElement>('.q-answer');
+  // 答案存在
+  if (answers.length && allBtns.length) {
+    // 作答
+    return answers.every((answer) => {
+      // 答案存在
+      if (answer && answer.length) {
+        // 包含答案最短长度选项
+        let minLengthChoice: HTMLButtonElement | undefined;
+        // 遍历
+        allBtns.forEach((choice) => {
+          // 选项文本
+          const choiceText = choice.innerText.trim();
+          // 包含答案
+          if (
+            choiceText === answer ||
+            choiceText.includes(answer) ||
+            answer.includes(choiceText)
+          ) {
+            // 最小长度选项有值
+            if (minLengthChoice) {
+              // 最短长度选项与当前选项比较长度
+              if (minLengthChoice.innerText.length > choiceText.length) {
+                minLengthChoice = choice;
+              }
+            } else {
+              // 最小长度选项赋值
+              minLengthChoice = choice;
+            }
+          }
+        });
+        // 存在选项
+        if (minLengthChoice) {
+          // 选择
+          if (!minLengthChoice.classList.contains('chosen')) {
+            minLengthChoice.click();
+          }
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+  return false;
+}
+// 随机处理选项
+function handleChoiceBtnRand(answers: string[]) {
+  // 选项按钮
+  const allBtns = $$<HTMLButtonElement>('.q-answer');
+  // 按钮存在
+  if (allBtns.length) {
+    const index = ~~(Math.random() * allBtns.length);
+    const randBtn = allBtns[index];
+    // 选择
+    if (!randBtn.classList.contains('chosen')) {
+      randBtn.click();
+    }
+  }
+}
+// 处理填空
+const handleBlankInput = (answers: string[]) => {
+  // 所有填空
+  const blanks = $$<HTMLInputElement>('.blank');
+  // 答案存在
+  if (blanks.length && answers.length) {
+    // 填空数量和答案数量一致
+    if (answers.length === blanks.length) {
+      return answers.every((answer, i) => {
+        // 答案存在
+        if (answer && answer.length) {
+          // 输入事件
+          const inputEvent = new Event('input', {
+            bubbles: true,
+          });
+          // 设置答案
+          blanks[i].setAttribute('value', answer);
+          // 触发输入input
+          blanks[i].dispatchEvent(inputEvent);
+          return true;
+        }
+        return false;
+      });
+    }
+    // 填空数量为1和提示数量大于1
+    if (blanks.length === 1 && answers.length > 1) {
+      // 直接将所有答案整合填进去
+      const answer = answers.join('');
+      // 答案存在
+      if (answer && answer.length) {
+        // 输入事件
+        const inputEvent = new Event('input', {
+          bubbles: true,
+        });
+        // 设置答案
+        blanks[0].setAttribute('value', answer);
+        // 触发输入input
+        blanks[0].dispatchEvent(inputEvent);
+        return true;
+      }
+    }
+  }
+  return false;
+};
 // 答题过程(整合)
 async function doingExam() {
   // 下一个按钮
@@ -1191,6 +1112,8 @@ async function doingExam() {
     const allTips = $$<HTMLFontElement>('font[color=red]');
     // 答案
     const answers = allTips.map((tip) => tip.innerText.trim());
+    // 获取题目的文本内容
+    const content = $$('.q-body')[0].innerText;
     // 等待一段时间
     await waitingTime(1500);
     // 选项按钮
@@ -1198,104 +1121,32 @@ async function doingExam() {
     // 所有填空
     const blanks = $$<HTMLInputElement>('input[type=text][class=blank]');
     // 问题类型
-    const questionType: '填空题' | '单选题' | '多选题' = $$('.q-header')[0]
-      .innerText
-      ? $$('.q-header')[0].innerText.substring(0, 3)
-      : '';
+    const questionType = <'填空题' | '单选题' | '多选题'>(
+      $$('.q-header')[0].innerText.substring(0, 3)
+    );
     // 题型分类作答
     switch (questionType) {
       case '填空题': {
         // 根据提示作答
         if (answers.length) {
-          // 填空数量和提示数量一致
-          if (answers.length === blanks.length) {
-            // 错误
-            let error = false;
-            for (let i = 0; i < answers.length; i++) {
-              // 将答案填写到对应的空中
-              const answer = answers[i];
-              // 答案存在
-              if (answer && answer.length) {
-                // 输入事件
-                const inputEvent = new Event('input', {
-                  bubbles: true,
-                });
-                // 设置答案
-                blanks[i].setAttribute('value', answer);
-                // 触发输入input
-                blanks[i].dispatchEvent(inputEvent);
-              } else {
-                error = true;
-                break;
-              }
-            }
-            // 无错误
-            if (!error) {
-              break;
-            }
-          } else if (answers.length > 1 && blanks.length === 1) {
-            // 直接将所有答案整合填进去
-            const answer = answers.join('');
-            // 答案存在
-            if (answer && answer.length) {
-              // 输入事件
-              const inputEvent = new Event('input', {
-                bubbles: true,
-              });
-              // 设置答案
-              blanks[0].setAttribute('value', answer);
-              // 触发输入input
-              blanks[0].dispatchEvent(inputEvent);
-              break;
-            }
+          const res = handleBlankInput(answers);
+          // 成功
+          if (res) {
+            break;
           }
         }
         // 尝试题库获取
-
-        // 生成秘钥
-        const key = getKey();
-        // 尝试获取答案
-        const data = await getAnswer(key);
-        // 获取答案数据
-        if (data && data.status !== 0) {
-          // 错误
-          let error = false;
-          // 格式化
-          const answerData: { content: string }[] = JSON.parse(
-            data.data.txt_content
-          );
-          // 答案
-          const answers = answerData[0].content
-            .split(';')
-            .map((ans) => ans.trim());
-          // 答案和空数量相同
-          if (answers.length === blanks.length) {
-            for (let i = 0; i < answers.length; i++) {
-              // 答案存在
-              if (answers[i] && answers[i].length) {
-                // 输入事件
-                const inputEvent = new Event('input', {
-                  bubbles: true,
-                });
-                // 设置答案
-                blanks[i].setAttribute('value', answers[i].trim());
-                // 触发输入input
-                blanks[i].dispatchEvent(inputEvent);
-              } else {
-                error = true;
-                break;
-              }
-            }
-          }
-          // 无错误
-          if (!error) {
+        const answersNetwork = await getAnswer(content);
+        // 根据题库作答
+        if (answersNetwork.length) {
+          const res = handleBlankInput(answersNetwork);
+          // 成功
+          if (res) {
             break;
           }
         }
         // 暂停答题
-        pauseExam();
-        // 暂停
-        await pauseLock();
+        await pauseExam();
         // 提交答案
         shouldSaveAnswer = true;
         break;
@@ -1303,169 +1154,49 @@ async function doingExam() {
       case '多选题': {
         // 根据提示作答
         if (answers.length) {
-          // 题目
-          const content = $$('.q-body')[0].innerText;
+          // 选项文本
+          const choicesText = allBtns.map((btn) => btn.innerText);
+          // 选项内容
+          const choicesContent = choicesText
+            .map((choiceText) => choiceText.split(/[A-Z]./)[1].trim())
+            .join('');
           // 空格
           const blanks = content.match(/（）/g);
-          // 空和选项数量相同
+          // 填空数量、选项数量、答案数量相同 | 选项全文等于答案全文
           if (
-            allBtns.length === answers.length ||
-            blanks.length === allBtns.length
+            (allBtns.length === answers.length &&
+              blanks.length === allBtns.length) ||
+            content === choicesContent
           ) {
             // 全选
             allBtns.forEach((choice) => {
-              // 未被选
               if (!choice.classList.contains('chosen')) {
                 choice.click();
               }
             });
             break;
-          } else if (allBtns.length > answers.length) {
-            //  错误
-            let error = false;
-            // 提示
-            for (let i = 0; i < answers.length; i++) {
-              // 答案
-              const answer = answers[i];
-              // 答案存在
-              if (answer && answer.length) {
-                // 是否答案完全对应选项
-                let hasButton = false;
-                // 包含答案最短长度选项
-                let minLengthChoice: HTMLButtonElement | undefined;
-                // 按钮
-                for (let j = 0; j < allBtns.length; j++) {
-                  // 选项
-                  let choice = allBtns[j];
-                  // 选项文本
-                  const choiceText = choice.innerText.trim();
-                  // 答案对应选项
-                  if (
-                    choiceText === answer ||
-                    choiceText.includes(answer) ||
-                    answer.includes(choiceText)
-                  ) {
-                    // 对应
-                    hasButton = true;
-                    // 最小长度选项有值
-                    if (minLengthChoice) {
-                      // 最短长度选项与当前选项比较长度
-                      if (
-                        minLengthChoice.innerText.length > choiceText.length
-                      ) {
-                        minLengthChoice = choice;
-                      }
-                    } else {
-                      // 最小长度选项赋值
-                      minLengthChoice = choice;
-                    }
-                  }
-                }
-                // 存在选项
-                if (hasButton && minLengthChoice) {
-                  // 选择
-                  if (!minLengthChoice.classList.contains('chosen')) {
-                    minLengthChoice.click();
-                  }
-                  break;
-                }
-                // 存在不匹配
-                if (!hasButton) {
-                  error = true;
-                  break;
-                }
-              } else {
-                // 答案不存在
-                error = true;
-                break;
-              }
-            }
-            // 无错误
-            if (!error) {
+          }
+          // 选项数量大于等于答案
+          if (allBtns.length >= answers.length) {
+            const res = handleChoiceBtn(answers);
+            // 成功
+            if (res) {
               break;
             }
           }
         }
         // 尝试题库获取
-
-        // 生成秘钥
-        const key = getKey();
-        // 尝试获取答案
-        let data: any = await getAnswer(key);
-        // 获取答案数据
-        if (data && data.status !== 0) {
-          // 格式化
-          const answerData: { content: string }[] = JSON.parse(
-            data.data.txt_content
-          );
-          // 答案
-          const answers = answerData[0].content
-            .split(';')
-            .map((ans) => ans.trim());
-          //  错误
-          let error = false;
-          // 作答
-          for (let i = 0; i < answers.length; i++) {
-            // 答案
-            const answer = answers[i];
-            // 答案存在
-            if (answer && answer.length) {
-              // 是否答案完全对应选项
-              let hasButton = false;
-              // 包含答案最短长度选项
-              let minLengthChoice: HTMLButtonElement | undefined;
-              for (let j = 0; j < allBtns.length; j++) {
-                // 选项
-                const choice = allBtns[j];
-                // 选项文本
-                const choiceText = choice.innerText.trim();
-                if (
-                  choiceText === answer ||
-                  choiceText.includes(answer) ||
-                  answer.includes(choiceText)
-                ) {
-                  // 对应
-                  hasButton = true;
-                  // 最小长度选项有值
-                  if (minLengthChoice) {
-                    // 最短长度选项与当前选项比较长度
-                    if (minLengthChoice.innerText.length > choiceText.length) {
-                      minLengthChoice = choice;
-                    }
-                  } else {
-                    // 最小长度选项赋值
-                    minLengthChoice = choice;
-                  }
-                }
-              }
-              // 存在选项
-              if (hasButton && minLengthChoice) {
-                // 选择
-                if (!minLengthChoice.classList.contains('chosen')) {
-                  minLengthChoice.click();
-                }
-                break;
-              }
-              // 存在不匹配
-              if (!hasButton) {
-                error = true;
-                break;
-              }
-            } else {
-              // 答案不存在
-              error = true;
-              break;
-            }
-          }
-          // 无错误
-          if (!error) {
+        const answersNetwork = await getAnswer(content);
+        // 答案存在
+        if (answersNetwork.length) {
+          const res = handleChoiceBtn(answersNetwork);
+          // 成功
+          if (res) {
             break;
           }
         }
         // 暂停答题
-        pauseExam();
-        // 暂停
-        await pauseLock();
+        await pauseExam();
         // 提交答案
         shouldSaveAnswer = true;
         break;
@@ -1475,145 +1206,72 @@ async function doingExam() {
         if (answers.length) {
           // 提示为1
           if (answers.length === 1) {
-            // 答案
-            const answer = answers[0];
-            // 答案存在
-            if (answer && answer.length) {
-              // 是否答案完全对应选项
-              let hasButton = false;
-              // 包含答案最短长度选项
-              let minLengthChoice: HTMLButtonElement | undefined;
-              for (let i = 0; i < allBtns.length; i++) {
-                // 选项
-                const choice = allBtns[i];
-                // 选项文本
-                const choiceText = choice.innerText.trim();
-                // 对比答案
-                if (
-                  choiceText === answer ||
-                  choiceText.includes(answer) ||
-                  answer.includes(choiceText)
-                ) {
-                  // 对应
-                  hasButton = true;
-                  // 最小长度选项有值
-                  if (minLengthChoice) {
-                    // 最短长度选项与当前选项比较长度
-                    if (minLengthChoice.innerText.length > choiceText.length) {
-                      minLengthChoice = choice;
-                    }
-                  } else {
-                    // 最小长度选项赋值
-                    minLengthChoice = choice;
-                  }
-                }
-              }
-              // 存在选项
-              if (hasButton && minLengthChoice) {
-                // 选择
-                if (!minLengthChoice.classList.contains('chosen')) {
-                  minLengthChoice.click();
-                }
-                break;
-              }
+            const res = handleChoiceBtn(answers);
+            // 成功
+            if (res) {
+              break;
             }
           } else {
-            const seperator = ['', ' ', '，', ';', ',', '、', '-'];
+            // 可能的分隔符
+            const seperator = [
+              '',
+              ' ',
+              '，',
+              ';',
+              ',',
+              '、',
+              '-',
+              '|',
+              '+',
+              '/',
+            ];
             // 可能的答案
             const answersLike = seperator.map((s) => answers.join(s));
             // 答案存在
             if (answersLike.every((answer) => answer.length)) {
-              // 是否答案完全对应选项
-              let hasButton = false;
-              for (let i = 0; i < allBtns.length; i++) {
-                // 选项
-                const choice = allBtns[i];
-                // 选项文本
-                const choiceText = choice.innerText.trim();
-                // 对比答案
-                if (
-                  answersLike.some(
-                    (answer) =>
-                      choiceText === answer ||
-                      choiceText.includes(answer) ||
-                      answer.includes(choiceText)
-                  )
-                ) {
-                  // 对应
-                  hasButton = true;
-                  // 选择
-                  if (!choice.classList.contains('chosen')) {
-                    choice.click();
-                  }
-                  break;
+              // 可能答案是否正确
+              for (const i in answersLike) {
+                // 尝试查找点击
+                const res = handleChoiceBtn([answersLike[i]]);
+                if (res) {
+                  return true;
                 }
-              }
-              // 存在选项
-              if (hasButton) {
-                break;
               }
             }
           }
         }
         // 尝试题库获取
-
-        // 生成秘钥
-        const key = getKey();
-        // 尝试获取答案
-        const data: any = await getAnswer(key);
-        // 获取答案数据
-        if (data && data.status !== 0) {
-          // 格式化
-          const answerData: { content: string }[] = JSON.parse(
-            data.data.txt_content
-          );
-          // 答案
-          const answer = answerData[0].content;
-          // 答案存在
-          if (answer && answer.length) {
-            // 是否答案完全对应选项
-            let hasButton = false;
-            // 包含答案最短长度选项
-            let minLengthChoice: HTMLButtonElement | undefined;
-            for (let i = 0; i < allBtns.length; i++) {
-              // 选项
-              const choice = allBtns[i];
-              // 选项文本
-              const choiceText = choice.innerText.trim();
-              // 对比答案
-              if (
-                choiceText === answer ||
-                choiceText.includes(answer) ||
-                answer.includes(choiceText)
-              ) {
-                // 对应
-                hasButton = true;
-                // 最小长度选项有值
-                if (minLengthChoice) {
-                  // 最短长度选项与当前选项比较长度
-                  if (minLengthChoice.innerText.length > choiceText.length) {
-                    minLengthChoice = choice;
-                  }
-                } else {
-                  // 最小长度选项赋值
-                  minLengthChoice = choice;
+        const answersNetwork = await getAnswer(content);
+        // 存在答案
+        if (answersNetwork.length) {
+          // 单答案单选项
+          if (answersNetwork.length === 1) {
+            // 尝试查找点击
+            const res = handleChoiceBtn(answersNetwork);
+            if (res) {
+              return true;
+            }
+          } else {
+            // 多答案单选项 选项意外拆分
+            // 可能分隔符
+            const seperator = ['', ' '];
+            // 可能答案
+            const answersLike = seperator.map((s) => answers.join(s));
+            // 答案存在
+            if (answersLike.every((answer) => answer.length)) {
+              // 可能答案是否正确
+              for (const i in answersLike) {
+                // 尝试查找点击
+                const res = handleChoiceBtn([answersLike[i]]);
+                if (res) {
+                  return true;
                 }
               }
-            }
-            // 存在选项
-            if (hasButton && minLengthChoice) {
-              // 选择
-              if (!minLengthChoice.classList.contains('chosen')) {
-                minLengthChoice.click();
-              }
-              break;
             }
           }
         }
         // 暂停答题
-        pauseExam();
-        // 暂停
-        await pauseLock();
+        await pauseExam();
         // 提交答案
         shouldSaveAnswer = true;
         break;
@@ -1626,7 +1284,7 @@ async function doingExam() {
       // 需要提交答案
       if (shouldSaveAnswer) {
         // 获取key
-        const key = getKey();
+        const key = getKey(content);
         // 答案
         const answers: string[] = [];
         if (questionType === '填空题') {
@@ -1652,7 +1310,7 @@ async function doingExam() {
         // 存在答案
         if (answer.length) {
           // 答案
-          console.log(`上传了手工答案 key:${key} answer:${answer}`);
+          console.log(`上传了手工答案\nkey:${key},答案:${answer}`);
           await saveAnswer(key, answer);
         }
       }
@@ -1665,7 +1323,7 @@ async function doingExam() {
       // 答题错误
       if (answerBox) {
         // 获取key
-        const key = getKey();
+        const key = getKey(content);
         const answerTemp = answerBox.innerText;
         // 从字符串中拿出答案
         const [, answer] = answerTemp.split('：');
@@ -1676,15 +1334,15 @@ async function doingExam() {
         }
         // 每周、专项暂停
         if (
-          url.includes(URL_CONFIG.examWeekly) ||
-          url.includes(URL_CONFIG.examPaper)
+          href.includes(URL_CONFIG.examWeekly) ||
+          href.includes(URL_CONFIG.examPaper)
         ) {
           // 暂停答题
-          pauseExam();
-          // 暂停
-          await pauseLock();
+          await pauseExam();
         }
       }
+      // 滑动验证
+      await waitVerify();
     }
     // 获取按钮
     nextButton = await getNextButton();
@@ -1698,15 +1356,12 @@ async function doingExam() {
   closeWin();
 }
 // 获取关键字
-function getKey() {
-  // 获取题目的文本内容
-  let content = $$('.q-body')[0].innerText;
+function getKey(content: string) {
   // 外部引用md5加密
   const key = md5(content);
   console.log(`获取 key:${key}`);
   return key;
 }
-
 // 初始化配置
 function initSetting() {
   try {

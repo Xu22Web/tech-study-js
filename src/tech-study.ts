@@ -39,43 +39,51 @@ const maxVideoNum = 6;
 // 暂停锁
 function pauseLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
-    const doing = setInterval(() => {
-      if (!pause) {
-        // 停止定时器
-        clearInterval(doing);
-        console.log('答题等待结束！');
-        if (callback && callback instanceof Function) {
-          callback('done');
+    if (pause) {
+      const doing = setInterval(() => {
+        if (!pause) {
+          // 停止定时器
+          clearInterval(doing);
+          console.log('答题等待结束！');
+          if (callback && callback instanceof Function) {
+            callback('done');
+          }
+          resolve('done');
+          return;
         }
-        resolve('done');
-        return;
-      }
-      if (callback && callback instanceof Function) {
-        callback('pending');
-      }
-      console.log('答题等待...');
-    }, 500);
+        if (callback && callback instanceof Function) {
+          callback('pending');
+        }
+        console.log('答题等待...');
+      }, 500);
+      return;
+    }
+    resolve('done');
   });
 }
 // 暂停学习锁
 function pauseStudyLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
-    const doing = setInterval(() => {
-      if (!pauseStudy) {
-        // 停止定时器
-        clearInterval(doing);
-        console.log('学习等待结束！');
-        if (callback && callback instanceof Function) {
-          callback('done');
+    if (pauseStudy) {
+      const doing = setInterval(() => {
+        if (!pauseStudy) {
+          // 停止定时器
+          clearInterval(doing);
+          console.log('学习等待结束！');
+          if (callback && callback instanceof Function) {
+            callback('done');
+          }
+          resolve('done');
+          return;
         }
-        resolve('done');
-        return;
-      }
-      if (callback && callback instanceof Function) {
-        callback('pending');
-      }
-      console.log('学习等待...');
-    }, 500);
+        if (callback && callback instanceof Function) {
+          callback('pending');
+        }
+        console.log('学习等待...');
+      }, 500);
+      return;
+    }
+    resolve('done');
   });
 }
 /* Tools End·工具函数结束 */
@@ -923,7 +931,9 @@ function getNextButton() {
   return new Promise((resolve) => {
     const timer = setInterval(() => {
       // 答题按钮
-      const nextAll = $$('.ant-btn').filter((next) => next.innerText);
+      const nextAll = $$('button:not([disabled]).ant-btn').filter(
+        (next) => next.innerText
+      );
       if (nextAll.length) {
         clearInterval(timer); // 停止定时器
         if (nextAll.length === 2) {
@@ -942,27 +952,33 @@ async function pauseExam() {
   if (manualButton) {
     console.log('自动答题失败，切换为手动');
     pause = true;
-    // 暂停
-    await pauseLock();
     manualButton.innerText = '开启自动答题';
     manualButton.classList.add('manual');
     createTip('已暂停，请答题后手动开启自动答题！', 10000);
+    // 暂停
+    await pauseLock();
   }
 }
 // 等待验证
 function waitVerify() {
   return new Promise((resolve) => {
-    // 定时器
-    const timer = setInterval(() => {
-      // 滑动验证
-      const mask = $$('#nc_mask')[0];
-      if (!mask || getComputedStyle(mask).display === 'none') {
-        console.log('学习等待结束！');
-        clearInterval(timer);
-        resolve(true);
-      }
-      console.log('等待滑动验证...');
-    }, 100);
+    // 滑动验证
+    const mask = $$('#nc_mask')[0];
+    if (mask && getComputedStyle(mask).display !== 'none') {
+      // 定时器
+      const timer = setInterval(() => {
+        // 滑动验证
+        const mask = $$('#nc_mask')[0];
+        if (!mask || getComputedStyle(mask).display === 'none') {
+          console.log('学习等待结束！');
+          clearInterval(timer);
+          resolve(true);
+        }
+        console.log('等待滑动验证...');
+      }, 100);
+      return;
+    }
+    resolve(true);
   });
 }
 // 处理选项

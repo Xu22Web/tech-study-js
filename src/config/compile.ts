@@ -1,3 +1,4 @@
+import ts from 'typescript';
 /**
  * @description 编译配置
  */
@@ -13,7 +14,15 @@ const COMPILE_CONFIG = {
   /**
    * @description 导出目录
    */
-  outDir: '/',
+  outDir: '.',
+  /**
+   * @description 目标版本
+   */
+  target: ts.ScriptTarget.ESNext,
+  /**
+   * @description 模块版本
+   */
+  module: ts.ModuleKind.ESNext,
 };
 
 export default COMPILE_CONFIG;

@@ -9,14 +9,150 @@ import COMPILE_CONFIG from '../src/config/compile';
 const { rootDir, file } = COMPILE_CONFIG;
 // 文件路径
 const sourceFilePath = path.resolve(rootDir, file);
-// 项目配置
-const programOptions = {
-  rootNames: [sourceFilePath],
-  options: {
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-    outDir: '.',
-  },
+// 导入路径
+const importFilePaths: string[] = [];
+/**
+ * @description 编译
+ * @param filePath
+ * @returns
+ */
+const handleCompile = async (filePath: string) => {
+  // 后缀
+  const ext = path.extname(filePath);
+  // 完整路径
+  const fullFilePath = path.resolve(rootDir, filePath);
+  // 文件名
+  const fileName = getFileName(filePath);
+  // 路径存在状态
+  const exists = handleFileStatus(fullFilePath);
+  // 不存在 检查index.ts
+  if (!exists) {
+    if (!ext.length) {
+      // 加后缀
+      const res = await handleCompile(`${filePath}.ts`);
+      if (res) {
+        return res;
+      }
+      if (fileName !== 'index.ts') {
+        const res = await handleCompile(`${filePath}/index.ts`);
+        if (res) {
+          return res;
+        }
+      }
+      return;
+    }
+
+    return;
+  }
+  // 是文件
+  if (exists) {
+    // 创建配置
+    const options = createOptions(fullFilePath);
+    // 创建项目
+    const program = ts.createIncrementalProgram(options);
+    // 根据项目配置获取源文件
+    const sourceFile = program.getSourceFile(fullFilePath);
+    // 自定义处理流程
+    const customTransformers: ts.CustomTransformers = {
+      before: [transformerFactory],
+    };
+    return new Promise<{
+      data: string;
+      complieName: string;
+      originName: string;
+      compiltPath: string;
+      originPath: string;
+    }>((resolve) => {
+      // 编译生成
+      program.emit(
+        sourceFile,
+        (name, text) => {
+          // 编译后的文件数据
+          const data = text.replace(/export (\{.*\}|default .*);/g, '');
+          // 编译后的文件名
+          const complieName = getFileName(name);
+          const compiltPath = path.resolve(name);
+          resolve({
+            data,
+            complieName,
+            compiltPath,
+            originName: fileName,
+            originPath: fullFilePath,
+          });
+        },
+        undefined,
+        false,
+        customTransformers
+      );
+    });
+  }
+  return;
+};
+/**
+ * @description 获取文件名
+ * @param filePath
+ * @returns
+ */
+const getFileName = (filePath) => {
+  return filePath.substring(filePath.lastIndexOf('/') + 1);
+};
+/**
+ * @description 文件存在
+ * @param filePath
+ * @returns
+ */
+const handleFileStatus = (filePath: string) => {
+  // 路径存在状态
+  const exists = fs.existsSync(filePath);
+  // 路径存在
+  if (exists) {
+    // 文件信息
+    const fileInfo = fs.statSync(filePath);
+    // 是文件
+    if (fileInfo.isFile()) {
+      return true;
+    }
+  }
+  return false;
+};
+/**
+ * @description 生成配置
+ * @param filePath
+ * @returns
+ */
+const createOptions = (filePath: string): ts.CreateProgramOptions => {
+  const { target, module, outDir } = COMPILE_CONFIG;
+  // 项目配置
+  const programOptions = {
+    rootNames: [filePath],
+    options: {
+      target,
+      module,
+      outDir,
+    },
+  };
+  return programOptions;
+};
+/**
+ * @description 创建用户脚本注释配置
+ * @returns
+ */
+const createCommentConfig = () => {
+  // 脚本数据
+  const data: string[] = [];
+  data.push('// ==UserScript==');
+  for (const key in SCRIPT_CONFIG) {
+    if (typeof SCRIPT_CONFIG[key] === 'string') {
+      data.push(`// @${key}   ${SCRIPT_CONFIG[key]}`);
+    }
+    if (Array.isArray(SCRIPT_CONFIG[key])) {
+      for (const i in SCRIPT_CONFIG[key]) {
+        data.push(`// @${key}   ${SCRIPT_CONFIG[key][i]}`);
+      }
+    }
+  }
+  data.push('// ==/UserScript==');
+  return data.join('\n');
 };
 // 处理流程工厂
 const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
@@ -31,12 +167,13 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
         const identifierText = node.importClause?.getText();
         // 获取导入模块名
         const moduleText = node.moduleSpecifier.getText();
-        // 检查是否满足正则 /["'`](.*)\?raw["'`]/
-        const res = moduleText.match(/["'`](.*)\?raw["'`]/);
-
-        if (identifierText && res) {
+        // 检查是否满足路径
+        const resSpecificPath = moduleText.match(
+          /(?<=(["'`]))(?:\.{0,2}(?:\/|(?:\\{1,2}))[-_.a-zA-Z]*)+(?=\?raw\1)/
+        );
+        if (identifierText && resSpecificPath) {
           // 提取模块相对路径
-          const [, relativefilePath] = res;
+          const [relativefilePath] = resSpecificPath;
           // 获取实际路径
           const filePath = path.resolve(rootDir, relativefilePath);
           // 获取文本信息
@@ -62,7 +199,22 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
           // 创建变量声明
           return ts.factory.createVariableStatement(undefined, declaratioList);
         }
+        // 检查是否满足路径
+        const resPath = moduleText.match(
+          /(?<=(["'`]))(?:\.{0,2}(?:\/|(?:\\{1,2}))[-_.a-zA-Z]*)+(?=\1)/
+        );
+        // 检查是否满足路径
+        if (resPath) {
+          // 相对路径
+          const relativefilePath = resPath[0];
+          importFilePaths.push(relativefilePath);
+          return ts.factory.createNotEmittedStatement(node);
+        }
         return node;
+      }
+      // 导出声明
+      if (ts.isExportDeclaration(node)) {
+        return ts.factory.createNotEmittedStatement(node);
       }
       return node;
     };
@@ -70,54 +222,59 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
     return ts.visitNode(node, visitor);
   };
 };
-// 开始编译
-const loading = ora('准备编译生成脚本文件！');
-// 创建项目
-const program = ts.createIncrementalProgram(programOptions);
-// 根据项目配置获取源文件
-const sourceFile = program.getSourceFile(sourceFilePath);
-// 自定义处理流程
-const customTransformers: ts.CustomTransformers = {
-  before: [transformerFactory],
-};
-// 编译开始
-loading.start('正在编译生成...');
-// 导出文件
-let outFile;
-// 编译生成
-program.emit(
-  sourceFile,
-  (name, text) => {
-    outFile = path.resolve(name);
+
+// 主函数
+const main = async () => {
+  // 开始编译
+  const progress = ora('准备编译生成脚本文件!');
+  progress.start(`正在编译... ${chalk.blueBright(file)}`);
+  // 编译
+  const res = await handleCompile(sourceFilePath);
+
+  if (res) {
+    // 编译信息
+    const { originName, complieName, compiltPath, data } = res;
+    progress.succeed(
+      `完成编译:${chalk.blueBright(originName)} -> ${chalk.blueBright(
+        complieName
+      )}!`
+    );
+    // 数据
+    const fullData: string[] = [];
     // 注释
-    loading.start(`正在生成 ${chalk.blueBright('UserScript')} 配置注释...`);
-    // 脚本数据
-    const data: string[] = [];
-    data.push('// ==UserScript==');
-    for (const key in SCRIPT_CONFIG) {
-      if (typeof SCRIPT_CONFIG[key] === 'string') {
-        data.push(`// @${key}   ${SCRIPT_CONFIG[key]}`);
+    progress.start(`正在生成${chalk.blueBright('用户脚本配置')}注释...`);
+    // 用户脚本注释配置
+    const config = createCommentConfig();
+    // 注释
+    progress.start(`已生成${chalk.blueBright('用户脚本配置')}注释!`);
+    fullData.push(config);
+    // 源文件名 编译文件名 数据
+    for (const i in importFilePaths) {
+      const filePath = importFilePaths[i];
+      progress.start(`正在编译... ${chalk.blueBright(filePath)}`);
+      // 编译
+      const res = await handleCompile(filePath);
+      if (res) {
+        // 编译信息
+        const { originName: importOriginName, data: importData } = res;
+        progress.succeed(
+          `完成编译:${chalk.blueBright(importOriginName)} -> ${chalk.blueBright(
+            complieName
+          )}!`
+        );
+        fullData.push(importData);
+        continue;
       }
-      if (Array.isArray(SCRIPT_CONFIG[key])) {
-        for (const i in SCRIPT_CONFIG[key]) {
-          data.push(`// @${key}   ${SCRIPT_CONFIG[key][i]}`);
-        }
-      }
+      progress.fail(`编译失败,请检查导入文件路径!`);
+      break;
     }
-    data.push('// ==/UserScript==');
-    // 注释
-    loading.start(`已生成 ${chalk.blueBright('UserScript')} 配置注释！`);
-    // 删除导出
-    data.push(text.replace('export {};', ''));
-    // 写入文件
-    loading.start(`正在导出文件 ${chalk.blueBright('tech-study.js')}...`);
-    fs.writeFileSync(outFile, data.join('\n'));
-    // 写入文件完成
-    loading.start(`已导出 ${chalk.blueBright('tech-study.js')}`);
-  },
-  undefined,
-  false,
-  customTransformers
-);
-// 编译结果信息
-loading.succeed(`导出文件： ${chalk.blueBright(outFile)}`);
+    fullData.push(data);
+    progress.start(`正在导出文件... ${chalk.blueBright(compiltPath)}`);
+    fs.writeFileSync(compiltPath, fullData.join('\n'));
+    progress.succeed(`导出文件:${chalk.blueBright(compiltPath)}!`);
+    return;
+  }
+  progress.fail(`编译失败,请检查文件路径!`);
+};
+
+main();

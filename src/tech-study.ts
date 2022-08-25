@@ -230,7 +230,9 @@ async function getExamWeekly(pageNo) {
   return [];
 }
 // 获取答案
-async function getAnswer(key) {
+async function getAnswer(content) {
+  // 获取密钥
+  const key = getKey(content)
   // 数据
   const data = {
     txt_name: key,
@@ -243,7 +245,7 @@ async function getAnswer(key) {
     })
     .join('&');
   // 请求
-  const res = await fetch(API_CONFIG.answerSearch[0], {
+  const res = await fetch(API_CONFIG.answerSearch, {
     method: 'POST',
     mode: 'cors',
     headers: {
@@ -931,7 +933,7 @@ function getNextButton() {
   return new Promise((resolve) => {
     const timer = setInterval(() => {
       // 答题按钮
-      const nextAll = $$('button:not([disabled]).ant-btn').filter(
+      const nextAll = $$('.ant-btn').filter(
         (next) => next.innerText
       );
       if (nextAll.length) {

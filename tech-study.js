@@ -57,10 +57,7 @@ const API_CONFIG = {
     // 文本服务器保存答案
     answerSave: 'https://a6.qikekeji.com/txt/data/save',
     // 文本服务器获取答案
-    answerSearch: [
-        'https://a6.qikekeji.com/txt/data/detail',
-        'https://www.souwen123.com/search/select.php',
-    ],
+    answerSearch: 'https://a6.qikekeji.com/txt/data/detail',
 };
 
 
@@ -555,7 +552,9 @@ async function getExamWeekly(pageNo) {
     return [];
 }
 // 获取答案
-async function getAnswer(key) {
+async function getAnswer(content) {
+    // 获取密钥
+    const key = getKey(content);
     // 数据
     const data = {
         txt_name: key,
@@ -568,7 +567,7 @@ async function getAnswer(key) {
     })
         .join('&');
     // 请求
-    const res = await fetch(API_CONFIG.answerSearch[0], {
+    const res = await fetch(API_CONFIG.answerSearch, {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -1226,7 +1225,7 @@ function getNextButton() {
     return new Promise((resolve) => {
         const timer = setInterval(() => {
             // 答题按钮
-            const nextAll = $$('button:not([disabled]).ant-btn').filter((next) => next.innerText);
+            const nextAll = $$('.ant-btn').filter((next) => next.innerText);
             if (nextAll.length) {
                 clearInterval(timer); // 停止定时器
                 if (nextAll.length === 2) {

@@ -35,8 +35,8 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 移除代码中调用`JQuery`部分，使用原生方案替代。
-2. 优化答题逻辑，提高答案正确率，提升答题速度。
+1. 优化答题逻辑，提高答案正确率，提升答题速度。
+2. 考虑发布基于`NodeJS`的全套解决方案。
 3. 答题存在滑动验证问题，暂时无法解决。
 
 ### 关于开发
@@ -62,10 +62,21 @@
 
 - 功能
 
-  ```
-  # 包含`?raw`结尾的`import`语句
-  import var from 'module?raw';
-  ```
+  1. 包含`?raw`结尾的`import`语句
 
-  1. 模块`module`文本赋值到`var`
-  2. 此类型`import`语句不会被编译到结果
+     ```
+
+     import var from 'file?raw';
+     ```
+
+     1. 文件`file`文本赋值到`var`
+     2. 此类型`import`语句不会被编译到结果
+
+  2. 普通的`import`语句
+
+     ```
+     import {funName} from 'file';
+     ```
+
+     1. 文件`file`文本插入到主文件一起导出，相当于合并多个`*.ts`文件导出为一个`*.js`文件
+     2. 此类型`import`语句不会被编译到结果

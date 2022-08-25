@@ -43,7 +43,10 @@
 
 - 脚本配置
 
-  `src/plugin.config.ts`
+  1. 脚本配置 `src/config/script.ts`
+  2. API 配置 `src/config/api.ts`
+  3. URL 配置 `src/config/url.ts`
+  4. 编译配置 `src/config/compile.ts`
 
 - CSS 文件
 
@@ -65,7 +68,6 @@
   1. 包含`?raw`结尾的`import`语句
 
      ```
-
      import var from 'file?raw';
      ```
 

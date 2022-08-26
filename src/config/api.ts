@@ -12,9 +12,15 @@ const API_CONFIG = {
   taskList:
     'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
   // 新闻数据
-  todayNews: 'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
+  todayNews: [
+    'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
+    'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
+  ],
   // 视频数据
-  todayVideos: 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
+  todayVideos: [
+    'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
+    'https://www.xuexi.cn/lgdata/1742g60067k.json',
+  ],
   // 每周答题列表
   weeklyList:
     'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',

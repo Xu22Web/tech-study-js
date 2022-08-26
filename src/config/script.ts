@@ -13,7 +13,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: '20220817',
+  version: '20220826',
   /**
    * @description 脚本描述
    */

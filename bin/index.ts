@@ -242,7 +242,7 @@ const main = async () => {
     progress.succeed(
       `完成编译:${chalk.blueBright(originName)} -> ${chalk.blueBright(
         compileName
-      )}!`
+      )}`
     );
     // 数据
     const fullData: string[] = [];

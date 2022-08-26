@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20220817
+// @version   20220826
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Noah
 // @match   https://www.xuexi.cn
@@ -48,9 +48,15 @@ const API_CONFIG = {
     // 任务列表
     taskList: 'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
     // 新闻数据
-    todayNews: 'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
+    todayNews: [
+        'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
+        'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
+    ],
     // 视频数据
-    todayVideos: 'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
+    todayVideos: [
+        'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
+        'https://www.xuexi.cn/lgdata/1742g60067k.json',
+    ],
     // 每周答题列表
     weeklyList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
     // 专项练习列表
@@ -336,19 +342,11 @@ const css = ':root {\n  --themeColor: #fa3333;\n  font-size: 10px;\n}\n.icon {\n
 // 嵌入样式
 GM_addStyle(css);
 /* Config·配置 */
-// 每周答题当前页码
-let examWeeklyPageNo = 1;
-// 每周答题总页码
-let examWeeklyTotalPageCount = 0;
 // 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
-let examWeeklyReverse = true;
-// 专项练习当前页码
-let examPaperPageNo = 1;
-// 专项练习总页码
-let examPaperTotalPageCount = 0;
-// 专 项答题开启逆序答题: false: 顺序答题; true: 逆序答题
-let examPaperReverse = true;
-// 每周答题，专项练习 请求rate 限制 每 3000ms 一次
+const examWeeklyReverse = true;
+// 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
+const examPaperReverse = true;
+//  答题请求速率限制
 const ratelimitms = 3000;
 // 单次最大新闻数
 const maxNewsNum = 6;
@@ -476,8 +474,10 @@ async function getTaskList() {
 }
 // 获取新闻数据
 async function getTodayNews() {
+    // 随机
+    const randNum = ~~(Math.random() * 2);
     // 获取重要新闻
-    const res = await fetch(API_CONFIG.todayNews, {
+    const res = await fetch(API_CONFIG.todayNews[randNum], {
         method: 'GET',
     });
     // 请求成功
@@ -491,8 +491,10 @@ async function getTodayNews() {
 }
 // 获取视频数据
 async function getTodayVideos() {
+    // 随机
+    const randNum = ~~(Math.random() * 2);
     // 获取重要新闻
-    const res = await fetch(API_CONFIG.todayVideos, {
+    const res = await fetch(API_CONFIG.todayVideos[randNum], {
         method: 'GET',
     });
     // 请求成功
@@ -640,10 +642,10 @@ async function saveAnswer(key, value) {
 /* 变量 */
 // 任务进度
 const tasks = [];
-// 获取 URL 
+// 获取 URL
 const { href } = window.location;
 // 设置
-let settings = [true, true, true, true, true, false, false];
+let settings = [true, true, true, true, true, false, false, false];
 // 是否暂停答题
 let pause = false;
 // 是否暂停学习
@@ -797,7 +799,7 @@ async function reading(type) {
         // 80-100秒后关闭页面，看文章
         time = ~~(Math.random() * (100 - 80 + 1) + 80);
     }
-    else {
+    if (type === 1) {
         // 230-250秒后关闭页面，看视频
         time = ~~(Math.random() * (250 - 230 + 1) + 230);
     }
@@ -876,11 +878,9 @@ async function createTip(text, delay) {
 // 获取新闻列表
 function getNews() {
     return new Promise(async (resolve) => {
-        // 新闻数
-        const newsNum = tasks[0].dayMaxScore - tasks[0].currentScore;
         // 需要学习的新闻数量
-        const need = newsNum < maxNewsNum ? newsNum : maxNewsNum;
-        console.log('还需要看' + need + '个新闻');
+        const need = tasks[0].need < maxNewsNum ? tasks[0].need : maxNewsNum;
+        console.log(`还需要看 ${need} 个新闻`);
         // 获取重要新闻
         const data = await getTodayNews();
         if (data && data.length) {
@@ -900,14 +900,9 @@ function getNews() {
 // 获取视频列表
 function getVideos() {
     return new Promise(async (resolve) => {
-        // 还需要看多少个视频
-        const temp1 = ~~(tasks[1].dayMaxScore - tasks[1].currentScore);
-        const temp2 = ~~(tasks[3].dayMaxScore - tasks[3].currentScore);
-        // 视频数
-        const videoNum = temp1 > temp2 ? temp1 : temp2;
         // 需要学习的视频数量
-        const need = videoNum < maxVideoNum ? videoNum : maxVideoNum;
-        console.log(`还需要看${need}个视频`);
+        const need = tasks[1].need < maxVideoNum ? tasks[1].need : maxVideoNum;
+        console.log(`还需要看 ${need} 个视频`);
         // 获取重要视频
         const data = await getTodayVideos();
         if (data && data.length) {
@@ -995,6 +990,7 @@ async function doExamPractice() {
     // 暂停
     await pauseStudyLock();
     console.log('正在完成每日答题');
+    // 新页面
     const newPage = GM_openInTab(URL_CONFIG.examPractice, {
         active: true,
         insert: true,
@@ -1012,214 +1008,155 @@ async function doExamPractice() {
         await doExamPractice();
     }
 }
-// fix code = 429
-async function waitingDependStartTime(startTime) {
-    let remainms = Date.now() - startTime;
-    if (remainms < ratelimitms) {
-        await waitingTime(ratelimitms - remainms + 1000);
+// 做每周答题
+async function doExamWeekly() {
+    // id
+    const examWeeklyId = await findExamWeekly();
+    if (examWeeklyId) {
+        // 暂停
+        await pauseStudyLock();
+        console.log('正在做每周答题...');
+        // 新页面
+        const newPage = GM_openInTab(`${URL_CONFIG.examWeekly}?id=${examWeeklyId}`, { active: true, insert: true, setParent: true });
+        // 等待窗口关闭
+        await waitingClose(newPage);
+        // 等待一段时间
+        await waitingTime(1500);
+        // 刷新菜单数据
+        await refreshMenu();
+        // 任务完成状况
+        if (!tasks[3].status) {
+            console.log('任务未完成，继续完成每周答题！');
+            return await doExamWeekly();
+        }
+        return true;
     }
+    return false;
+}
+// 做专项练习
+async function doExamPaper() {
+    // id
+    const examPaperId = await findExamPaper();
+    if (examPaperId) {
+        // 暂停
+        await pauseStudyLock();
+        console.log('正在做专项练习...');
+        // 新页面
+        const newPage = GM_openInTab(`${URL_CONFIG.examPaper}?id=${examPaperId}`, {
+            active: true,
+            insert: true,
+            setParent: true,
+        });
+        // 等待窗口关闭
+        await waitingClose(newPage);
+        // 等待一段时间
+        await waitingTime(1500);
+        // 刷新菜单数据
+        await refreshMenu();
+        // 任务完成状况
+        if (!tasks[4].status) {
+            console.log('任务未完成，继续专项练习！');
+            return await doExamPaper();
+        }
+        return true;
+    }
+    return false;
 }
 // 初始化每周答题总页数属性
-async function InitExamWeeklyAttr() {
-    let startTime = Date.now();
-    // 默认从第一页获取全部页属性
-    var data = await getExamWeekly(1);
-    if (data) {
-        // 初始化总页码
-        examWeeklyTotalPageCount = data.totalPageCount;
-        // 若每周答题逆序, 则从最后一页开始
-        if (examWeeklyReverse) {
-            examWeeklyPageNo = examWeeklyTotalPageCount;
+async function InitExam(type) {
+    if (type === 0) {
+        // 默认从第一页获取全部页属性
+        var data = await getExamWeekly(1);
+        if (data) {
+            return data.totalPageCount;
         }
     }
-    await waitingDependStartTime(startTime);
+    if (type === 1) {
+        var data = await getExamPaper(1); // 默认从第一页获取全部页属性
+        if (data) {
+            return data.totalPageCount;
+        }
+    }
+    await waitingTime(ratelimitms);
 }
 // 查询每周答题列表看看还有没有没做过的，有则返回id
 async function findExamWeekly() {
-    var continueFind = true;
-    var examWeeklyId = null;
     console.log('初始化每周答题');
-    await InitExamWeeklyAttr();
-    console.log('正在寻找未完成的每周答题');
-    while (continueFind) {
-        let startTime = Date.now();
-        await getExamWeekly(examWeeklyPageNo).then(async (data) => {
-            if (data) {
+    // 获取总页数
+    const total = await InitExam(0);
+    // 当前页数
+    let current = examPaperReverse ? total : 1;
+    console.log('每周答题,开启逆序模式,从最早的题目开始答题');
+    console.log('正在寻找未完成的每周答题...');
+    while (current <= total && current) {
+        // 请求数据
+        const data = await getExamWeekly(current);
+        if (data) {
+            // 逆序
+            if (examWeeklyReverse) {
+                // 若开启逆序答题, 则反转列表
+                data.list.reverse();
+            }
+            for (const i in data.list) {
+                // 获取每周的测试列表
+                const examWeeks = data.list[i].practices;
+                // 若开启逆序, 则反转每周的测试列表
                 if (examWeeklyReverse) {
-                    // 若开启逆序答题, 则反转列表
-                    console.log('每周答题,开启逆序模式,从最早的题目开始答题');
-                    data.list.reverse();
+                    examWeeks.reverse();
                 }
-                for (const i in data.list) {
-                    let examWeeks = data.list[i].practices; // 获取每周的测试列表
-                    if (examWeeklyReverse) {
-                        // 若开启逆序, 则反转每周的测试列表
-                        examWeeks.reverse();
-                    }
-                    for (const j in examWeeks) {
-                        // 遍历查询有没有没做过的
-                        if (examWeeks[j].status !== 2) {
-                            // status： 1为"开始答题" , 2为"重新答题"
-                            // 如果不是"重新答题"，则可以做
-                            examWeeklyId = examWeeks[j].id;
-                            continueFind = false;
-                            break;
-                        }
-                    }
-                    if (!continueFind) {
-                        // 如果已经找到了，则退出循环
-                        break;
-                    }
-                }
-                if (continueFind) {
-                    // 增加页码
-                    examWeeklyPageNo += examWeeklyReverse ? -1 : 1;
-                    if (examWeeklyTotalPageCount === 0 ||
-                        examWeeklyPageNo > examWeeklyTotalPageCount ||
-                        examWeeklyPageNo < 1) {
-                        // 已经找完所有页码，还是没找到，不再继续查找
-                        continueFind = false;
+                for (const j in examWeeks) {
+                    // 遍历查询有没有没做过的
+                    if (examWeeks[j].status !== 2) {
+                        // status： 1为"开始答题" , 2为"重新答题"
+                        return examWeeks[j].id;
                     }
                 }
             }
-            else {
-                continueFind = false;
-            }
-            // fix code = 429
-            await waitingDependStartTime(startTime);
-        });
-    }
-    return examWeeklyId;
-}
-// 做每周答题
-function doExamWeekly() {
-    return new Promise((resolve) => {
-        // 查找有没有没做过的每周测试，有则返回ID
-        // examWeeklyId = 147;// 测试题目
-        findExamWeekly().then(async (examWeeklyId) => {
-            if (examWeeklyId !== null) {
-                // 暂停
-                await pauseStudyLock();
-                console.log('正在做每周答题');
-                // 新页面
-                const newPage = GM_openInTab(`${URL_CONFIG.examWeekly}?id=${examWeeklyId}`, { active: true, insert: true, setParent: true });
-                // 等待窗口关闭
-                await waitingClose(newPage);
-                // 等待一段时间
-                await waitingTime(1500);
-                // 刷新菜单数据
-                await refreshMenu();
-                // 任务完成状况
-                if (settings[3] && !tasks[3].status) {
-                    console.log('任务未完成，继续完成每周答题！');
-                    resolve(await doExamWeekly());
-                    return;
-                }
-                resolve('done');
-            }
-            else {
-                console.log('没有找到未完成的每周答题，跳过');
-                resolve('noTest');
-            }
-        });
-    });
-}
-// 初始化专项练习总页数属性
-async function InitExamPaperAttr() {
-    let startTime = Date.now();
-    var data = await getExamPaper(1); // 默认从第一页获取全部页属性
-    if (data) {
-        // 初始化总页码
-        examPaperTotalPageCount = data.totalPageCount;
-        // 若专项练习逆序, 则从最后一页开始
-        if (examPaperReverse) {
-            examPaperPageNo = examPaperTotalPageCount;
+            // 增加页码
+            current += examWeeklyReverse ? -1 : 1;
+            // 等待
+            await waitingTime(ratelimitms);
+        }
+        else {
+            break;
         }
     }
-    await waitingDependStartTime(startTime);
 }
 // 查询专项练习列表看看还有没有没做过的，有则返回id
 async function findExamPaper() {
-    var continueFind = true;
-    var examPaperId = null;
-    console.log('初始化专项练习属性');
-    await InitExamPaperAttr();
-    console.log('正在寻找未完成的专项练习');
-    while (continueFind) {
-        let startTime = Date.now();
-        await getExamPaper(examPaperPageNo).then(async (data) => {
-            if (data) {
-                let examPapers = data.list; // 获取专项练习的列表
-                if (examPaperReverse) {
-                    // 若开启逆序答题, 则反转专项练习列表
-                    console.log('专项练习,开启逆序模式,从最早的题目开始答题');
-                    examPapers.reverse();
-                }
-                for (const i in examPapers) {
-                    // 遍历查询有没有没做过的
-                    if (examPapers[i].status !== 2) {
-                        // status： 1为"开始答题" , 2为"重新答题"
-                        // 如果不是"重新答题"，则可以做
-                        examPaperId = examPapers[i].id;
-                        continueFind = false;
-                        break;
-                    }
-                }
-                if (continueFind) {
-                    // 增加页码 (若开启逆序翻页, 则减少页码)
-                    examPaperPageNo += examPaperReverse ? -1 : 1;
-                    if (examPaperTotalPageCount === 0 ||
-                        examPaperPageNo > examPaperTotalPageCount ||
-                        examPaperPageNo < 1) {
-                        // 已经找完所有页码，还是没找到，不再继续查找
-                        continueFind = false;
-                    }
+    console.log('初始化专项练习');
+    // 获取总页数
+    const total = await InitExam(0);
+    // 当前页数
+    let current = examPaperReverse ? total : 1;
+    console.log('专项练习,开启逆序模式,从最早的题目开始答题');
+    console.log('正在寻找未完成的专项练习...');
+    while (current <= total && current) {
+        // 请求数据
+        const data = await getExamPaper(current);
+        if (data) {
+            // 获取专项练习的列表
+            const examPapers = data.list;
+            if (examPaperReverse) {
+                // 若开启逆序答题, 则反转专项练习列表
+                examPapers.reverse();
+            }
+            for (const i in examPapers) {
+                // 遍历查询有没有没做过的
+                if (examPapers[i].status !== 2) {
+                    // status： 1为"开始答题" , 2为"重新答题"
+                    return examPapers[i].id;
                 }
             }
-            else {
-                continueFind = false;
-            }
-            // fix code = 429
-            await waitingDependStartTime(startTime);
-        });
+            // 增加页码 (若开启逆序翻页, 则减少页码)
+            current += examPaperReverse ? -1 : 1;
+            // 等待
+            await waitingTime(ratelimitms);
+        }
+        else {
+            break;
+        }
     }
-    return examPaperId;
-}
-// 做专项练习
-function doExamPaper() {
-    return new Promise((resolve) => {
-        // 查找有没有没做过的专项练习，有则返回ID
-        findExamPaper().then(async (examPaperId) => {
-            if (examPaperId !== null) {
-                // 暂停
-                await pauseStudyLock();
-                console.log('正在做专项练习');
-                // 新页面
-                const newPage = GM_openInTab(`${URL_CONFIG.examPaper}?id=${examPaperId}`, {
-                    active: true,
-                    insert: true,
-                    setParent: true,
-                });
-                // 等待窗口关闭
-                await waitingClose(newPage);
-                // 等待一段时间
-                await waitingTime(1500);
-                // 刷新菜单数据
-                await refreshMenu();
-                // 任务完成状况
-                if (settings[4] && !tasks[4].status) {
-                    console.log('任务未完成，继续专项练习！');
-                    resolve(await doExamPaper());
-                    return;
-                }
-                resolve('done');
-            }
-            else {
-                console.log('没有找到未完成的专项练习，跳过');
-                resolve('noTest');
-            }
-        });
-    });
 }
 // 获取答题按钮
 function getNextButton() {
@@ -1784,14 +1721,13 @@ async function loadTaskList() {
     // 原始任务进度
     const taskProgress = await getTaskList();
     if (taskProgress) {
-        // 进度条对象
-        const taskProgressList = $$('.egg_progress');
         // 文章
         const { currentScore: artCur, dayMaxScore: artMax } = taskProgress[0];
         tasks[0] = {
             currentScore: artCur,
             dayMaxScore: artMax,
             status: false,
+            need: artMax - artCur,
         };
         // 视频
         const { currentScore: videoCur1, dayMaxScore: videoMax1 } = taskProgress[1];
@@ -1800,6 +1736,7 @@ async function loadTaskList() {
             currentScore: videoCur1 + videoCur2,
             dayMaxScore: videoMax1 + videoMax2,
             status: false,
+            need: videoMax1 + videoMax2 - (videoCur1 + videoCur2),
         };
         // 每日答题
         const { currentScore: dayCur, dayMaxScore: dayMax } = taskProgress[6];
@@ -1807,6 +1744,7 @@ async function loadTaskList() {
             currentScore: dayCur,
             dayMaxScore: dayMax,
             status: false,
+            need: dayMax - dayCur,
         };
         // 每周答题
         const { currentScore: weekCur, dayMaxScore: weekMax } = taskProgress[2];
@@ -1814,6 +1752,7 @@ async function loadTaskList() {
             currentScore: weekCur,
             dayMaxScore: weekMax,
             status: false,
+            need: weekMax - weekCur,
         };
         // 专项练习
         const { currentScore: exerCur, dayMaxScore: exerMax } = taskProgress[5];
@@ -1821,6 +1760,7 @@ async function loadTaskList() {
             currentScore: exerCur,
             dayMaxScore: exerMax,
             status: false,
+            need: exerMax - exerCur,
         };
         // 更新数据
         for (const i in tasks) {
@@ -1834,16 +1774,9 @@ async function loadTaskList() {
             if (rate === 100) {
                 tasks[i].status = true;
             }
-            // 修复每周答题、专项练习做完,进度条显示异常
             if (rate > 0) {
-                // 进度条
-                const bar = taskProgressList[i].querySelector('.egg_bar');
-                // 百分比
-                const percent = taskProgressList[i].querySelector('.egg_percent');
-                // 长度
-                bar.style.width = `${rate.toFixed(2)}%`;
-                // 文字
-                percent.innerText = `${rate.toFixed(0)}%`;
+                // 设置进度条
+                setProgress(Number(i), Number(rate.toFixed(2)));
             }
         }
     }
@@ -1980,10 +1913,13 @@ async function renderMenu() {
     document.body.append(base);
     // 加载用户信息
     await loadUserInfo();
+    console.log('加载用户信息');
     // 加载分数信息
     await loadScoreInfo();
+    console.log('加载分数信息');
     // 加载任务列表
     await loadTaskList();
+    console.log('加载任务列表');
     // 渲染开始按钮
     if (login) {
         // 开始学习按钮
@@ -2003,7 +1939,7 @@ async function renderMenu() {
     }
     // 自动答题'
     if (login && settings[6]) {
-        await createTip('3秒后开始自动答题', 3000);
+        await createTip('5秒后开始自动答题', 5000);
         start();
     }
 }
@@ -2096,7 +2032,7 @@ async function study() {
             // 做每周答题
             const res = await doExamWeekly();
             // 无题可做
-            if (res === 'noTest') {
+            if (!res) {
                 // 如果是全都完成了，已经没有能做的了
                 tasks[3].status = true;
                 // 进度条对象
@@ -2120,7 +2056,7 @@ async function study() {
         // 做专项练习
         const res = await doExamPaper();
         // 无题可做
-        if (res === 'noTest') {
+        if (!res) {
             // 如果是全都完成了，已经没有能做的了
             tasks[4].status = true;
             // 进度条对象
@@ -2135,6 +2071,19 @@ async function study() {
             percent.innerText = `100%`;
         }
     }
+}
+// 设置进度条
+function setProgress(index, progress) {
+    // 进度条对象
+    const taskProgressList = $$('.egg_progress');
+    // 进度条
+    const bar = taskProgressList[index].querySelector('.egg_bar');
+    // 百分比
+    const percent = taskProgressList[index].querySelector('.egg_percent');
+    // 长度
+    bar.style.width = `${progress}%`;
+    // 文字
+    percent.innerText = `${progress}%`;
 }
 // 暂停任务
 function pauseTask() {

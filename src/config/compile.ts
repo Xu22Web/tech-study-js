@@ -14,7 +14,7 @@ const COMPILE_CONFIG = {
   /**
    * @description 导出目录
    */
-  outDir: '.',
+  outDir: '../',
   /**
    * @description 目标版本
    */

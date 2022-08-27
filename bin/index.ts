@@ -6,9 +6,9 @@ import chalk from 'chalk';
 import SCRIPT_CONFIG from '../src/config/script';
 import COMPILE_CONFIG from '../src/config/compile';
 // 根目录 文件名
-const { rootDir, file } = COMPILE_CONFIG;
+const { rootDir, file, outDir } = COMPILE_CONFIG;
 // 文件路径
-const sourceFilePath = path.resolve(rootDir, file);
+const sourceFilePath = file;
 // 导入路径
 const importFilePaths: string[] = [];
 /**
@@ -22,10 +22,11 @@ const handleCompile = async (
   | {
       data: string;
       compileName: string;
-      originName: string;
       compiltPath: string;
+      compiltelativePath: string;
+      originName: string;
       originPath: string;
-      relativePath: string;
+      originRelativePath: string;
     }
   | undefined
 > => {
@@ -75,14 +76,18 @@ const handleCompile = async (
           const data = text.replace(/export (\{.*\}|default .*);/g, '');
           // 编译后的文件名
           const compileName = getFileName(name);
-          const compiltPath = path.resolve(name);
+          // 编译路径
+          const compiltPath = path.resolve(outDir, name);
+          // 相对
+          const compiltelativePath = path.join(rootDir, outDir, name);
           resolve({
             data,
             compileName,
             compiltPath,
+            compiltelativePath,
             originName: fileName,
             originPath: fullFilePath,
-            relativePath: filePath,
+            originRelativePath: filePath,
           });
         },
         undefined,
@@ -238,9 +243,15 @@ const main = async () => {
 
   if (res) {
     // 编译信息
-    const { originName, compileName, compiltPath, data } = res;
+    const {
+      originRelativePath,
+      compileName,
+      compiltPath,
+      compiltelativePath,
+      data,
+    } = res;
     progress.succeed(
-      `完成编译:${chalk.blueBright(originName)} -> ${chalk.blueBright(
+      `完成编译: ${chalk.blueBright(originRelativePath)} -> ${chalk.blueBright(
         compileName
       )}`
     );
@@ -261,10 +272,10 @@ const main = async () => {
       const res = await handleCompile(filePath);
       if (res) {
         // 编译信息
-        const { relativePath: importRelativePath, data: importData } = res;
+        const { originRelativePath, data: importData } = res;
         progress.succeed(
-          `完成编译:${chalk.blueBright(
-            importRelativePath
+          `完成编译: ${chalk.blueBright(
+            originRelativePath
           )} -> ${chalk.blueBright(compileName)}!`
         );
         fullData.push(importData);
@@ -276,7 +287,7 @@ const main = async () => {
     fullData.push(data);
     progress.start(`正在导出文件... ${chalk.blueBright(compiltPath)}`);
     fs.writeFileSync(compiltPath, fullData.join('\n'));
-    progress.succeed(`导出文件:${chalk.blueBright(compiltPath)}!`);
+    progress.succeed(`导出文件: ${chalk.blueBright(compiltelativePath)}!`);
     return;
   }
   progress.fail(`编译失败,请检查文件路径!`);

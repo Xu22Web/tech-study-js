@@ -7,7 +7,7 @@
 ### 描述 Description
 
 - 灵活且貌似轻量的 `学习强国` 油猴插件。
-- A flexible and light tampermonkey plugin for xuexiqiangguo.
+- A flexible and light userscript for xuexiqiangguo based on tampermonkey plugin.
 
 ### 用法 Usage
 
@@ -52,6 +52,20 @@
 
   `src/css/index.css`
 
+  - 根据特性（i）
+
+    ```js
+    // 将文件'./css/index.css'文本内容赋值到'css'
+    import css from './css/index.css?raw';
+    ```
+
+  - 根据 Tampermonkey API 函数
+
+    ```js
+    // 嵌入样式
+    GM_addStyle(css);
+    ```
+
 - 脚本内容
 
   `src/tech-study.ts`
@@ -63,7 +77,17 @@
   pnpm build
   ```
 
-- 功能
+  即
+
+  ```
+   ✔ 完成编译:tech-study.ts -> tech-study.js!
+   ✔ 完成编译:./config/url.ts -> tech-study.js!
+   ✔ 完成编译:./config/api.ts -> tech-study.js!
+   ✔ 完成编译:./utils/index.ts -> tech-study.js!
+   ✔ 导出文件:../tech-study.js!
+  ```
+
+- 功能特性（基于`TypeScript Compiler API`）
 
   1. 包含`?raw`结尾的`import`语句
 
@@ -71,7 +95,7 @@
      import var from 'file?raw';
      ```
 
-     1. 文件`file`文本赋值到`var`
+     1. 文件`file`文本内容赋值到`var`
      2. 此类型`import`语句不会被编译到结果
 
   2. 普通的`import`语句

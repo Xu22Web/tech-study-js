@@ -77,9 +77,9 @@ const handleCompile = async (
           // 编译后的文件名
           const compileName = getFileName(name);
           // 编译路径
-          const compiltPath = path.resolve(outDir, name);
+          const compiltPath = path.resolve(rootDir, outDir, compileName);
           // 相对
-          const compiltelativePath = path.join(rootDir, outDir, name);
+          const compiltelativePath = path.join(rootDir, outDir, compileName);
           resolve({
             data,
             compileName,
@@ -285,6 +285,7 @@ const main = async () => {
       break;
     }
     fullData.push(data);
+
     progress.start(`正在导出文件... ${chalk.blueBright(compiltPath)}`);
     fs.writeFileSync(compiltPath, fullData.join('\n'));
     progress.succeed(`导出文件: ${chalk.blueBright(compiltelativePath)}!`);

@@ -1455,12 +1455,12 @@ async function doingExam() {
                         // 答案存在
                         if (answersLike.every((answer) => answer.length)) {
                             // 可能答案是否正确
-                            for (const i in answersLike) {
+                            const res = answersLike.some((answer) => {
                                 // 尝试查找点击
-                                const res = handleChoiceBtn([answersLike[i]]);
-                                if (res) {
-                                    return true;
-                                }
+                                return handleChoiceBtn([answer]);
+                            });
+                            if (res) {
+                                break;
                             }
                         }
                     }
@@ -1474,7 +1474,7 @@ async function doingExam() {
                         // 尝试查找点击
                         const res = handleChoiceBtn(answersNetwork);
                         if (res) {
-                            return true;
+                            break;
                         }
                     }
                     else {
@@ -1486,12 +1486,12 @@ async function doingExam() {
                         // 答案存在
                         if (answersLike.every((answer) => answer.length)) {
                             // 可能答案是否正确
-                            for (const i in answersLike) {
+                            const res = answersLike.some((answer) => {
                                 // 尝试查找点击
-                                const res = handleChoiceBtn([answersLike[i]]);
-                                if (res) {
-                                    return true;
-                                }
+                                return handleChoiceBtn([answer]);
+                            });
+                            if (res) {
+                                break;
                             }
                         }
                     }

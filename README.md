@@ -1,4 +1,4 @@
-# tech-study.js
+# tech-study-js
 
 ### 原仓库：
 
@@ -7,19 +7,25 @@
 ### 描述 Description
 
 - 灵活且貌似轻量的 `学习强国` 油猴插件。
-- A flexible and light userscript for xuexiqiangguo based on tampermonkey plugin.
+
+- 如果感觉功能不强大，去看看 [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版') `https://github.com/Xu22Web/tech-study-node`
 
 ### 用法 Usage
 
-1. 装个浏览器插件 tampermonkey （可以从这里下载 https://github.com/TechXueXi/Tampermonkey ，网上也很多教程）
+1. 装个浏览器插件 tampermonkey （下载：https://github.com/TechXueXi/Tampermonkey ）
+
 2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 `tech-study.js` 脚本复制粘贴进编辑框保存。
+
 3. 开启这个脚本，然后进入网页强国 `www.xuexi.cn` ，登录网页。
 
 ### 优化 Promote
 
 1. 优化整体交互设计，新增一体式扫码登录
+
 2. 新增用户信息显示，包括昵称、头像、总分以及当天分数
+
 3. 新增任务进度显示，优化显示逻辑
+
 4. 修复部分小 bug，优化答题逻辑
 
 ### 使用流程 Process
@@ -29,6 +35,7 @@
 ![登录](./login.png)
 
 2. 点击 `开始学习`，等待完成学习
+
 3. 完成学习
 
 ![完成学习](./done.png)
@@ -36,23 +43,28 @@
 ### 更新与维护 Update and Maintenance
 
 1. 优化答题逻辑，提高答案正确率，提升答题速度。
-2. 答题存在滑动验证问题，暂时无法解决。
-3. 考虑发布基于`Node.js`以及`puppeteer`的全套解决方案，筹备中...
 
-### 关于开发
+2. 答题存在滑动验证问题，暂时无法解决。
+
+3. 发布基于`Node.js`以及`puppeteer`的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版') 解决了滑动验证问题等问题，实现全自动化。
+
+### 关于开发 Development
 
 - 脚本配置
 
   1. 脚本配置 `src/config/script.ts`
+
   2. API 配置 `src/config/api.ts`
+
   3. URL 配置 `src/config/url.ts`
+
   4. 编译配置 `src/config/compile.ts`
 
 - CSS 文件
 
   `src/css/index.css`
 
-  - 根据特性（i）
+  - 根据功能特性（i）
 
     ```js
     // 将文件'./css/index.css'文本内容赋值到'css'
@@ -96,13 +108,15 @@
      ```
 
      1. 文件`file`文本内容赋值到`var`
+
      2. 此类型`import`语句不会被编译到结果
 
   2. 普通的`import`语句
 
      ```
-     import {funName} from 'file';
+     import { funName } from 'file';
      ```
 
      1. 文件`file`文本插入到主文件一起导出，相当于合并多个`*.ts`文件导出为一个`*.js`文件
+
      2. 此类型`import`语句不会被编译到结果

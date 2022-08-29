@@ -13,7 +13,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: '20220826',
+  version: '20220829',
   /**
    * @description 脚本描述
    */
@@ -22,7 +22,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 作者
    */
-  author: '原作者：techxuexi 荷包蛋。现作者：Noah',
+  author: '原作者：techxuexi 荷包蛋。现作者：Xu22Web',
   /**
    * @description 链接匹配
    */

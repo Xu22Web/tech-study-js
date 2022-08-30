@@ -483,11 +483,11 @@ async function reading(type: number) {
   let time = 1;
   if (type === 0) {
     // 80-100秒后关闭页面，看文章
-    time = ~~(Math.random() * (100 - 80 + 1) + 80);
+    time = ~~(Math.random() * 20 + 80) + 1;
   }
   if (type === 1) {
-    // 230-250秒后关闭页面，看视频
-    time = ~~(Math.random() * (250 - 230 + 1) + 230);
+    // 100-180秒后关闭页面，看视频
+    time = ~~(Math.random() * 80 + 100) + 1;
   }
   let firstTime = time - 2;
   let secendTime = 12;
@@ -923,11 +923,16 @@ function handleChoiceBtn(answers: string[]) {
         allBtns.forEach((choice) => {
           // 选项文本
           const choiceText = choice.innerText.trim();
+          // 无符号选项文本
+          const unsignedChoiceText = choiceText.replaceAll(/[、，,。 ]/g, '');
+          // 无符号答案
+          const unsignedAnswer = answer.replaceAll(/[、，,。 ]/g, '');
           // 包含答案
           if (
             choiceText === answer ||
             choiceText.includes(answer) ||
-            answer.includes(choiceText)
+            answer.includes(choiceText) ||
+            unsignedChoiceText.includes(unsignedAnswer)
           ) {
             // 最小长度选项有值
             if (minLengthChoice) {

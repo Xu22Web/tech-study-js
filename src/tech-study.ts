@@ -1276,7 +1276,11 @@ async function doingExam() {
     }
     // 获取按钮
     nextButton = await getNextButton();
-    if (nextButton.innerText === '下一题' || nextButton.innerText === '交 卷') {
+    if (
+      nextButton.innerText === '下一题' ||
+      nextButton.innerText === '完 成' ||
+      nextButton.innerText === '交 卷'
+    ) {
       // 等待一段时间
       await waitingTime(2500);
       // 下一题

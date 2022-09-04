@@ -1094,9 +1094,9 @@ async function doingExam() {
           const blanks = content.match(/（）/g);
           // 填空数量、选项数量、答案数量相同 | 选项全文等于答案全文
           if (
-            (allBtns.length === answers.length &&
-              blanks.length === allBtns.length) ||
-            content === choicesContent
+            allBtns.length === blanks.length ||
+            content === choicesContent ||
+            allBtns.length === 2
           ) {
             // 全选
             allBtns.forEach((choice) => {

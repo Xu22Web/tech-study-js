@@ -252,6 +252,7 @@ async function getAnswer(question) {
       if (errno !== -1) {
         // 答案
         const { answers } = data.data;
+        console.log('answers',answers);
         return answers;
       }
     }

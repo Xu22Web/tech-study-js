@@ -64,7 +64,7 @@ const API_CONFIG = {
     // 文本服务器保存答案
     answerSave: 'https://a6.qikekeji.com/txt/data/save',
     // 文本服务器获取答案
-    answerSearch: 'http://api.answer.uu988.xyz/answer/search',
+    answerSearch: 'https://api.answer.uu988.xyz:4545/answer/search',
 };
 
 
@@ -556,6 +556,7 @@ async function getExamWeekly(pageNo) {
 }
 // 获取答案
 async function getAnswer(question) {
+    console.log('获取网络答案');
     // 数据
     const data = {
         question,

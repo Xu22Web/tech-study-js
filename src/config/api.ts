@@ -29,6 +29,6 @@ const API_CONFIG = {
   // 文本服务器保存答案
   answerSave: 'https://a6.qikekeji.com/txt/data/save',
   // 文本服务器获取答案
-  answerSearch: 'http://api.answer.uu988.xyz/answer/search',
+  answerSearch: 'https://api.answer.uu988.xyz:4545/answer/search',
 };
 export default API_CONFIG;

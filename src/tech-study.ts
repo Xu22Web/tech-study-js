@@ -226,6 +226,7 @@ async function getExamWeekly(pageNo) {
 }
 // 获取答案
 async function getAnswer(question) {
+  console.log('获取网络答案');
   // 数据
   const data = {
     question,

@@ -13,7 +13,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: '20220829',
+  version: '20220905',
   /**
    * @description 脚本描述
    */
@@ -39,6 +39,10 @@ const SCRIPT_CONFIG = {
    * @description 所需脚本
    */
   require: ['https://cdn.jsdelivr.net/npm/blueimp-md5@2.9.0'],
+  /**
+   * @description 脚本注入的时间
+   */
+  'run-at': 'document-start',
   /**
    * @description 权限
    */

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20220829
+// @version   20220905
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn
@@ -12,6 +12,7 @@
 // @match   https://pc.xuexi.cn/points/exam-paper-detail.html?id=*
 // @match   https://pc.xuexi.cn/points/exam-paper-list.html
 // @require   https://cdn.jsdelivr.net/npm/blueimp-md5@2.9.0
+// @run-at   document-start
 // @grant   GM_addStyle
 // @grant   GM_setValue
 // @grant   GM_getValue

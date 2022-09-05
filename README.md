@@ -42,11 +42,13 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 优化答题逻辑，提高答案正确率，提升答题速度。
+1. 优化答题逻辑，替换答题 API ，提高答题正确率。
 
-2. 答题存在滑动验证问题，暂时无法解决。
+2. 新增对于`Firefox`浏览器的支持（测试`Firefox`版本: `v104.0.1`）。
 
-3. 发布基于`Node.js`以及`puppeteer`的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版') 解决了滑动验证问题等问题，实现全自动化。
+3. 答题存在滑动验证问题，暂时无法解决。
+
+4. 发布基于Node.js以及puppeteer的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
 
 ### 关于开发 Development
 

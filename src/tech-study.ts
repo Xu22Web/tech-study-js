@@ -225,48 +225,32 @@ async function getExamWeekly(pageNo) {
   return [];
 }
 // 获取答案
-async function getAnswer(content) {
-  // 获取密钥
-  const key = getKey(content);
+async function getAnswer(question) {
   // 数据
   const data = {
-    txt_name: key,
-    password: '',
+    question,
   };
-  // 请求体
-  const body = Object.keys(data)
-    .map((key) => {
-      return `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`;
-    })
-    .join('&');
   // 请求
   const res = await fetch(API_CONFIG.answerSearch, {
     method: 'POST',
     mode: 'cors',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
-    body,
+    body: JSON.stringify(data),
   });
   // 请求成功
   if (res.ok) {
     const data: {
-      status: number;
-      data: { txt_content: string; txt_name: string };
+      errno: number;
+      data: { answers: string[] };
     } = await res.json();
     // 状态
-    const { status } = data;
-    if (status !== 0) {
+    const { errno } = data;
+    if (errno !== -1) {
       try {
-        // 答案列表
-        const answerList: { content: string; title: string }[] = JSON.parse(
-          data.data.txt_content
-        );
         // 答案
-        const answers = answerList[0].content
-          .split(';')
-          .map((ans) => ans.trim());
+        const { answers } = data.data;
         return answers;
       } catch (error) {}
     }
@@ -1043,7 +1027,7 @@ async function doingExam() {
     // 答案
     const answers = allTips.map((tip) => tip.innerText.trim());
     // 获取题目的文本内容
-    const content = $$('.q-body')[0].innerText;
+    const question = $$('.q-body')[0].innerText;
     // 等待一段时间
     await waitingTime(1500);
     // 选项按钮
@@ -1066,7 +1050,7 @@ async function doingExam() {
           }
         }
         // 尝试题库获取
-        const answersNetwork = await getAnswer(content);
+        const answersNetwork = await getAnswer(question);
         // 根据题库作答
         if (answersNetwork.length) {
           const res = handleBlankInput(answersNetwork);
@@ -1091,11 +1075,11 @@ async function doingExam() {
             .map((choiceText) => choiceText.split(/[A-Z]./)[1].trim())
             .join('');
           // 空格
-          const blanks = content.match(/（）/g);
+          const blanks = question.match(/（）/g);
           // 填空数量、选项数量、答案数量相同 | 选项全文等于答案全文
           if (
             allBtns.length === blanks.length ||
-            content === choicesContent ||
+            question === choicesContent ||
             allBtns.length === 2
           ) {
             // 全选
@@ -1116,7 +1100,7 @@ async function doingExam() {
           }
         }
         // 尝试题库获取
-        const answersNetwork = await getAnswer(content);
+        const answersNetwork = await getAnswer(question);
         // 答案存在
         if (answersNetwork.length) {
           const res = handleChoiceBtn(answersNetwork);
@@ -1171,7 +1155,7 @@ async function doingExam() {
           }
         }
         // 尝试题库获取
-        const answersNetwork = await getAnswer(content);
+        const answersNetwork = await getAnswer(question);
         // 存在答案
         if (answersNetwork.length) {
           // 单答案单选项
@@ -1214,7 +1198,7 @@ async function doingExam() {
       // 需要提交答案
       if (shouldSaveAnswer) {
         // 获取key
-        const key = getKey(content);
+        const key = getKey(question);
         // 答案
         const answers: string[] = [];
         if (questionType === '填空题') {
@@ -1253,7 +1237,7 @@ async function doingExam() {
       // 答题错误
       if (answerBox) {
         // 获取key
-        const key = getKey(content);
+        const key = getKey(question);
         const answerTemp = answerBox.innerText;
         // 从字符串中拿出答案
         const [, answer] = answerTemp.split('：');

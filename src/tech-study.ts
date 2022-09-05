@@ -82,110 +82,110 @@ function pauseStudyLock(callback?: (msg: string) => void) {
 /* API请求函数 */
 // 获取用户信息
 async function getUserInfo() {
-  const res = await fetch(API_CONFIG.userInfo, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    const res = await fetch(API_CONFIG.userInfo, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const { data } = await res.json();
       return data;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 获取总积分
 async function getTotalScore() {
-  const res = await fetch(API_CONFIG.totalScore, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    const res = await fetch(API_CONFIG.totalScore, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const { data } = await res.json();
       // 总分
       const { score } = data;
       return score;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 获取当天总积分
 async function getTodayScore() {
-  const res = await fetch(API_CONFIG.todayScore, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    const res = await fetch(API_CONFIG.todayScore, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const { data } = await res.json();
       // 当天总分
       const { score } = data;
       return score;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 获取任务列表
 async function getTaskList() {
-  const res = await fetch(API_CONFIG.taskList, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    const res = await fetch(API_CONFIG.taskList, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const { data } = await res.json();
       // 进度和当天总分
       const { taskProgress } = data;
       return taskProgress;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 获取新闻数据
 async function getTodayNews() {
   // 随机
   const randNum = ~~(Math.random() * 2);
-  // 获取重要新闻
-  const res = await fetch(API_CONFIG.todayNews[randNum], {
-    method: 'GET',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    // 获取重要新闻
+    const res = await fetch(API_CONFIG.todayNews[randNum], {
+      method: 'GET',
+    });
+    // 请求成功
+    if (res.ok) {
       const data = await res.json();
       return data;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 获取视频数据
 async function getTodayVideos() {
   // 随机
   const randNum = ~~(Math.random() * 2);
-  // 获取重要新闻
-  const res = await fetch(API_CONFIG.todayVideos[randNum], {
-    method: 'GET',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    // 获取重要新闻
+    const res = await fetch(API_CONFIG.todayVideos[randNum], {
+      method: 'GET',
+    });
+    // 请求成功
+    if (res.ok) {
       const data = await res.json();
       return data;
-    } catch (err) {}
-  }
+    }
+  } catch (err) {}
 }
 // 专项练习数据
 async function getExamPaper(pageNo) {
   // 链接
   const url = `${API_CONFIG.paperList}?pageSize=50&pageNo=${pageNo}`;
-  // 获取专项练习
-  const res = await fetch(url, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    // 获取专项练习
+    const res = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const data = await res.json();
       const paperJson = decodeURIComponent(
         escape(window.atob(data.data_str.replace(/-/g, '+').replace(/_/g, '/')))
@@ -193,9 +193,9 @@ async function getExamPaper(pageNo) {
       // JSON格式化
       const paper = JSON.parse(paperJson);
       return paper;
-    } catch (err) {
-      return [];
     }
+  } catch (err) {
+    return [];
   }
   return [];
 }
@@ -203,14 +203,14 @@ async function getExamPaper(pageNo) {
 async function getExamWeekly(pageNo) {
   // 链接
   const url = `${API_CONFIG.weeklyList}?pageSize=50&pageNo=${pageNo}`;
-  // 获取每周答题
-  const res = await fetch(url, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  // 请求成功
-  if (res.ok) {
-    try {
+  try {
+    // 获取每周答题
+    const res = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    // 请求成功
+    if (res.ok) {
       const data = await res.json();
       const paperJson = decodeURIComponent(
         escape(window.atob(data.data_str.replace(/-/g, '+').replace(/_/g, '/')))
@@ -218,9 +218,9 @@ async function getExamWeekly(pageNo) {
       // JSON格式化
       const paper = JSON.parse(paperJson);
       return paper;
-    } catch (err) {
-      return [];
     }
+  } catch (err) {
+    return [];
   }
   return [];
 }
@@ -230,31 +230,31 @@ async function getAnswer(question) {
   const data = {
     question,
   };
-  // 请求
-  const res = await fetch(API_CONFIG.answerSearch, {
-    method: 'POST',
-    mode: 'cors',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  // 请求成功
-  if (res.ok) {
-    const data: {
-      errno: number;
-      data: { answers: string[] };
-    } = await res.json();
-    // 状态
-    const { errno } = data;
-    if (errno !== -1) {
-      try {
+  try {
+    // 请求
+    const res = await fetch(API_CONFIG.answerSearch, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    // 请求成功
+    if (res.ok) {
+      const data: {
+        errno: number;
+        data: { answers: string[] };
+      } = await res.json();
+      // 状态
+      const { errno } = data;
+      if (errno !== -1) {
         // 答案
         const { answers } = data.data;
         return answers;
-      } catch (error) {}
+      }
     }
-  }
+  } catch (error) {}
   return [];
 }
 // 保存答案

@@ -48,7 +48,31 @@
 
 3. 答题存在滑动验证问题，暂时无法解决。
 
-4. 发布基于Node.js以及puppeteer的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
+4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
+
+### 公告 announcement
+
+- **现征集在线题库，特此公告**
+
+  > 不知道大家有没有发现，在新版的脚本中，我将原本混乱的搜题`API`，替换成了自行整合的搜题`API`
+
+  由于以下原因:
+
+  1. 答题需要收集和优化题库，方便搜题请求
+
+  2. 便于其他方式的调用，目前，搜题`API`的题库有`5`个
+
+  存在的问题:
+
+  1. 题量有限
+
+  2. 准确度欠佳
+
+- 如果大家发现新的题库或者对于题库有何建议，可以去下面的仓库反馈
+
+- 关于题库: [answer-search-bank](https://github.com/Xu22Web/answer-search-bank) `https://github.com/Xu22Web/answer-search-bank`
+
+最后，希望在大家的帮助下，提供更高质量、更优质的脚本！
 
 ### 关于开发 Development
 

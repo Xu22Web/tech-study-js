@@ -1329,8 +1329,14 @@ function initFontSize() {
   // 移动端
   const moblie = hasMobile();
   if (moblie) {
-    const scale = window.innerWidth / window.outerWidth;
+    const scale = ~~(window.innerWidth / window.outerWidth);
+    document.documentElement.style.setProperty('--scale', String(scale));
     document.documentElement.style.fontSize = `${10 * scale}px`;
+    window.addEventListener('resize', () => {
+      const scale = ~~(window.innerWidth / window.outerWidth);
+      document.documentElement.style.setProperty('--scale', String(scale));
+      document.documentElement.style.fontSize = `${10 * scale}px`;
+    });
   }
 }
 // 创建“手动答题”按钮

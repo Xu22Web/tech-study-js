@@ -1,6 +1,7 @@
 :root {
   --themeColor: #fa3333;
   font-size: 10px;
+  --scale: 1;
 }
 .icon {
   width: 1em;
@@ -248,17 +249,19 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 }
 .egg_frame.active {
   padding: 4px;
-  width: 218px;
-  height: 218px;
+  width: 21.8rem;
+  height: 21.8rem;
   overflow: hidden;
 }
 .egg_frame .egg_frame_login {
   position: absolute;
-  left: -69px;
-  top: -26px;
+  left: -6.9rem;
+  top: -2.6rem;
 }
 .egg_frame iframe {
   width: 284px;
   height: 241px;
   border: none;
+  transform: scale(var(--scale));
+  transform-origin: top left;
 }

@@ -1,7 +1,7 @@
 :root {
   --themeColor: #fa3333;
-  font-size: 10px;
   --scale: 1;
+  font-size: calc(10px * var(--scale));
 }
 .icon {
   width: 1em;

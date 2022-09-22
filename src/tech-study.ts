@@ -1329,13 +1329,13 @@ function initFontSize() {
   // 移动端
   const moblie = hasMobile();
   if (moblie) {
-    const scale = ~~(window.innerWidth / window.outerWidth);
+    // 缩放比例
+    const scale = ~~(window.innerWidth / window.outerWidth) || 1;
     document.documentElement.style.setProperty('--scale', String(scale));
-    document.documentElement.style.fontSize = `${10 * scale}px`;
     window.addEventListener('resize', () => {
-      const scale = ~~(window.innerWidth / window.outerWidth);
+      // 缩放比例
+      const scale = ~~(window.innerWidth / window.outerWidth) || 1;
       document.documentElement.style.setProperty('--scale', String(scale));
-      document.documentElement.style.fontSize = `${10 * scale}px`;
     });
   }
 }

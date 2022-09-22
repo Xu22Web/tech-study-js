@@ -3,7 +3,7 @@
  */
 const URL_CONFIG = {
   // 主页
-  home: /^https\:\/\/www\.xuexi\.cn\/?$/,
+  home: /^https\:\/\/www\.xuexi\.cn(\/(index\.html)?)?$/,
   // 每日答题页面
   examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
   // 每周答题页面

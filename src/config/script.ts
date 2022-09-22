@@ -13,7 +13,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: '20220905',
+  version: '20220922',
   /**
    * @description 脚本描述
    */
@@ -27,13 +27,10 @@ const SCRIPT_CONFIG = {
    * @description 链接匹配
    */
   match: [
-    'https://www.xuexi.cn',
     'https://www.xuexi.cn/*',
     'https://pc.xuexi.cn/points/exam-practice.html',
     'https://pc.xuexi.cn/points/exam-weekly-detail.html?id=*',
-    'https://pc.xuexi.cn/points/exam-weekly-list.html',
     'https://pc.xuexi.cn/points/exam-paper-detail.html?id=*',
-    'https://pc.xuexi.cn/points/exam-paper-list.html',
   ],
   /**
    * @description 所需脚本

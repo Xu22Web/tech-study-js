@@ -175,7 +175,7 @@ async function getTodayVideos() {
   } catch (err) {}
 }
 // 专项练习数据
-async function getExamPaper(pageNo) {
+async function getExamPaper(pageNo: number) {
   // 链接
   const url = `${API_CONFIG.paperList}?pageSize=50&pageNo=${pageNo}`;
   try {
@@ -200,7 +200,7 @@ async function getExamPaper(pageNo) {
   return [];
 }
 // 每周答题数据
-async function getExamWeekly(pageNo) {
+async function getExamWeekly(pageNo: number) {
   // 链接
   const url = `${API_CONFIG.weeklyList}?pageSize=50&pageNo=${pageNo}`;
   try {
@@ -225,7 +225,7 @@ async function getExamWeekly(pageNo) {
   return [];
 }
 // 获取答案
-async function getAnswer(question) {
+async function getAnswer(question:string) {
   console.log('获取网络答案');
   // 数据
   const data = {
@@ -252,7 +252,7 @@ async function getAnswer(question) {
       if (errno !== -1) {
         // 答案
         const { answers } = data.data;
-        console.log('answers',answers);
+        console.log('answers', answers);
         return answers;
       }
     }
@@ -472,8 +472,8 @@ async function reading(type: number) {
     time = ~~(Math.random() * 20 + 80) + 1;
   }
   if (type === 1) {
-    // 100-180秒后关闭页面，看视频
-    time = ~~(Math.random() * 80 + 100) + 1;
+    // 100-150秒后关闭页面，看视频
+    time = ~~(Math.random() * 50 + 100) + 1;
   }
   let firstTime = time - 2;
   let secendTime = 12;

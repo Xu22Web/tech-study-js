@@ -32,7 +32,7 @@
   padding: 1.2rem 2rem;
   border-radius: 1rem;
   background: #fff;
-  box-shadow: 0 0 1rem #666777;
+  box-shadow: 0.2rem 0.2rem 0.4rem -0.1rem #ccc;
   width: 20rem;
   overflow: hidden;
 }
@@ -47,6 +47,13 @@
   display: flex;
   justify-items: center;
   justify-content: space-between;
+  transform: 80ms ease-out;
+  z-index: 99999;
+}
+.egg_setting_box hr {
+  height: 0.1rem;
+  border: none;
+  background: #eee;
 }
 .egg_info {
   flex-direction: column;
@@ -136,6 +143,8 @@
   border-radius: 1rem;
   flex: 1 1 auto;
   overflow: hidden;
+  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,
+    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;
 }
 .egg_progress .egg_track .egg_bar {
   height: 0.5rem;
@@ -163,6 +172,8 @@ input[type='checkbox'].egg_setting_switch {
   border-radius: 5rem;
   transition: background 0.3s;
   --border-padding: 0.5rem;
+  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,
+    0.1rem 0 0.1rem -0.1rem #999 inset;
 }
 input[type='checkbox'].egg_setting_switch::after {
   content: '';

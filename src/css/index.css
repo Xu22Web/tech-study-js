@@ -33,13 +33,8 @@
   border-radius: 1rem;
   background: #fff;
   box-shadow: 0 0 0.4rem 0.1rem #ccc;
-  width: 20rem;
-  overflow: hidden;
   transition: 80ms ease-out;
   z-index: 99999;
-}
-.egg_setting_box.active {
-  width: 24rem;
 }
 .egg_setting_box hr {
   height: 0.1rem;
@@ -246,20 +241,24 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   opacity: 1;
   transform: scale(1) translateY(0);
 }
-.egg_frame iframe {
-  width: 40rem;
-  height: 32rem;
-  position: relative;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  border: none;
-}
-.egg_menu.mobile .egg_frame iframe {
-  width: 20rem;
-  height: 20rem;
-  top: 0;
-}
 .egg_frame {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+.egg_frame.active {
+  padding: 4px;
+  width: 218px;
+  height: 218px;
   overflow: hidden;
+}
+.egg_frame .egg_frame_login {
+  position: absolute;
+  left: -69px;
+  top: -26px;
+}
+.egg_frame iframe {
+  width: 284px;
+  height: 241px;
+  border: none;
 }

@@ -340,7 +340,7 @@ function createTextNode(...text) {
 }
 
 
-const css = ':root {\n  --themeColor: #fa3333;\n  font-size: 10px;\n}\n.icon {\n  width: 1em;\n  height: 1em;\n  vertical-align: -0.15em;\n  fill: currentColor;\n  overflow: hidden;\n}\n.egg_btn {\n  transition: 0.5s;\n  outline: none;\n  border: none;\n  padding: 1.2rem 2rem;\n  border-radius: 1.2rem;\n  cursor: pointer;\n  font-size: 1.8rem;\n  font-weight: bold;\n  text-align: center;\n  color: rgb(255, 255, 255);\n  background: #666777;\n}\n.egg_btn.manual {\n  background: #e3484b;\n}\n.egg_setting_box {\n  position: fixed;\n  top: 7rem;\n  left: 1rem;\n  padding: 1.2rem 2rem;\n  border-radius: 1rem;\n  background: #fff;\n  box-shadow: 0 0 0.4rem 0.1rem #ccc;\n  width: 20rem;\n  overflow: hidden;\n  transition: 80ms ease-out;\n  z-index: 99999;\n}\n.egg_setting_box.active {\n  width: 24rem;\n}\n.egg_setting_box hr {\n  height: 0.1rem;\n  border: none;\n  background: #eee;\n}\n.egg_setting_item {\n  margin-top: 0.5rem;\n  min-height: 3rem;\n  min-width: 20rem;\n  font-size: 1.6rem;\n  display: flex;\n  justify-items: center;\n  justify-content: space-between;\n}\n.egg_info {\n  flex-direction: column;\n}\n.egg_userinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.egg_login_status {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.egg_login_status button {\n  outline: none;\n  padding: 0.4rem 0.8rem;\n  background: #ccc;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n}\n.egg_login_status.active {\n  flex-grow: 1;\n}\n.egg_login_status.active button {\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n}\n.egg_userinfo .egg_user {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_userinfo .egg_user .egg_sub_nickname,\n.egg_userinfo .egg_user .egg_avatar_img {\n  height: 5rem;\n  width: 5rem;\n  border-radius: 50%;\n  background: var(--themeColor);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  font-size: 2rem;\n  color: white;\n}\n.egg_userinfo .egg_user .egg_name {\n  padding-left: 0.5rem;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  max-width: 10rem;\n}\n.egg_scoreinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding-top: 0.8rem;\n}\n.egg_scoreinfo .egg_totalscore,\n.egg_scoreinfo .egg_todayscore {\n  font-size: 1.2rem;\n}\n.egg_scoreinfo span {\n  color: var(--themeColor);\n  padding-left: 0.4rem;\n  font-weight: bold;\n}\n.egg_setting_item label {\n  flex-grow: 1;\n}\n.egg_progress {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_progress .egg_track {\n  background: #ccc;\n  height: 0.5rem;\n  border-radius: 1rem;\n  flex: 1 1 auto;\n  overflow: hidden;\n  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,\n    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;\n}\n.egg_progress .egg_track .egg_bar {\n  height: 0.5rem;\n  background: var(--themeColor);\n  border-radius: 1rem;\n  width: 0;\n  transition: width 0.5s;\n}\n.egg_progress .egg_percent {\n  font-size: 1.2rem;\n  padding-left: 0.5rem;\n  width: 3.5rem;\n}\ninput[type=\'checkbox\'].egg_setting_switch {\n  cursor: pointer;\n  margin: 0;\n  outline: 0;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  position: relative;\n  width: 4.2rem;\n  height: 2.2rem;\n  background: #ccc;\n  border-radius: 5rem;\n  transition: background 0.3s;\n  --border-padding: 0.5rem;\n  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,\n    0.1rem 0 0.1rem -0.1rem #999 inset;\n}\ninput[type=\'checkbox\'].egg_setting_switch::after {\n  content: \'\';\n  display: inline-block;\n  width: 1.4rem;\n  height: 1.4rem;\n  border-radius: 50%;\n  background: #fff;\n  box-shadow: 0 0 0.2rem #999;\n  transition: 0.4s;\n  position: absolute;\n  top: calc(50% - (1.4rem / 2));\n  position: absolute;\n  left: var(--border-padding);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked {\n  background: var(--themeColor);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked::after {\n  left: calc(100% - var(--border-padding) - 1.4rem);\n}\n.egg_start_btn {\n  justify-content: center;\n}\n.egg_study_btn {\n  outline: none;\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n  transition: all 0.3s;\n}\n.egg_study_btn:hover {\n  opacity: 0.8;\n}\n@keyframes fade {\n  from {\n    opacity: 0.8;\n  }\n  to {\n    opacity: 0.4;\n    background: #ccc;\n  }\n}\n.egg_study_btn.loading {\n  animation: fade 2s ease infinite alternate;\n}\n.egg_study_btn.disabled {\n  background: #ccc;\n}\n.egg_tip {\n  position: fixed;\n  bottom: 2rem;\n  left: 2rem;\n  padding: 1.2rem 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  background: #222222;\n  color: #ffffff;\n  font-size: 1.4rem;\n  font-weight: bold;\n  transition: all 0.8s ease;\n  opacity: 0;\n  transform: scale(0.9) translateY(10px);\n}\n.egg_tip.active {\n  opacity: 1;\n  transform: scale(1) translateY(0);\n}\n.egg_frame iframe {\n  width: 40rem;\n  height: 32rem;\n  position: relative;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  border: none;\n}\n.egg_menu.mobile .egg_frame iframe {\n  width: 20rem;\n  height: 20rem;\n  top: 0;\n}\n.egg_frame {\n  overflow: hidden;\n}\n';
+const css = ':root {\n  --themeColor: #fa3333;\n  font-size: 10px;\n}\n.icon {\n  width: 1em;\n  height: 1em;\n  vertical-align: -0.15em;\n  fill: currentColor;\n  overflow: hidden;\n}\n.egg_btn {\n  transition: 0.5s;\n  outline: none;\n  border: none;\n  padding: 1.2rem 2rem;\n  border-radius: 1.2rem;\n  cursor: pointer;\n  font-size: 1.8rem;\n  font-weight: bold;\n  text-align: center;\n  color: rgb(255, 255, 255);\n  background: #666777;\n}\n.egg_btn.manual {\n  background: #e3484b;\n}\n.egg_setting_box {\n  position: fixed;\n  top: 7rem;\n  left: 1rem;\n  padding: 1.2rem 2rem;\n  border-radius: 1rem;\n  background: #fff;\n  box-shadow: 0 0 0.4rem 0.1rem #ccc;\n  transition: 80ms ease-out;\n  z-index: 99999;\n}\n.egg_setting_box hr {\n  height: 0.1rem;\n  border: none;\n  background: #eee;\n}\n.egg_setting_item {\n  margin-top: 0.5rem;\n  min-height: 3rem;\n  min-width: 20rem;\n  font-size: 1.6rem;\n  display: flex;\n  justify-items: center;\n  justify-content: space-between;\n}\n.egg_info {\n  flex-direction: column;\n}\n.egg_userinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.egg_login_status {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.egg_login_status button {\n  outline: none;\n  padding: 0.4rem 0.8rem;\n  background: #ccc;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n}\n.egg_login_status.active {\n  flex-grow: 1;\n}\n.egg_login_status.active button {\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n}\n.egg_userinfo .egg_user {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_userinfo .egg_user .egg_sub_nickname,\n.egg_userinfo .egg_user .egg_avatar_img {\n  height: 5rem;\n  width: 5rem;\n  border-radius: 50%;\n  background: var(--themeColor);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  font-size: 2rem;\n  color: white;\n}\n.egg_userinfo .egg_user .egg_name {\n  padding-left: 0.5rem;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  max-width: 10rem;\n}\n.egg_scoreinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding-top: 0.8rem;\n}\n.egg_scoreinfo .egg_totalscore,\n.egg_scoreinfo .egg_todayscore {\n  font-size: 1.2rem;\n}\n.egg_scoreinfo span {\n  color: var(--themeColor);\n  padding-left: 0.4rem;\n  font-weight: bold;\n}\n.egg_setting_item label {\n  flex-grow: 1;\n}\n.egg_progress {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_progress .egg_track {\n  background: #ccc;\n  height: 0.5rem;\n  border-radius: 1rem;\n  flex: 1 1 auto;\n  overflow: hidden;\n  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,\n    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;\n}\n.egg_progress .egg_track .egg_bar {\n  height: 0.5rem;\n  background: var(--themeColor);\n  border-radius: 1rem;\n  width: 0;\n  transition: width 0.5s;\n}\n.egg_progress .egg_percent {\n  font-size: 1.2rem;\n  padding-left: 0.5rem;\n  width: 3.5rem;\n}\ninput[type=\'checkbox\'].egg_setting_switch {\n  cursor: pointer;\n  margin: 0;\n  outline: 0;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  position: relative;\n  width: 4.2rem;\n  height: 2.2rem;\n  background: #ccc;\n  border-radius: 5rem;\n  transition: background 0.3s;\n  --border-padding: 0.5rem;\n  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,\n    0.1rem 0 0.1rem -0.1rem #999 inset;\n}\ninput[type=\'checkbox\'].egg_setting_switch::after {\n  content: \'\';\n  display: inline-block;\n  width: 1.4rem;\n  height: 1.4rem;\n  border-radius: 50%;\n  background: #fff;\n  box-shadow: 0 0 0.2rem #999;\n  transition: 0.4s;\n  position: absolute;\n  top: calc(50% - (1.4rem / 2));\n  position: absolute;\n  left: var(--border-padding);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked {\n  background: var(--themeColor);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked::after {\n  left: calc(100% - var(--border-padding) - 1.4rem);\n}\n.egg_start_btn {\n  justify-content: center;\n}\n.egg_study_btn {\n  outline: none;\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n  transition: all 0.3s;\n}\n.egg_study_btn:hover {\n  opacity: 0.8;\n}\n@keyframes fade {\n  from {\n    opacity: 0.8;\n  }\n  to {\n    opacity: 0.4;\n    background: #ccc;\n  }\n}\n.egg_study_btn.loading {\n  animation: fade 2s ease infinite alternate;\n}\n.egg_study_btn.disabled {\n  background: #ccc;\n}\n.egg_tip {\n  position: fixed;\n  bottom: 2rem;\n  left: 2rem;\n  padding: 1.2rem 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  background: #222222;\n  color: #ffffff;\n  font-size: 1.4rem;\n  font-weight: bold;\n  transition: all 0.8s ease;\n  opacity: 0;\n  transform: scale(0.9) translateY(10px);\n}\n.egg_tip.active {\n  opacity: 1;\n  transform: scale(1) translateY(0);\n}\n.egg_frame {\n  position: relative;\n  box-sizing: border-box;\n  margin: 0 auto;\n}\n.egg_frame.active {\n  padding: 4px;\n  width: 218px;\n  height: 218px;\n  overflow: hidden;\n}\n.egg_frame .egg_frame_login {\n  position: absolute;\n  left: -69px;\n  top: -26px;\n}\n.egg_frame iframe {\n  width: 284px;\n  height: 241px;\n  border: none;\n}';
 // 嵌入样式
 GM_addStyle(css);
 /* Config·配置 */
@@ -635,7 +635,9 @@ const tasks = [];
 // 获取 URL
 const { href } = window.location;
 // 设置
-let settings = [true, true, true, true, true, false, false, false];
+let settings = [true, true, true, true, true, false, false];
+// 已经开始
+let started = false;
 // 是否暂停答题
 let pause = false;
 // 是否暂停学习
@@ -671,20 +673,12 @@ window.addEventListener('load', () => {
         href === GM_getValue('readingUrl')) {
         // 初始化设置
         initSetting();
-        if (!settings[5]) {
-            // 创建学习提示
-            createTip('开始读文章');
-        }
         reading(0);
     }
     else if (typeof GM_getValue('watchingUrl') === 'string' &&
         href === GM_getValue('watchingUrl')) {
         // 初始化设置
         initSetting();
-        if (!settings[5]) {
-            // 创建学习提示
-            createTip('开始看视频');
-        }
         let randNum = 0;
         const checkVideoPlayingInterval = setInterval(() => {
             let temp = getVideoTag();
@@ -797,40 +791,34 @@ async function reading(type) {
     let secendTime = 12;
     // 滚动长度
     const scrollLength = document.body.scrollHeight / 2;
-    const readingInterval = setInterval(() => {
-        time--;
-        if (!settings[5]) {
-            $$('#studyTip')[0].innerText = time + ' 秒后关闭页面';
-        }
-        if (time <= firstTime) {
+    await createTip('距离关闭页面还剩', time, (time) => {
+        if (time === firstTime) {
             window.scrollTo(0, 394);
-            firstTime = -1;
         }
-        if (time <= secendTime) {
+        if (time === secendTime) {
             window.scrollTo(0, scrollLength / 3);
-            secendTime = -1;
         }
-        if (time <= 0) {
+        if (time === 0) {
             if (type === 0) {
                 GM_setValue('readingUrl', null);
             }
             else {
                 GM_setValue('watchingUrl', null);
             }
-            clearInterval(readingInterval);
             // 关闭窗口
             closeWin();
         }
-    }, 1000);
+    });
     // 关闭文章或视频页面
 }
 // 创建学习提示
-async function createTip(text, delay) {
-    return new Promise((resolve, reject) => {
+async function createTip(text, delay, callback) {
+    return new Promise((resolve) => {
         // 提示
-        let tipInfo = creatElementNode('div', {
-            innerText: text ? text : '',
-        }, { id: 'studyTip', class: 'egg_tip' });
+        let tipInfo = creatElementNode('div', undefined, {
+            id: 'studyTip',
+            class: 'egg_tip',
+        });
         // 插入节点
         document.body.append(tipInfo);
         // 操作
@@ -854,14 +842,36 @@ async function createTip(text, delay) {
                 }
             },
         };
-        operate.show();
+        tipInfo.append(text ? text : '');
         if (delay && delay >= 0) {
-            setTimeout(() => {
-                operate.hide();
-                resolve(operate);
-            }, delay);
+            // 倒计时
+            const countdown = creatElementNode('span', {
+                innerText: ` ${delay} s`,
+            }, {
+                class: 'egg_countdown',
+            });
+            tipInfo.appendChild(countdown);
+            operate.show();
+            // 定时
+            const timer = setInterval(() => {
+                countdown.innerText = ` ${delay} s`;
+                if (typeof delay === 'number' && callback) {
+                    callback(delay, operate);
+                }
+                // 倒计时结束
+                if (!delay) {
+                    // 清除计时器
+                    clearInterval(timer);
+                    // 隐藏
+                    operate.hide();
+                    resolve(operate);
+                    return;
+                }
+                delay--;
+            }, 1000);
             return;
         }
+        operate.show();
         resolve(operate);
     });
 }
@@ -1185,7 +1195,7 @@ async function pauseExam() {
         pause = true;
         manualButton.innerText = '开启自动答题';
         manualButton.classList.add('manual');
-        createTip('已暂停，请答题后手动开启自动答题！', 10000);
+        createTip('已暂停，请答题后手动开启自动答题! ', 10);
         // 暂停
         await pauseLock();
     }
@@ -1844,7 +1854,7 @@ async function renderMenu() {
         const handleCheckChange = debounce(async (checked) => {
             if (settings[i] !== checked) {
                 // 创建提示
-                const { destroy } = await createTip(`${settingTaskLabels[i]}已${checked ? '打开' : '关闭'}`, 2000);
+                const { destroy } = await createTip(`${settingTaskLabels[i]}已${checked ? '打开' : '关闭'}`, 2);
                 // 销毁
                 destroy();
                 settings[i] = checked;
@@ -1881,15 +1891,15 @@ async function renderMenu() {
         // 处理设置选项变化
         const handleCheckChange = debounce(async (checked) => {
             if (settings[currentIndex] !== checked) {
+                settings[currentIndex] = checked;
+                // 设置
+                GM_setValue('studySetting', JSON.stringify(settings));
                 // 创建提示
-                const { destroy } = await createTip(`${settingLabel[i]}已${checked ? '打开' : '关闭'}，部分设置刷新后生效！`, 2000);
+                const { destroy } = await createTip(`${settingLabel[i]}已${checked ? '打开' : '关闭'}！`, 2);
                 // 销毁
                 destroy();
-                settings[currentIndex] = checked;
-                // 运行时是否要隐藏
-                GM_setValue('studySetting', JSON.stringify(settings));
             }
-        }, 500);
+        }, 300);
         // 选项
         const input = creatElementNode('input', undefined, {
             title: settingLabel[i],
@@ -1906,7 +1916,13 @@ async function renderMenu() {
         settingItems.push(item);
     }
     // 窗口项
-    const frame = creatElementNode('div', undefined, { class: 'egg_frame' });
+    const login_frame = creatElementNode('div', undefined, {
+        class: 'egg_frame_login',
+    });
+    // 窗口项
+    const frame = creatElementNode('div', undefined, { class: 'egg_frame' }, [
+        login_frame,
+    ]);
     settingItems.push(frame);
     // 设置
     const settingBox = creatElementNode('div', undefined, { class: 'egg_setting_box' }, settingItems);
@@ -1945,10 +1961,17 @@ async function renderMenu() {
             finishTask();
         }
     }
-    // 自动答题'
+    // 自动答题
     if (login && settings[6]) {
-        await createTip('5秒后开始自动答题', 5000);
-        start();
+        await createTip('即将开始自动答题', 5);
+        // 再次查看是否开启
+        if (settings[6] && !started) {
+            createTip('开始自动答题', 2);
+            start();
+        }
+        else {
+            createTip('已取消自动答题！', 2);
+        }
     }
 }
 // 是否显示目录
@@ -1971,17 +1994,17 @@ function loginStatus() {
 }
 // 登录窗口
 async function loginWindow() {
-    // iframe
-    const frame = $$('.egg_frame')[0];
+    // egg_frame_login
+    const frame_login = $$('.egg_frame_login')[0];
     // 配置
-    const settingBox = $$('.egg_setting_box')[0];
-    if (frame) {
-        let iframe = frame.querySelector('iframe');
+    const frame = $$('.egg_frame')[0];
+    if (frame_login) {
+        let iframe = frame_login.querySelector('iframe');
         if (!iframe) {
             iframe = creatElementNode('iframe');
-            frame.append(iframe);
+            frame_login.append(iframe);
         }
-        settingBox.classList.add('active');
+        frame.classList.add('active');
         // 登录页面
         iframe.src = URL_CONFIG.login;
         // 刷新
@@ -2128,6 +2151,7 @@ async function start() {
     console.log('初始化...');
     console.log('检查是否登录...');
     if (login) {
+        started = true;
         // 开始按钮
         const startButton = $$('#startButton')[0];
         startButton.innerText = '正在学习，点击暂停';
@@ -2165,6 +2189,5 @@ async function start() {
         // 登录窗口
         await loginWindow();
     }
-    return;
 }
 

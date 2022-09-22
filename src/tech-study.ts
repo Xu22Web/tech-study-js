@@ -310,7 +310,9 @@ const tasks: {
 // 获取 URL
 const { href } = window.location;
 // 设置
-let settings = [true, true, true, true, true, false, false, false];
+let settings = [true, true, true, true, true, false, false];
+// 已经开始
+let started = false;
 // 是否暂停答题
 let pause = false;
 // 是否暂停学习
@@ -348,10 +350,6 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
-    if (!settings[5]) {
-      // 创建学习提示
-      createTip('开始读文章');
-    }
     reading(0);
   } else if (
     typeof GM_getValue('watchingUrl') === 'string' &&
@@ -359,10 +357,6 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
-    if (!settings[5]) {
-      // 创建学习提示
-      createTip('开始看视频');
-    }
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
       let temp = getVideoTag();
@@ -479,47 +473,42 @@ async function reading(type: number) {
   let secendTime = 12;
   // 滚动长度
   const scrollLength = document.body.scrollHeight / 2;
-  const readingInterval = setInterval(() => {
-    time--;
-    if (!settings[5]) {
-      $$('#studyTip')[0].innerText = time + ' 秒后关闭页面';
-    }
-    if (time <= firstTime) {
+  await createTip('距离关闭页面还剩', time, (time) => {
+    if (time === firstTime) {
       window.scrollTo(0, 394);
-      firstTime = -1;
     }
-    if (time <= secendTime) {
+    if (time === secendTime) {
       window.scrollTo(0, scrollLength / 3);
-      secendTime = -1;
     }
-    if (time <= 0) {
+    if (time === 0) {
       if (type === 0) {
         GM_setValue('readingUrl', null);
       } else {
         GM_setValue('watchingUrl', null);
       }
-      clearInterval(readingInterval);
       // 关闭窗口
       closeWin();
     }
-  }, 1000);
+  });
+
   // 关闭文章或视频页面
 }
 // 创建学习提示
-async function createTip(text?: string, delay?: number) {
+async function createTip(
+  text?: string,
+  delay?: number,
+  callback?: (current: number, operate: object) => void
+) {
   return new Promise<{
     destroy(): void;
     hide(): void;
     show(): void;
-  }>((resolve, reject) => {
+  }>((resolve) => {
     // 提示
-    let tipInfo: HTMLElement | null = creatElementNode(
-      'div',
-      {
-        innerText: text ? text : '',
-      },
-      { id: 'studyTip', class: 'egg_tip' }
-    );
+    let tipInfo: HTMLElement | null = creatElementNode('div', undefined, {
+      id: 'studyTip',
+      class: 'egg_tip',
+    });
     // 插入节点
     document.body.append(tipInfo);
     // 操作
@@ -543,14 +532,40 @@ async function createTip(text?: string, delay?: number) {
         }
       },
     };
-    operate.show();
+    tipInfo.append(text ? text : '');
     if (delay && delay >= 0) {
-      setTimeout(() => {
-        operate.hide();
-        resolve(operate);
-      }, delay);
+      // 倒计时
+      const countdown = creatElementNode(
+        'span',
+        {
+          innerText: ` ${delay} s`,
+        },
+        {
+          class: 'egg_countdown',
+        }
+      );
+      tipInfo.appendChild(countdown);
+      operate.show();
+      // 定时
+      const timer = setInterval(() => {
+        countdown.innerText = ` ${delay} s`;
+        if (typeof delay === 'number' && callback) {
+          callback(delay, operate);
+        }
+        // 倒计时结束
+        if (!delay) {
+          // 清除计时器
+          clearInterval(timer);
+          // 隐藏
+          operate.hide();
+          resolve(operate);
+          return;
+        }
+        delay--;
+      }, 1000);
       return;
     }
+    operate.show();
     resolve(operate);
   });
 }
@@ -879,7 +894,7 @@ async function pauseExam() {
     pause = true;
     manualButton.innerText = '开启自动答题';
     manualButton.classList.add('manual');
-    createTip('已暂停，请答题后手动开启自动答题！', 10000);
+    createTip('已暂停，请答题后手动开启自动答题! ', 10);
     // 暂停
     await pauseLock();
   }
@@ -1616,7 +1631,7 @@ async function renderMenu() {
         // 创建提示
         const { destroy } = await createTip(
           `${settingTaskLabels[i]}已${checked ? '打开' : '关闭'}`,
-          2000
+          2
         );
         // 销毁
         destroy();
@@ -1660,20 +1675,18 @@ async function renderMenu() {
     // 处理设置选项变化
     const handleCheckChange = debounce(async (checked) => {
       if (settings[currentIndex] !== checked) {
+        settings[currentIndex] = checked;
+        // 设置
+        GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
         const { destroy } = await createTip(
-          `${settingLabel[i]}已${
-            checked ? '打开' : '关闭'
-          }，部分设置刷新后生效！`,
-          2000
+          `${settingLabel[i]}已${checked ? '打开' : '关闭'}！`,
+          2
         );
         // 销毁
         destroy();
-        settings[currentIndex] = checked;
-        // 运行时是否要隐藏
-        GM_setValue('studySetting', JSON.stringify(settings));
       }
-    }, 500);
+    }, 300);
     // 选项
     const input = creatElementNode('input', undefined, {
       title: settingLabel[i],
@@ -1695,7 +1708,13 @@ async function renderMenu() {
     settingItems.push(item);
   }
   // 窗口项
-  const frame = creatElementNode('div', undefined, { class: 'egg_frame' });
+  const login_frame = creatElementNode('div', undefined, {
+    class: 'egg_frame_login',
+  });
+  // 窗口项
+  const frame = creatElementNode('div', undefined, { class: 'egg_frame' }, [
+    login_frame,
+  ]);
   settingItems.push(frame);
   // 设置
   const settingBox = creatElementNode(
@@ -1754,10 +1773,16 @@ async function renderMenu() {
       finishTask();
     }
   }
-  // 自动答题'
+  // 自动答题
   if (login && settings[6]) {
-    await createTip('5秒后开始自动答题', 5000);
-    start();
+    await createTip('即将开始自动答题', 5);
+    // 再次查看是否开启
+    if (settings[6] && !started) {
+      createTip('开始自动答题', 2);
+      start();
+    } else {
+      createTip('已取消自动答题！', 2);
+    }
   }
 }
 
@@ -1782,17 +1807,17 @@ function loginStatus() {
 
 // 登录窗口
 async function loginWindow() {
-  // iframe
-  const frame = $$('.egg_frame')[0];
+  // egg_frame_login
+  const frame_login = $$('.egg_frame_login')[0];
   // 配置
-  const settingBox = $$('.egg_setting_box')[0];
-  if (frame) {
-    let iframe = frame.querySelector('iframe');
+  const frame = $$('.egg_frame')[0];
+  if (frame_login) {
+    let iframe = frame_login.querySelector('iframe');
     if (!iframe) {
       iframe = creatElementNode('iframe');
-      frame.append(iframe);
+      frame_login.append(iframe);
     }
-    settingBox.classList.add('active');
+    frame.classList.add('active');
     // 登录页面
     iframe.src = URL_CONFIG.login;
     // 刷新
@@ -1940,6 +1965,7 @@ async function start() {
   console.log('初始化...');
   console.log('检查是否登录...');
   if (login) {
+    started = true;
     // 开始按钮
     const startButton = $$('#startButton')[0];
     startButton.innerText = '正在学习，点击暂停';
@@ -1977,5 +2003,4 @@ async function start() {
     // 登录窗口
     await loginWindow();
   }
-  return;
 }

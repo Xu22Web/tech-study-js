@@ -145,7 +145,7 @@ async function getTaskList() {
 // 获取新闻数据
 async function getTodayNews() {
   // 随机
-  const randNum = ~~(Math.random() * 2);
+  const randNum = ~~(Math.random() * API_CONFIG.todayNews.length);
   try {
     // 获取重要新闻
     const res = await fetch(API_CONFIG.todayNews[randNum], {
@@ -161,7 +161,7 @@ async function getTodayNews() {
 // 获取视频数据
 async function getTodayVideos() {
   // 随机
-  const randNum = ~~(Math.random() * 2);
+  const randNum = ~~(Math.random() * API_CONFIG.todayVideos.length);
   try {
     // 获取重要新闻
     const res = await fetch(API_CONFIG.todayVideos[randNum], {
@@ -225,7 +225,7 @@ async function getExamWeekly(pageNo: number) {
   return [];
 }
 // 获取答案
-async function getAnswer(question:string) {
+async function getAnswer(question: string) {
   console.log('获取网络答案');
   // 数据
   const data = {
@@ -566,8 +566,13 @@ function getNews() {
       // 数量补足需要数量
       while (news.length < need) {
         // 随便取
-        const randomIndex = ~~(Math.random() * (data.length + 1));
-        news.push(data[randomIndex]);
+        const randomIndex = ~~(Math.random() * data.length);
+        // 新闻
+        const item = data[randomIndex];
+        // 是否存在新闻
+        if (item.dataValid && item.type === 'tuwen') {
+          news.push(item);
+        }
       }
     } else {
       news = [];
@@ -587,8 +592,16 @@ function getVideos() {
       // 数量补足需要数量
       while (videos.length < need) {
         // 随便取
-        const randomIndex = ~~(Math.random() * (data.length + 1));
-        videos.push(data[randomIndex]);
+        const randomIndex = ~~(Math.random() * data.length);
+        // 视频
+        const item = data[randomIndex];
+        // 是否存在视频
+        if (
+          item.dataValid &&
+          (item.type === 'shipin' || item.type === 'juji')
+        ) {
+          videos.push(item);
+        }
       }
     } else {
       videos = [];

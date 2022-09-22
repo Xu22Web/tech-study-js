@@ -49,11 +49,15 @@ const API_CONFIG = {
     todayNews: [
         'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
         'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
+        'https://www.xuexi.cn/lgdata/35il6fpn0ohq.json',
     ],
     // 视频数据
     todayVideos: [
+        'https://www.xuexi.cn/lgdata/525pi8vcj24p.json',
+        'https://www.xuexi.cn/lgdata/11vku6vt6rgom.json',
+        'https://www.xuexi.cn/lgdata/2qfjjjrprmdh.json',
         'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
-        'https://www.xuexi.cn/lgdata/1742g60067k.json',
+        'https://www.xuexi.cn/lgdata/591ht3bc22pi.json',
     ],
     // 每周答题列表
     weeklyList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
@@ -473,7 +477,7 @@ async function getTaskList() {
 // 获取新闻数据
 async function getTodayNews() {
     // 随机
-    const randNum = ~~(Math.random() * 2);
+    const randNum = ~~(Math.random() * API_CONFIG.todayNews.length);
     try {
         // 获取重要新闻
         const res = await fetch(API_CONFIG.todayNews[randNum], {
@@ -490,7 +494,7 @@ async function getTodayNews() {
 // 获取视频数据
 async function getTodayVideos() {
     // 随机
-    const randNum = ~~(Math.random() * 2);
+    const randNum = ~~(Math.random() * API_CONFIG.todayVideos.length);
     try {
         // 获取重要新闻
         const res = await fetch(API_CONFIG.todayVideos[randNum], {
@@ -873,8 +877,13 @@ function getNews() {
             // 数量补足需要数量
             while (news.length < need) {
                 // 随便取
-                const randomIndex = ~~(Math.random() * (data.length + 1));
-                news.push(data[randomIndex]);
+                const randomIndex = ~~(Math.random() * data.length);
+                // 新闻
+                const item = data[randomIndex];
+                // 是否存在新闻
+                if (item.dataValid && item.type === 'tuwen') {
+                    news.push(item);
+                }
             }
         }
         else {
@@ -895,8 +904,14 @@ function getVideos() {
             // 数量补足需要数量
             while (videos.length < need) {
                 // 随便取
-                const randomIndex = ~~(Math.random() * (data.length + 1));
-                videos.push(data[randomIndex]);
+                const randomIndex = ~~(Math.random() * data.length);
+                // 视频
+                const item = data[randomIndex];
+                // 是否存在视频
+                if (item.dataValid &&
+                    (item.type === 'shipin' || item.type === 'juji')) {
+                    videos.push(item);
+                }
             }
         }
         else {

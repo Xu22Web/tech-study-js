@@ -28,14 +28,14 @@
 .egg_setting_box {
   position: fixed;
   top: 7rem;
-  left: 0.5rem;
+  left: 1rem;
   padding: 1.2rem 2rem;
   border-radius: 1rem;
   background: #fff;
-  box-shadow: 0.2rem 0.2rem 0.4rem -0.1rem #ccc;
+  box-shadow: 0 0 0.4rem 0.1rem #ccc;
   width: 20rem;
   overflow: hidden;
-  transform: 80ms ease-out;
+  transition: 80ms ease-out;
   z-index: 99999;
 }
 .egg_setting_box.active {

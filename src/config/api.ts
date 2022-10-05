@@ -13,9 +13,11 @@ const API_CONFIG = {
     'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
   // 新闻数据
   todayNews: [
-    'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
-    'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
     'https://www.xuexi.cn/lgdata/35il6fpn0ohq.json',
+    'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
+    'https://www.xuexi.cn/lgdata/1novbsbi47k.json',
+    'https://www.xuexi.cn/lgdata/vdppiu92n1.json',
+    'https://www.xuexi.cn/lgdata/152mdtl3qn1.json',
   ],
   // 视频数据
   todayVideos: [
@@ -24,6 +26,8 @@ const API_CONFIG = {
     'https://www.xuexi.cn/lgdata/2qfjjjrprmdh.json',
     'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
     'https://www.xuexi.cn/lgdata/591ht3bc22pi.json',
+    'https://www.xuexi.cn/lgdata/1742g60067k.json',
+    'https://www.xuexi.cn/lgdata/1novbsbi47k.json',
   ],
   // 每周答题列表
   weeklyList:

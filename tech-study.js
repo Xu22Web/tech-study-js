@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20220922
+// @version   20221005
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -47,9 +47,11 @@ const API_CONFIG = {
     taskList: 'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
     // 新闻数据
     todayNews: [
-        'https://www.xuexi.cn/lgdata/1jscb6pu1n2.json',
-        'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
         'https://www.xuexi.cn/lgdata/35il6fpn0ohq.json',
+        'https://www.xuexi.cn/lgdata/1ap1igfgdn2.json',
+        'https://www.xuexi.cn/lgdata/1novbsbi47k.json',
+        'https://www.xuexi.cn/lgdata/vdppiu92n1.json',
+        'https://www.xuexi.cn/lgdata/152mdtl3qn1.json',
     ],
     // 视频数据
     todayVideos: [
@@ -58,6 +60,8 @@ const API_CONFIG = {
         'https://www.xuexi.cn/lgdata/2qfjjjrprmdh.json',
         'https://www.xuexi.cn/lgdata/3o3ufqgl8rsn.json',
         'https://www.xuexi.cn/lgdata/591ht3bc22pi.json',
+        'https://www.xuexi.cn/lgdata/1742g60067k.json',
+        'https://www.xuexi.cn/lgdata/1novbsbi47k.json',
     ],
     // 每周答题列表
     weeklyList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
@@ -938,7 +942,7 @@ async function readNews() {
         await pauseStudyLock();
         // 链接
         GM_setValue('readingUrl', news[i].url);
-        console.log('正在看第' + (Number(i) + 1) + '个新闻');
+        console.log(`正在看第${Number(i) + 1}个新闻`);
         // 新页面
         const newPage = GM_openInTab(news[i].url, {
             active: true,
@@ -972,7 +976,7 @@ async function watchVideo() {
         await pauseStudyLock();
         // 链接
         GM_setValue('watchingUrl', videos[i].url);
-        console.log('正在观看第' + (Number(i) + 1) + '个视频');
+        console.log(`正在观看第${Number(i) + 1}个视频`);
         // 页面
         const newPage = GM_openInTab(videos[i].url, {
             active: true,
@@ -1074,27 +1078,31 @@ async function doExamPaper() {
     return false;
 }
 // 初始化每周答题总页数属性
-async function InitExam(type) {
+async function initExam(type) {
     if (type === 0) {
         // 默认从第一页获取全部页属性
-        var data = await getExamWeekly(1);
+        const data = await getExamWeekly(1);
         if (data) {
+            // 等待
+            await waitingTime(ratelimitms);
             return data.totalPageCount;
         }
     }
     if (type === 1) {
-        var data = await getExamPaper(1); // 默认从第一页获取全部页属性
+        // 默认从第一页获取全部页属性
+        const data = await getExamPaper(1);
         if (data) {
+            // 等待
+            await waitingTime(ratelimitms);
             return data.totalPageCount;
         }
     }
-    await waitingTime(ratelimitms);
 }
 // 查询每周答题列表看看还有没有没做过的，有则返回id
 async function findExamWeekly() {
     console.log('初始化每周答题');
     // 获取总页数
-    const total = await InitExam(0);
+    const total = await initExam(0);
     // 当前页数
     let current = examPaperReverse ? total : 1;
     console.log('每周答题,开启逆序模式,从最早的题目开始答题');
@@ -1103,23 +1111,23 @@ async function findExamWeekly() {
         // 请求数据
         const data = await getExamWeekly(current);
         if (data) {
-            // 逆序
+            const examWeeks = data.list;
+            // 逆序每周列表
             if (examWeeklyReverse) {
-                // 若开启逆序答题, 则反转列表
-                data.list.reverse();
+                examWeeks.reverse();
             }
             for (const i in data.list) {
-                // 获取每周的测试列表
-                const examWeeks = data.list[i].practices;
+                // 获取每周列表
+                const examWeek = data.list[i].practices;
                 // 若开启逆序, 则反转每周的测试列表
                 if (examWeeklyReverse) {
-                    examWeeks.reverse();
+                    examWeek.reverse();
                 }
-                for (const j in examWeeks) {
+                for (const j in examWeek) {
                     // 遍历查询有没有没做过的
-                    if (examWeeks[j].status !== 2) {
+                    if (examWeek[j].status === 1) {
                         // status： 1为"开始答题" , 2为"重新答题"
-                        return examWeeks[j].id;
+                        return examWeek[j].id;
                     }
                 }
             }
@@ -1137,7 +1145,7 @@ async function findExamWeekly() {
 async function findExamPaper() {
     console.log('初始化专项练习');
     // 获取总页数
-    const total = await InitExam(0);
+    const total = await initExam(1);
     // 当前页数
     let current = examPaperReverse ? total : 1;
     console.log('专项练习,开启逆序模式,从最早的题目开始答题');
@@ -1154,7 +1162,7 @@ async function findExamPaper() {
             }
             for (const i in examPapers) {
                 // 遍历查询有没有没做过的
-                if (examPapers[i].status !== 2) {
+                if (examPapers[i].status === 1) {
                     // status： 1为"开始答题" , 2为"重新答题"
                     return examPapers[i].id;
                 }

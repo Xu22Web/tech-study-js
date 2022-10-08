@@ -42,13 +42,15 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 优化答题逻辑，替换答题 API ，提高答题正确率。
+1. 更新提示弹窗界面，优化动画效果。
 
-2. 新增对于`Firefox`浏览器的支持（测试`Firefox`版本: `v104.0.1`）。
+2. 新增答题配置：`随机作答`以及`答错暂停`。
 
-3. 答题存在滑动验证问题，暂时无法解决。
+3. 功能面板分区配置，部分配置可查看详情。
 
-4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
+4. 答题存在滑动验证问题，暂时无法解决。
+
+5. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
 
 ### 公告 announcement
 

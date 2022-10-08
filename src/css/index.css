@@ -36,11 +36,23 @@
   box-shadow: 0 0 0.4rem 0.1rem #ccc;
   transition: 80ms ease-out;
   z-index: 99999;
+  font-family: Noto Sans SC;
 }
 .egg_setting_box hr {
   height: 0.1rem;
   border: none;
   background: #eee;
+  position: relative;
+  margin: 0.8rem 0;
+}
+.egg_setting_box hr:after {
+  content: attr(data-category);
+  position: absolute;
+  transform: translate(calc(-50%), calc(-50%));
+  left: 50%;
+  top: 50%;
+  font-size: 1.2rem;
+  color: #999;
 }
 .egg_setting_item {
   margin-top: 0.5rem;
@@ -48,11 +60,12 @@
   min-width: 20rem;
   font-size: 1.6rem;
   display: flex;
-  justify-items: center;
+  align-items: center;
   justify-content: space-between;
 }
 .egg_info {
   flex-direction: column;
+  align-items: stretch;
 }
 .egg_userinfo {
   display: flex;
@@ -191,6 +204,19 @@ input[type='checkbox'].egg_setting_switch:checked {
 input[type='checkbox'].egg_setting_switch:checked::after {
   left: calc(100% - var(--border-padding) - 1.4rem);
 }
+.tip {
+  background: #ccc;
+  color: white;
+  border-radius: 10rem;
+  font-size: 1.2rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.4rem;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.6rem;
+  cursor: pointer;
+}
 .egg_start_btn {
   justify-content: center;
 }
@@ -230,17 +256,30 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   padding: 1.2rem 1.4rem;
   border: none;
   border-radius: 1rem;
-  background: #222222;
-  color: #ffffff;
+  background: var(--themeColor);
+  color: white;
   font-size: 1.4rem;
-  font-weight: bold;
-  transition: all 0.8s ease;
+  transition: 0.3s ease;
+  font-family: Noto Sans SC;
+  z-index: 99999;
+}
+.egg_tip.inactive {
   opacity: 0;
-  transform: scale(0.9) translateY(10px);
+  transform: scale(0.9) translateY(1rem);
 }
 .egg_tip.active {
   opacity: 1;
   transform: scale(1) translateY(0);
+}
+.egg_tip .egg_countdown {
+  display: inline-block;
+  color: var(--themeColor);
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.4rem;
+  font-weight: bold;
+  margin-left: 0.4rem;
+  font-size: 1.2rem;
 }
 .egg_frame {
   position: relative;
@@ -248,7 +287,7 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   margin: 0 auto;
 }
 .egg_frame.active {
-  padding: 4px;
+  padding: 0.4rem;
   width: 21.8rem;
   height: 21.8rem;
   overflow: hidden;

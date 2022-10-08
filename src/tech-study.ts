@@ -14,6 +14,28 @@ import {
 import css from './css/index.css?raw';
 // 嵌入样式
 GM_addStyle(css);
+GM_addElement(document.head, 'link', {
+  rel: 'preconnect',
+  href: 'https://fonts.googleapis.com',
+});
+GM_addElement(document.head, 'link', {
+  rel: 'preconnect',
+  href: 'https://fonts.gstatic.com',
+  crossorigin: 'crossorigin',
+});
+GM_addElement(document.head, 'link', {
+  rel: 'preconnect',
+  href: 'https://fonts.googleapis.com',
+  crossorigin: 'crossorigin',
+});
+GM_addElement(document.head, 'link', {
+  href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap',
+  crossorigin: 'crossorigin',
+  rel: 'stylesheet',
+});
+// <link rel="preconnect" href="https://fonts.googleapis.com">
+// <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+// <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap" rel="stylesheet">
 /* Config·配置 */
 // 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
 const examWeeklyReverse = true;
@@ -30,12 +52,17 @@ const maxVideoNum = 6;
 // 暂停锁
 function pauseLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
+    // 学习暂停
+    const pauseStudy = <boolean>(GM_getValue('pauseStudy') || false);
+    if (pauseStudy) {
+      pauseExam(pauseStudy);
+    }
     if (pause) {
       const doing = setInterval(() => {
         if (!pause) {
           // 停止定时器
           clearInterval(doing);
-          console.log('答题等待结束！');
+          console.log('答题等待结束!');
           if (callback && callback instanceof Function) {
             callback('done');
           }
@@ -60,7 +87,7 @@ function pauseStudyLock(callback?: (msg: string) => void) {
         if (!pauseStudy) {
           // 停止定时器
           clearInterval(doing);
-          console.log('学习等待结束！');
+          console.log('学习等待结束!');
           if (callback && callback instanceof Function) {
             callback('done');
           }
@@ -310,7 +337,7 @@ const tasks: {
 // 获取 URL
 const { href } = window.location;
 // 设置
-let settings = [true, true, true, true, true, false, false];
+let settings = [true, true, true, true, true, false, false, false, false];
 // 已经开始
 let started = false;
 // 是否暂停答题
@@ -331,9 +358,15 @@ window.addEventListener('load', () => {
   console.log('加载脚本');
   // 主页
   if (URL_CONFIG.home.test(href)) {
-    console.log('进入主页面！');
+    console.log('进入主页面!');
     let ready = setInterval(() => {
       if ($$('.text-wrap')[0]) {
+        window.addEventListener('beforeunload', () => {
+          // 全局暂停
+          if (GM_getValue('pauseStudy') !== false) {
+            GM_setValue('pauseStudy', false);
+          }
+        });
         // 停止定时器
         clearInterval(ready);
         // 设置字体
@@ -350,6 +383,8 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
+    console.log('初始化设置');
+    console.log(settings);
     reading(0);
   } else if (
     typeof GM_getValue('watchingUrl') === 'string' &&
@@ -357,6 +392,8 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
+    console.log('初始化设置');
+    console.table(settings);
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
       let temp = getVideoTag();
@@ -392,7 +429,11 @@ window.addEventListener('load', () => {
     href.includes(URL_CONFIG.examPractice) ||
     href.includes(URL_CONFIG.examWeekly)
   ) {
-    console.log('进入答题页面！');
+    // 初始化设置
+    initSetting();
+    console.log('初始化设置');
+    console.table(settings);
+    console.log('进入答题页面!');
     // 答题页面
     const ready = setInterval(() => {
       if ($$('.title')[0]) {
@@ -404,7 +445,7 @@ window.addEventListener('load', () => {
       }
     }, 500);
   } else {
-    console.log('此页面不支持加载学习脚本！');
+    console.log('此页面不支持加载学习脚本!');
   }
 });
 
@@ -413,7 +454,7 @@ function getVideoTag() {
   let iframe = $$<HTMLIFrameElement>('iframe')[0];
   let video: HTMLVideoElement | undefined;
   let pauseButton: HTMLButtonElement | undefined;
-  var u = navigator.userAgent;
+  const u = navigator.userAgent;
   if (u.indexOf('Mac') > -1) {
     // Mac
     if (iframe && iframe.innerHTML) {
@@ -457,16 +498,16 @@ function getVideoTag() {
 }
 
 // 读新闻或者看视频
-// type:0为新闻，1为视频
+// type:0为新闻,1为视频
 async function reading(type: number) {
   // 看文章或者视频
   let time = 1;
   if (type === 0) {
-    // 80-100秒后关闭页面，看文章
+    // 80-100秒后关闭页面,看文章
     time = ~~(Math.random() * 20 + 80) + 1;
   }
   if (type === 1) {
-    // 100-150秒后关闭页面，看视频
+    // 100-150秒后关闭页面,看视频
     time = ~~(Math.random() * 50 + 100) + 1;
   }
   let firstTime = time - 2;
@@ -504,41 +545,54 @@ async function createTip(
     hide(): void;
     show(): void;
   }>((resolve) => {
+    // 提前去除
+    const studyTip = $$('#studyTip')[0];
+    if (studyTip) {
+      studyTip.destroy();
+    }
     // 提示
-    let tipInfo: HTMLElement | null = creatElementNode('div', undefined, {
+    const tipInfo: HTMLElement = creatElementNode('div', undefined, {
       id: 'studyTip',
-      class: 'egg_tip',
+      class: 'egg_tip inactive',
     });
+    let destroyed = false;
     // 插入节点
     document.body.append(tipInfo);
     // 操作
     const operate = {
       destroy() {
-        if (tipInfo) {
+        if (!destroyed) {
           // 隐藏
           operate.hide();
-          tipInfo.remove();
-          tipInfo = null;
+          destroyed = true;
+          setTimeout(() => {
+            tipInfo.remove();
+          }, 300);
         }
       },
       hide() {
-        if (tipInfo) {
+        if (!destroyed) {
+          tipInfo.classList.add('inactive');
           tipInfo.classList.remove('active');
         }
       },
       show() {
-        if (tipInfo) {
-          tipInfo.classList.add('active');
+        if (!destroyed) {
+          setTimeout(() => {
+            tipInfo.classList.add('active');
+            tipInfo.classList.remove('inactive');
+          }, 300);
         }
       },
     };
+    Object.assign(tipInfo, operate);
     tipInfo.append(text ? text : '');
     if (delay && delay >= 0) {
       // 倒计时
       const countdown = creatElementNode(
         'span',
         {
-          innerText: ` ${delay} s`,
+          innerText: `${delay}s`,
         },
         {
           class: 'egg_countdown',
@@ -546,23 +600,23 @@ async function createTip(
       );
       tipInfo.appendChild(countdown);
       operate.show();
-      // 定时
-      const timer = setInterval(() => {
-        countdown.innerText = ` ${delay} s`;
+      // 倒计时
+      const countDown = () => {
+        countdown.innerText = `${delay}s`;
         if (typeof delay === 'number' && callback) {
           callback(delay, operate);
         }
         // 倒计时结束
         if (!delay) {
-          // 清除计时器
-          clearInterval(timer);
           // 隐藏
           operate.hide();
           resolve(operate);
           return;
         }
         delay--;
-      }, 1000);
+        setTimeout(countDown, 1000);
+      };
+      countDown();
       return;
     }
     operate.show();
@@ -652,7 +706,7 @@ async function readNews() {
   }
   // 任务完成状况
   if (settings[0] && !tasks[0].status) {
-    console.log('任务未完成，继续看新闻！');
+    console.log('任务未完成,继续看新闻!');
     await readNews();
   }
 }
@@ -677,7 +731,7 @@ async function watchVideo() {
     await waitingClose(newPage);
     // 等待一段时间
     await waitingTime(1500);
-    // 刷新菜单数据
+    // 刷新菜单数据pauseStudyLock
     await refreshMenu();
     // 任务完成跳出循环
     if (settings[1] && tasks[1].status) {
@@ -686,7 +740,7 @@ async function watchVideo() {
   }
   // 任务完成状况
   if (settings[1] && !tasks[1].status) {
-    console.log('任务未完成，继续看视频！');
+    console.log('任务未完成,继续看视频!');
     await watchVideo();
   }
 }
@@ -710,7 +764,7 @@ async function doExamPractice() {
   await refreshMenu();
   // 任务完成状况
   if (settings[2] && !tasks[2].status) {
-    console.log('任务未完成，继续完成每日答题！');
+    console.log('任务未完成,继续完成每日答题!');
     await doExamPractice();
   }
 }
@@ -734,8 +788,8 @@ async function doExamWeekly() {
     // 刷新菜单数据
     await refreshMenu();
     // 任务完成状况
-    if (!tasks[3].status) {
-      console.log('任务未完成，继续完成每周答题！');
+    if (settings[3] && !tasks[3].status) {
+      console.log('任务未完成,继续完成每周答题!');
       return await doExamWeekly();
     }
     return true;
@@ -764,8 +818,8 @@ async function doExamPaper() {
     // 刷新菜单数据
     await refreshMenu();
     // 任务完成状况
-    if (!tasks[4].status) {
-      console.log('任务未完成，继续专项练习！');
+    if (settings[4] && !tasks[4].status) {
+      console.log('任务未完成,继续专项练习!');
       return await doExamPaper();
     }
     return true;
@@ -794,7 +848,7 @@ async function initExam(type: number) {
   }
 }
 
-// 查询每周答题列表看看还有没有没做过的，有则返回id
+// 查询每周答题列表看看还有没有没做过的,有则返回id
 async function findExamWeekly() {
   console.log('初始化每周答题');
   // 获取总页数
@@ -836,7 +890,7 @@ async function findExamWeekly() {
     }
   }
 }
-// 查询专项练习列表看看还有没有没做过的，有则返回id
+// 查询专项练习列表看看还有没有没做过的,有则返回id
 async function findExamPaper() {
   console.log('初始化专项练习');
   // 获取总页数
@@ -890,17 +944,18 @@ function getNextButton() {
   });
 }
 // 暂停答题
-async function pauseExam() {
+function pauseExam(flag: boolean) {
   // 按钮
   const manualButton = $$<HTMLButtonElement>('#manualButton')[0];
   if (manualButton) {
-    console.log('自动答题失败，切换为手动');
-    pause = true;
+    if (flag) {
+      createTip('已暂停,手动开启自动答题! ', 10);
+    } else {
+      createTip('已开启,自动答题! ', 2);
+    }
+    pause = flag;
     manualButton.innerText = '开启自动答题';
     manualButton.classList.add('manual');
-    createTip('已暂停，请答题后手动开启自动答题! ', 10);
-    // 暂停
-    await pauseLock();
   }
 }
 // 等待验证
@@ -914,7 +969,7 @@ function waitVerify() {
         // 滑动验证
         const mask = $$('#nc_mask')[0];
         if (!mask || getComputedStyle(mask).display === 'none') {
-          console.log('学习等待结束！');
+          console.log('学习等待结束!');
           clearInterval(timer);
           resolve(true);
         }
@@ -978,8 +1033,8 @@ function handleChoiceBtn(answers: string[]) {
   }
   return false;
 }
-// 随机处理选项
-function handleChoiceBtnRand(answers: string[]) {
+// 随机处理单选
+function handleSingleChoiceRand() {
   // 选项按钮
   const allBtns = $$<HTMLButtonElement>('.q-answer');
   // 按钮存在
@@ -990,6 +1045,20 @@ function handleChoiceBtnRand(answers: string[]) {
     if (!randBtn.classList.contains('chosen')) {
       randBtn.click();
     }
+  }
+}
+// 随机处理多选
+function handleMutiplyChoiceRand() {
+  // 选项按钮
+  const allBtns = $$<HTMLButtonElement>('.q-answer');
+  // 按钮存在
+  if (allBtns.length) {
+    allBtns.forEach((allBtn) => {
+      // 选择
+      if (!allBtn.classList.contains('chosen')) {
+        allBtn.click();
+      }
+    });
   }
 }
 // 处理填空
@@ -1036,6 +1105,23 @@ const handleBlankInput = (answers: string[]) => {
   }
   return false;
 };
+// 处理填空随机
+async function handleBlankInputRand() {
+  // 所有填空
+  const blanks = $$<HTMLInputElement>('.blank');
+  if (blanks.length) {
+    // 输入事件
+    const inputEvent = new Event('input', {
+      bubbles: true,
+    });
+    blanks.forEach((blank) => {
+      // 设置答案
+      blank.setAttribute('value', '答案');
+      // 触发输入input
+      blank.dispatchEvent(inputEvent);
+    });
+  }
+}
 // 答题过程(整合)
 async function doingExam() {
   // 下一个按钮
@@ -1064,6 +1150,8 @@ async function doingExam() {
     const question = $$('.q-body')[0].innerText;
     // 等待一段时间
     await waitingTime(1500);
+    // 暂停
+    await pauseLock();
     // 选项按钮
     const allBtns = $$<HTMLButtonElement>('.q-answer');
     // 所有填空
@@ -1072,6 +1160,8 @@ async function doingExam() {
     const questionType = <'填空题' | '单选题' | '多选题'>(
       $$('.q-header')[0].innerText.substring(0, 3)
     );
+    // 暂停
+    await pauseLock();
     // 题型分类作答
     switch (questionType) {
       case '填空题': {
@@ -1093,8 +1183,15 @@ async function doingExam() {
             break;
           }
         }
-        // 暂停答题
-        await pauseExam();
+        // 随机作答
+        if (settings[7]) {
+          console.log('答案不存在,随机作答!');
+          createTip('答案不存在,随机作答!', 2);
+          await handleBlankInputRand();
+        } else {
+          // 暂停答题
+          pauseExam(true);
+        }
         // 提交答案
         shouldSaveAnswer = true;
         break;
@@ -1143,8 +1240,15 @@ async function doingExam() {
             break;
           }
         }
-        // 暂停答题
-        await pauseExam();
+        // 随机作答
+        if (settings[7]) {
+          console.log('答案不存在,随机作答!');
+          createTip('答案不存在,随机作答!', 2);
+          await handleMutiplyChoiceRand();
+        } else {
+          // 暂停答题
+          pauseExam(true);
+        }
         // 提交答案
         shouldSaveAnswer = true;
         break;
@@ -1164,7 +1268,7 @@ async function doingExam() {
             const seperator = [
               '',
               ' ',
-              '，',
+              ',',
               ';',
               ',',
               '、',
@@ -1218,13 +1322,22 @@ async function doingExam() {
             }
           }
         }
-        // 暂停答题
-        await pauseExam();
+        // 随机作答
+        if (settings[7]) {
+          console.log('答案不存在,随机作答!');
+          createTip('答案不存在,随机作答!', 2);
+          await handleSingleChoiceRand();
+        } else {
+          // 暂停答题
+          pauseExam(true);
+        }
         // 提交答案
         shouldSaveAnswer = true;
         break;
       }
     }
+    // 暂停
+    await pauseLock();
     // 获取下一个按钮
     nextButton = await getNextButton();
     // 确认
@@ -1258,7 +1371,7 @@ async function doingExam() {
         // 存在答案
         if (answer.length) {
           // 答案
-          console.log(`上传了手工答案\nkey:${key},答案:${answer}`);
+          console.log(`上传 key:${key}, 答案:${answer}`);
           await saveAnswer(key, answer);
         }
       }
@@ -1266,6 +1379,8 @@ async function doingExam() {
       nextButton.click();
       // 等待一段时间
       await waitingTime(2000);
+      // 暂停
+      await pauseLock();
       // 答案解析
       const answerBox = $$('.answer')[0];
       // 答题错误
@@ -1280,13 +1395,16 @@ async function doingExam() {
           console.log(`上传了错题答案 key:${key} answer:${answer}`);
           await saveAnswer(key, answer);
         }
-        // 每周、专项暂停
-        if (
-          href.includes(URL_CONFIG.examWeekly) ||
-          href.includes(URL_CONFIG.examPaper)
-        ) {
-          // 暂停答题
-          await pauseExam();
+        // 每周答题
+        if (href.includes(URL_CONFIG.examWeekly)) {
+          // 每周暂停
+          if (settings[8]) {
+            console.log('每周答题暂停!');
+            // 暂停答题
+            pauseExam(true);
+            // 暂停
+            await pauseLock();
+          }
         }
       }
       // 滑动验证
@@ -1321,11 +1439,11 @@ function initSetting() {
     if (settingTemp) {
       settings = settingTemp;
     } else {
-      settings = [true, true, true, true, true, false, false];
+      settings = [true, true, true, true, true, false, false, false, false];
     }
   } catch (e) {
     // 没有则直接初始化
-    settings = [true, true, true, true, true, false, false];
+    settings = [true, true, true, true, true, false, false, false, false];
   }
 }
 // 初始化配置
@@ -1441,7 +1559,7 @@ async function loadUserInfo() {
     // 登录按钮
     const loginBtn = creatElementNode(
       'button',
-      { innerText: '请先登录' },
+      { innerText: '扫码登录' },
       {
         type: 'button',
         onclick() {
@@ -1557,7 +1675,7 @@ async function renderMenu() {
   const totalScoreSpan = creatElementNode('span', { innerText: 0 });
   const totalScoreDiv = creatElementNode(
     'div',
-    { innerHTML: '总积分' },
+    { innerText: '总积分' },
     { class: 'egg_totalscore' },
     totalScoreSpan
   );
@@ -1565,7 +1683,7 @@ async function renderMenu() {
   const todayScoreSpan = creatElementNode('span', { innerText: 0 });
   const todayScoreDiv = creatElementNode(
     'div',
-    { innerHTML: '当天积分' },
+    { innerText: '当天积分' },
     { class: 'egg_todayscore' },
     todayScoreSpan
   );
@@ -1595,7 +1713,9 @@ async function renderMenu() {
     '专项练习',
   ];
   // 分割线
-  settingItems.push(creatElementNode('hr'));
+  settingItems.push(
+    creatElementNode('hr', undefined, { 'data-category': '任务' })
+  );
   for (const i in settingTaskLabels) {
     // 进度条
     const bar = creatElementNode('div', undefined, { class: 'egg_bar' });
@@ -1640,7 +1760,7 @@ async function renderMenu() {
       if (settings[i] !== checked) {
         // 创建提示
         const { destroy } = await createTip(
-          `${settingTaskLabels[i]}已${checked ? '打开' : '关闭'}`,
+          `${settingTaskLabels[i]} ${checked ? '打开' : '关闭'}!`,
           2
         );
         // 销毁
@@ -1671,15 +1791,18 @@ async function renderMenu() {
     settingItems.push(item);
   }
   // 分割线
-  settingItems.push(creatElementNode('hr'));
-  // 设置标签
-  const settingLabel = ['运行隐藏', '自动开始'];
+  settingItems.push(
+    creatElementNode('hr', undefined, { 'data-category': '运行' })
+  );
+  // 运行设置标签
+  const settingRunLabel = ['运行隐藏', '自动开始'];
 
-  for (const i in settingLabel) {
+  for (const i in settingRunLabel) {
     // 标签
     const label = creatElementNode('label', {
-      innerText: settingLabel[i],
+      innerText: settingRunLabel[i],
     });
+
     // 当前序号
     const currentIndex = Number(i) + settingTaskLabels.length;
     // 处理设置选项变化
@@ -1690,7 +1813,7 @@ async function renderMenu() {
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
         const { destroy } = await createTip(
-          `${settingLabel[i]}已${checked ? '打开' : '关闭'}！`,
+          `${settingRunLabel[i]} ${checked ? '打开' : '关闭'}!`,
           2
         );
         // 销毁
@@ -1699,7 +1822,71 @@ async function renderMenu() {
     }, 300);
     // 选项
     const input = creatElementNode('input', undefined, {
-      title: settingLabel[i],
+      title: settingRunLabel[i],
+      class: 'egg_setting_switch',
+      type: 'checkbox',
+      checked: settings[currentIndex] ? 'checked' : '',
+      onchange: (e) => {
+        const { checked } = e.target;
+        handleCheckChange(checked);
+      },
+    });
+    // 设置项
+    const item = creatElementNode(
+      'div',
+      undefined,
+      { class: 'egg_setting_item' },
+      [label, input]
+    );
+    settingItems.push(item);
+  }
+  // 分割线
+  settingItems.push(
+    creatElementNode('hr', undefined, { 'data-category': '答题' })
+  );
+  // 运行设置标签
+  const settingExamLabel = [
+    {
+      title: '随机作答',
+      tip: '无答案时,随机选择或者填入答案,随机不保证正确!',
+    },
+    { title: '答错暂停', tip: '每周答题时,答错暂停答题!' },
+  ];
+
+  for (const i in settingExamLabel) {
+    // 标签
+    const label = creatElementNode('label', {
+      innerText: settingExamLabel[i].title,
+    });
+    if (settingExamLabel[i].tip.length) {
+      const tip = creatElementNode(
+        'span',
+        { innerText: 'i' },
+        { class: 'tip', title: settingExamLabel[i].tip }
+      );
+      label.appendChild(tip);
+    }
+    // 当前序号
+    const currentIndex =
+      Number(i) + settingTaskLabels.length + settingRunLabel.length;
+    // 处理设置选项变化
+    const handleCheckChange = debounce(async (checked) => {
+      if (settings[currentIndex] !== checked) {
+        settings[currentIndex] = checked;
+        // 设置
+        GM_setValue('studySetting', JSON.stringify(settings));
+        // 创建提示
+        const { destroy } = await createTip(
+          `${settingExamLabel[i].title} ${checked ? '打开' : '关闭'}!`,
+          2
+        );
+        // 销毁
+        destroy();
+      }
+    }, 300);
+    // 选项
+    const input = creatElementNode('input', undefined, {
+      title: settingExamLabel[i].tip,
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[currentIndex] ? 'checked' : '',
@@ -1746,6 +1933,29 @@ async function renderMenu() {
 
   // 根容器
   const base = creatElementNode('div', undefined, undefined, menu);
+  // 已经登录
+  if (login) {
+    // 开始学习按钮
+    const startButton = creatElementNode(
+      'button',
+      { innerText: '等待中' },
+      {
+        id: 'startButton',
+        class: 'egg_study_btn loading',
+        type: 'button',
+        onclick: start,
+        disabled: 'disabled',
+      }
+    );
+    // 设置项
+    const item = creatElementNode(
+      'div',
+      undefined,
+      { class: 'egg_setting_item egg_start_btn' },
+      startButton
+    );
+    settingBox.append(item);
+  }
   // 插入节点
   document.body.append(base);
   // 加载用户信息
@@ -1757,30 +1967,19 @@ async function renderMenu() {
   // 加载任务列表
   await loadTaskList();
   console.log('加载任务列表');
-  // 渲染开始按钮
+  // 已经登录
   if (login) {
-    // 开始学习按钮
-    const startButton = creatElementNode(
-      'button',
-      { innerText: '开始学习' },
-      {
-        id: 'startButton',
-        class: 'egg_study_btn',
-        type: 'button',
-        onclick: start,
-      }
-    );
-    // 设置项
-    const item = creatElementNode(
-      'div',
-      undefined,
-      { class: 'egg_setting_item egg_start_btn' },
-      startButton
-    );
-    settingBox.append(item);
     // 完成任务
     if (tasks.every((task) => task.status)) {
       finishTask();
+      return;
+    }
+    // 开始学习按钮
+    const startButton = $$('#startButton')[0];
+    if (startButton) {
+      startButton.removeAttribute('disabled');
+      startButton.classList.remove('loading');
+      startButton.innerText = '开始学习';
     }
   }
   // 自动答题
@@ -1791,7 +1990,7 @@ async function renderMenu() {
       createTip('开始自动答题', 2);
       start();
     } else {
-      createTip('已取消自动答题！', 2);
+      createTip('已取消自动答题!', 2);
     }
   }
 }
@@ -1841,7 +2040,7 @@ async function loginWindow() {
     if (res) {
       // 登录成功
       window.clearInterval(timer);
-      console.log('登录成功！');
+      console.log('登录成功!');
       window.location.reload();
       return;
     }
@@ -1888,7 +2087,7 @@ async function study() {
       const res = await doExamWeekly();
       // 无题可做
       if (!res) {
-        // 如果是全都完成了，已经没有能做的了
+        // 如果是全都完成了,已经没有能做的了
         tasks[3].status = true;
         // 进度条对象
         const taskProgressList = $$('.egg_progress');
@@ -1912,7 +2111,7 @@ async function study() {
     const res = await doExamPaper();
     // 无题可做
     if (!res) {
-      // 如果是全都完成了，已经没有能做的了
+      // 如果是全都完成了,已经没有能做的了
       tasks[4].status = true;
       // 进度条对象
       const taskProgressList = $$('.egg_progress');
@@ -1945,6 +2144,10 @@ function pauseTask() {
   // 开始按钮
   const startButton = $$('#startButton')[0];
   pauseStudy = true;
+  // 全局暂停
+  if (GM_getValue('pauseStudy') !== true) {
+    GM_setValue('pauseStudy', true);
+  }
   startButton.innerText = '继续学习';
   startButton.classList.remove('loading');
   startButton.removeEventListener('click', pauseTask);
@@ -1952,16 +2155,24 @@ function pauseTask() {
 }
 // 继续任务
 function continueTask() {
+  // 全局暂停
+  if (GM_getValue('pauseStudy') !== false) {
+    GM_setValue('pauseStudy', false);
+  }
   // 开始按钮
   const startButton = $$('#startButton')[0];
   pauseStudy = false;
-  startButton.innerText = '正在学习，点击暂停';
+  startButton.innerText = '正在学习,点击暂停';
   startButton.classList.add('loading');
   startButton.removeEventListener('click', continueTask);
   startButton.addEventListener('click', pauseTask);
 }
 // 完成任务
 function finishTask() {
+  // 全局暂停
+  if (GM_getValue('pauseStudy') !== false) {
+    GM_setValue('pauseStudy', false);
+  }
   // 开始按钮
   const startButton = $$('#startButton')[0];
   startButton.innerText = '已完成';
@@ -1976,9 +2187,13 @@ async function start() {
   console.log('检查是否登录...');
   if (login) {
     started = true;
+    // 初始化暂停
+    if (GM_getValue('pauseStudy') !== false) {
+      GM_setValue('pauseStudy', false);
+    }
     // 开始按钮
     const startButton = $$('#startButton')[0];
-    startButton.innerText = '正在学习，点击暂停';
+    startButton.innerText = '正在学习,点击暂停';
     startButton.classList.add('loading');
     startButton.removeEventListener('click', start);
     // 点击暂停

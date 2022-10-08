@@ -106,26 +106,6 @@ function hasMobile() {
   return isMobile;
 }
 /**
- * @description 将 GET 请求参数插入 URL
- * @param url
- * @param params
- * @returns
- */
-function stringfyParamsURL(url: string, params: object): string {
-  // 参数名
-  const keys = Object.keys(params);
-  // 参数名存在
-  if (keys.length) {
-    // 完整链接
-    const fullURL = `${url}?${keys
-      .filter((key) => key.length)
-      .map((key) => `${key}=${params[key]}`)
-      .join('&')}`;
-    return fullURL;
-  }
-  return url;
-}
-/**
  * @description 创建元素节点
  * @param eleName
  * @param props
@@ -264,6 +244,7 @@ function createTextNode(...text) {
   }
   return fragment;
 }
+
 export {
   $$,
   closeWin,

@@ -53,6 +53,8 @@
   top: 50%;
   font-size: 1.2rem;
   color: #999;
+  background: white;
+  padding: 0.1rem 0.6rem;
 }
 .egg_setting_item {
   margin-top: 0.5rem;

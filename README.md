@@ -26,7 +26,7 @@
 
 3. 新增任务进度显示，优化显示逻辑
 
-4. 修复部分小 bug，优化答题逻辑
+4. 修复部分问题，优化答题逻辑
 
 ### 使用流程 Process
 
@@ -42,15 +42,13 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 更新提示弹窗界面，优化动画效果。
+1. 优化全局暂停逻辑，当前，主页面的任务暂停，能同步到其他任务页面
 
-2. 新增答题配置：`随机作答`以及`答错暂停`。
+2. 优化任务执行逻辑，解决始终停留在`视听学习`任务上的问题
 
-3. 功能面板分区配置，部分配置可查看详情。
+3. 解决滑动验证问题，基本实现了全局自动化。
 
-4. 答题存在滑动验证问题，暂时无法解决。
-
-5. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
+4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
 
 ### 公告 announcement
 
@@ -120,11 +118,11 @@
   即
 
   ```
-   ✔ 完成编译:tech-study.ts -> tech-study.js!
-   ✔ 完成编译:./config/url.ts -> tech-study.js!
-   ✔ 完成编译:./config/api.ts -> tech-study.js!
-   ✔ 完成编译:./utils/index.ts -> tech-study.js!
-   ✔ 导出文件:../tech-study.js!
+   ✔ 完成编译: tech-study.ts -> tech-study.js
+   ✔ 完成编译: ./config/url.ts -> tech-study.js!
+   ✔ 完成编译: ./config/api.ts -> tech-study.js!
+   ✔ 完成编译: ./utils/index.ts -> tech-study.js!
+   ✔ 导出文件: tech-study.js!
   ```
 
 - 功能特性（基于`TypeScript Compiler API`）

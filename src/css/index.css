@@ -261,11 +261,9 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   background: var(--themeColor);
   color: white;
   font-size: 1.4rem;
-  transition: 0.3s ease;
+  transition: 0.3s ease-in-out;
   font-family: Noto Sans SC;
   z-index: 99999;
-}
-.egg_tip.inactive {
   opacity: 0;
   transform: scale(0.9) translateY(1rem);
 }

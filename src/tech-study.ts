@@ -461,7 +461,7 @@ function getVideoTag() {
   if (u.indexOf('Mac') > -1) {
     // Mac
     if (iframe && iframe.innerHTML) {
-      // 如果有iframe,说明外面的video标签是假的
+      // 如果有iframe, 说明外面的video标签是假的
       video = iframe.contentWindow?.document.getElementsByTagName('video')[0];
       pauseButton = <HTMLButtonElement>(
         iframe.contentWindow?.document.getElementsByClassName(
@@ -479,7 +479,7 @@ function getVideoTag() {
     };
   } else {
     if (iframe) {
-      // 如果有iframe,说明外面的video标签是假的
+      // 如果有iframe, 说明外面的video标签是假的
       video = <HTMLVideoElement>(
         iframe.contentWindow?.document.getElementsByTagName('video')[0]
       );
@@ -506,127 +506,154 @@ async function reading(type: number) {
   // 看文章或者视频
   let time = 1;
   if (type === 0) {
-    // 80-100秒后关闭页面,看文章
+    // 80-100秒后关闭页面, 看文章
     time = ~~(Math.random() * 20 + 80) + 1;
   }
   if (type === 1) {
-    // 100-150秒后关闭页面,看视频
+    // 100-150秒后关闭页面, 看视频
     time = ~~(Math.random() * 50 + 100) + 1;
   }
+  // 第一次滚动时间
   let firstTime = time - 2;
+  // 第二次滚动时间
   let secendTime = 12;
   // 滚动长度
   const scrollLength = document.body.scrollHeight / 2;
-  await createTip('距离关闭页面还剩', time, async (time) => {
-    // 暂停锁
-    await pauseStudyLock();
-    if (time === firstTime) {
-      window.scrollTo(0, 394);
-    }
-    if (time === secendTime) {
-      window.scrollTo(0, scrollLength / 3);
-    }
-    if (time === 0) {
-      if (type === 0) {
-        GM_setValue('readingUrl', null);
-      } else {
-        GM_setValue('watchingUrl', null);
+  // 创建提示
+  const tip = createTip(
+    '距离关闭页面还剩',
+    time,
+    async (time) => {
+      // 暂停锁
+      await pauseStudyLock();
+      if (time === firstTime) {
+        window.scrollTo(0, 394);
       }
-      // 关闭窗口
-      closeWin();
-    }
-  });
-
-  // 关闭文章或视频页面
+      if (time === secendTime) {
+        window.scrollTo(0, scrollLength / 3);
+      }
+    },
+    !settings[5]
+  );
+  // 倒计时结束
+  await tip.waitCountDown();
+  // 清空链接
+  if (type === 0) {
+    GM_setValue('readingUrl', null);
+  } else {
+    GM_setValue('watchingUrl', null);
+  }
+  // 关闭窗口
+  closeWin();
 }
 // 创建学习提示
-async function createTip(
-  text?: string,
-  delay?: number,
-  callback?: (current: number, operate: object) => void
+function createTip(
+  text: string,
+  delay: number = 2,
+  callback?: (current: number, operate: object) => any,
+  show: boolean = true
 ) {
-  return new Promise<{
-    destroy(): void;
-    hide(): void;
-    show(): void;
-  }>((resolve) => {
-    // 提前去除
-    const studyTip = $$('#studyTip')[0];
-    if (studyTip) {
-      studyTip.destroy();
+  // 提前去除
+  const studyTip = $$('#studyTip')[0];
+  if (studyTip) {
+    studyTip.destroy();
+  }
+  // 提示
+  const tipInfo: HTMLElement = creatElementNode('div', undefined, {
+    id: 'studyTip',
+    class: 'egg_tip',
+  });
+  // 倒计时
+  const countdown = creatElementNode(
+    'span',
+    {
+      innerText: `${delay}s`,
+    },
+    {
+      class: 'egg_countdown',
     }
-    // 提示
-    const tipInfo: HTMLElement = creatElementNode('div', undefined, {
-      id: 'studyTip',
-      class: 'egg_tip inactive',
-    });
-    let destroyed = false;
-    // 插入节点
-    document.body.append(tipInfo);
-    // 操作
-    const operate = {
-      destroy() {
-        if (!destroyed) {
-          // 隐藏
-          operate.hide();
-          destroyed = true;
-          setTimeout(() => {
-            tipInfo.remove();
-          }, 300);
-        }
-      },
-      hide() {
-        if (!destroyed) {
-          tipInfo.classList.add('inactive');
-          tipInfo.classList.remove('active');
-        }
-      },
-      show() {
-        if (!destroyed) {
-          setTimeout(() => {
-            tipInfo.classList.add('active');
-            tipInfo.classList.remove('inactive');
-          }, 300);
-        }
-      },
-    };
-    Object.assign(tipInfo, operate);
-    tipInfo.append(text ? text : '');
-    if (delay && delay >= 0) {
-      // 倒计时
-      const countdown = creatElementNode(
-        'span',
-        {
-          innerText: `${delay}s`,
-        },
-        {
-          class: 'egg_countdown',
-        }
-      );
-      tipInfo.appendChild(countdown);
-      operate.show();
-      // 倒计时
-      const countDown = async () => {
-        countdown.innerText = `${delay}s`;
-        if (typeof delay === 'number' && callback) {
-          await callback(delay, operate);
-        }
-        // 倒计时结束
-        if (!delay) {
-          // 隐藏
-          operate.hide();
-          resolve(operate);
-          return;
-        }
-        delay--;
-        setTimeout(countDown, 1000);
-      };
-      countDown();
+  );
+  // 文本
+  const span = creatElementNode(
+    'span',
+    {
+      innerText: text,
+    },
+    {
+      class: 'egg_text',
+    }
+  );
+  // 销毁
+  let destroyed = false;
+  // 倒计时结束
+  let done = false;
+  // 倒计时
+  const countDown = async () => {
+    countdown.innerText = `${delay}s`;
+    // 回调
+    if (callback) {
+      await callback(delay, operate);
+    }
+    // 倒计时结束
+    if (!delay) {
+      done = true;
+      // 隐藏
+      operate.hide();
       return;
     }
-    operate.show();
-    resolve(operate);
-  });
+    delay--;
+    setTimeout(countDown, 1000);
+  };
+  // 操作
+  const operate = {
+    async destroy() {
+      if (!destroyed) {
+        // 隐藏
+        operate.hide();
+        destroyed = true;
+        setTimeout(() => {
+          tipInfo.remove();
+        }, 300);
+      }
+    },
+    hide() {
+      if (!destroyed) {
+        tipInfo.classList.remove('active');
+      }
+    },
+    show() {
+      if (!destroyed) {
+        setTimeout(() => {
+          tipInfo.classList.add('active');
+        }, 300);
+      }
+    },
+    setText(text: string) {
+      span.innerText = text;
+    },
+    waitCountDown() {
+      return new Promise((resolve) => {
+        // 计时器
+        const timer = setInterval(() => {
+          // 结束
+          if (done) {
+            clearInterval(timer);
+            resolve(true);
+          }
+        }, 100);
+      });
+    },
+  };
+  Object.assign(tipInfo, operate);
+  tipInfo.append(span);
+  tipInfo.appendChild(countdown);
+  // 插入节点
+  document.body.append(tipInfo);
+  // 显示
+  show && operate.show();
+  // 倒计时
+  countDown();
+  return operate;
 }
 // 获取新闻列表
 function getNews() {
@@ -711,7 +738,7 @@ async function readNews() {
   }
   // 任务完成状况
   if (settings[0] && !tasks[0].status) {
-    console.log('任务未完成,继续看新闻!');
+    console.log('任务未完成, 继续看新闻!');
     await readNews();
   }
 }
@@ -745,7 +772,7 @@ async function watchVideo() {
   }
   // 任务完成状况
   if (settings[1] && !tasks[1].status) {
-    console.log('任务未完成,继续看视频!');
+    console.log('任务未完成, 继续看视频!');
     await watchVideo();
   }
 }
@@ -769,7 +796,7 @@ async function doExamPractice() {
   await refreshMenu();
   // 任务完成状况
   if (settings[2] && !tasks[2].status) {
-    console.log('任务未完成,继续完成每日答题!');
+    console.log('任务未完成, 继续完成每日答题!');
     await doExamPractice();
   }
 }
@@ -794,7 +821,7 @@ async function doExamWeekly() {
     await refreshMenu();
     // 任务完成状况
     if (settings[3] && !tasks[3].status) {
-      console.log('任务未完成,继续完成每周答题!');
+      console.log('任务未完成, 继续完成每周答题!');
       return await doExamWeekly();
     }
     return true;
@@ -824,7 +851,7 @@ async function doExamPaper() {
     await refreshMenu();
     // 任务完成状况
     if (settings[4] && !tasks[4].status) {
-      console.log('任务未完成,继续专项练习!');
+      console.log('任务未完成, 继续专项练习!');
       return await doExamPaper();
     }
     return true;
@@ -853,14 +880,14 @@ async function initExam(type: number) {
   }
 }
 
-// 查询每周答题列表看看还有没有没做过的,有则返回id
+// 查询每周答题列表看看还有没有没做过的, 有则返回id
 async function findExamWeekly() {
   console.log('初始化每周答题');
   // 获取总页数
   const total = await initExam(0);
   // 当前页数
   let current = examPaperReverse ? total : 1;
-  console.log('每周答题,开启逆序模式,从最早的题目开始答题');
+  console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
   console.log('正在寻找未完成的每周答题...');
   while (current <= total && current) {
     // 请求数据
@@ -895,14 +922,14 @@ async function findExamWeekly() {
     }
   }
 }
-// 查询专项练习列表看看还有没有没做过的,有则返回id
+// 查询专项练习列表看看还有没有没做过的, 有则返回id
 async function findExamPaper() {
   console.log('初始化专项练习');
   // 获取总页数
   const total = await initExam(1);
   // 当前页数
   let current = examPaperReverse ? total : 1;
-  console.log('专项练习,开启逆序模式,从最早的题目开始答题');
+  console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
   console.log('正在寻找未完成的专项练习...');
   while (current <= total && current) {
     // 请求数据
@@ -933,12 +960,15 @@ async function findExamPaper() {
 
 // 获取答题按钮
 function getNextButton() {
-  return new Promise((resolve) => {
+  return new Promise<HTMLButtonElement>((resolve) => {
     const timer = setInterval(() => {
       // 答题按钮
-      const nextAll = $$('.ant-btn').filter((next) => next.innerText);
+      const nextAll = $$<HTMLButtonElement>('.ant-btn').filter(
+        (next) => next.innerText
+      );
       if (nextAll.length) {
-        clearInterval(timer); // 停止定时器
+        // 停止定时器
+        clearInterval(timer);
         if (nextAll.length === 2) {
           resolve(nextAll[1]);
           return;
@@ -954,9 +984,11 @@ function pauseExam(flag: boolean) {
   const manualButton = $$<HTMLButtonElement>('#manualButton')[0];
   if (manualButton) {
     if (flag) {
-      createTip('已暂停,手动开启自动答题! ', 10);
+      // 创建提示
+      createTip('已暂停, 手动开启自动答题! ', 10);
     } else {
-      createTip('已开启,自动答题! ', 2);
+      // 创建提示
+      createTip('已开启, 自动答题! ', 2);
     }
     pause = flag;
     manualButton.innerText = '开启自动答题';
@@ -967,12 +999,19 @@ function pauseExam(flag: boolean) {
 function handleSlideVerify() {
   return new Promise(async (resolve) => {
     // 滑动验证
-    const mask = $$('#nc_mask')[0];
+    const mask = $$<HTMLElement>('#nc_mask')[0];
     if (mask && getComputedStyle(mask).display !== 'none') {
+      // 创建提示
+      createTip('等待处理滑动验证 ', 2);
+      // 提高层级
+      mask.style.zIndex = '999';
+      // 轨道
       const track = $$<HTMLElement>('.nc_scale')[0];
+      // 滑块
       const slide = $$<HTMLElement>('.btn_slide')[0];
       const rectTrack = track.getBoundingClientRect();
       const rectSlide = slide.getBoundingClientRect();
+      // 窗口
       const window = unsafeWindow;
       // 范围内随机起点
       const start = createRandomPoint(rectSlide);
@@ -982,7 +1021,7 @@ function handleSlideVerify() {
         y: rectTrack.y + rectTrack.height / 2,
       };
       // 路径
-      const path = createRandomPath(start, end, 8);
+      const path = createRandomPath(start, end, 10);
       // 鼠标按下
       const mousedown = new MouseEvent('mousedown', {
         clientX: path[0].x,
@@ -1010,16 +1049,20 @@ function handleSlideVerify() {
         view: window,
       });
       slide.dispatchEvent(mouseup);
+      // 创建提示
+      createTip('滑动验证成功! ', 2);
       // 定时器
       const timer = setInterval(() => {
         // 滑动验证
         const mask = $$('#nc_mask')[0];
         if (!mask || getComputedStyle(mask).display === 'none') {
-          console.log('学习等待结束!');
+          console.log('滑动验证完成!');
+          // 创建提示
+          createTip('滑动验证完成! ', 2);
           clearInterval(timer);
           resolve(true);
         }
-        console.log('等待滑动验证...');
+        console.log('正在滑动验证...');
       }, 100);
       return;
     }
@@ -1171,7 +1214,9 @@ async function handleBlankInputRand() {
 // 答题过程(整合)
 async function doingExam() {
   // 下一个按钮
-  let nextButton;
+  let nextButton: HTMLButtonElement;
+  // 下一个文本
+  let nextText: string;
   // 保存答案
   let shouldSaveAnswer = false;
   while (true) {
@@ -1181,6 +1226,8 @@ async function doingExam() {
     await pauseLock();
     // 获取下一个按钮
     nextButton = await getNextButton();
+    // 下一个文本
+    nextText = nextButton.innerText.replaceAll(' ', '');
     // 结束
     const finish = ['再练一次', '再来一组', '查看解析'];
     if (finish.includes(nextButton.innerText)) {
@@ -1219,6 +1266,8 @@ async function doingExam() {
             break;
           }
         }
+        // 创建提示
+        createTip('答案异常, 尝试网络题库获取!', 2);
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
         // 根据题库作答
@@ -1231,8 +1280,9 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[7]) {
-          console.log('答案不存在,随机作答!');
-          createTip('答案不存在,随机作答!', 2);
+          console.log('答案不存在, 随机作答!');
+          // 创建提示
+          createTip('答案不存在, 随机作答!', 2);
           await handleBlankInputRand();
         } else {
           // 暂停答题
@@ -1276,6 +1326,8 @@ async function doingExam() {
             }
           }
         }
+        // 创建提示
+        createTip('答案异常, 尝试网络题库获取!', 2);
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
         // 答案存在
@@ -1288,8 +1340,9 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[7]) {
-          console.log('答案不存在,随机作答!');
-          createTip('答案不存在,随机作答!', 2);
+          console.log('答案不存在, 随机作答!');
+          // 创建提示
+          createTip('答案不存在, 随机作答!', 2);
           await handleMutiplyChoiceRand();
         } else {
           // 暂停答题
@@ -1338,6 +1391,8 @@ async function doingExam() {
             }
           }
         }
+        // 创建提示
+        createTip('答案异常, 尝试网络题库获取!', 2);
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
         // 存在答案
@@ -1370,8 +1425,9 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[7]) {
-          console.log('答案不存在,随机作答!');
-          createTip('答案不存在,随机作答!', 2);
+          console.log('答案不存在, 随机作答!');
+          // 创建提示
+          createTip('答案不存在, 随机作答!', 2);
           await handleSingleChoiceRand();
         } else {
           // 暂停答题
@@ -1386,8 +1442,10 @@ async function doingExam() {
     await pauseLock();
     // 获取下一个按钮
     nextButton = await getNextButton();
+    // 下一个文本
+    nextText = nextButton.innerText.replaceAll(' ', '');
     // 确认
-    if (nextButton.innerText === '确 定') {
+    if (nextButton.innerText.replaceAll(' ', '') === '确定') {
       // 需要提交答案
       if (shouldSaveAnswer) {
         // 获取key
@@ -1442,15 +1500,12 @@ async function doingExam() {
           await saveAnswer(key, answer);
         }
         // 每周答题
-        if (href.includes(URL_CONFIG.examWeekly)) {
-          // 每周暂停
-          if (settings[8]) {
-            console.log('每周答题暂停!');
-            // 暂停答题
-            pauseExam(true);
-            // 暂停
-            await pauseLock();
-          }
+        if (href.includes(URL_CONFIG.examWeekly) && settings[8]) {
+          console.log('每周答题, 答错暂停!');
+          // 暂停答题
+          pauseExam(true);
+          // 暂停
+          await pauseLock();
         }
       }
       // 滑动验证
@@ -1458,11 +1513,9 @@ async function doingExam() {
     }
     // 获取按钮
     nextButton = await getNextButton();
-    if (
-      nextButton.innerText === '下一题' ||
-      nextButton.innerText === '完 成' ||
-      nextButton.innerText === '交 卷'
-    ) {
+    // 下一个文本
+    nextText = nextButton.innerText.replaceAll(' ', '');
+    if (nextText === '下一题' || nextText === '完成' || nextText === '交卷') {
       // 等待一段时间
       await waitingTime(2500);
       // 下一题
@@ -1687,7 +1740,7 @@ async function loadTaskList() {
       const { currentScore, dayMaxScore } = tasks[i];
       // 进度
       let rate = (100 * currentScore) / dayMaxScore;
-      // 修复专项练习成组做完,进度条显示异常
+      // 修复专项练习成组做完, 进度条显示异常
       if (dayMaxScore <= currentScore) {
         rate = 100;
       }
@@ -1804,16 +1857,11 @@ async function renderMenu() {
     // 处理设置选项变化
     const handleCheckChange = debounce(async (checked) => {
       if (settings[i] !== checked) {
-        // 创建提示
-        const { destroy } = await createTip(
-          `${settingTaskLabels[i]} ${checked ? '打开' : '关闭'}!`,
-          2
-        );
-        // 销毁
-        destroy();
         settings[i] = checked;
-        // 运行时是否要隐藏
+        // 设置
         GM_setValue('studySetting', JSON.stringify(settings));
+        // 创建提示
+        createTip(`${settingTaskLabels[i]} ${checked ? '打开' : '关闭'}!`, 2);
       }
     }, 500);
     // 选项
@@ -1858,12 +1906,7 @@ async function renderMenu() {
         // 设置
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
-        const { destroy } = await createTip(
-          `${settingRunLabel[i]} ${checked ? '打开' : '关闭'}!`,
-          2
-        );
-        // 销毁
-        destroy();
+        createTip(`${settingRunLabel[i]} ${checked ? '打开' : '关闭'}!`, 2);
       }
     }, 300);
     // 选项
@@ -1894,9 +1937,9 @@ async function renderMenu() {
   const settingExamLabel = [
     {
       title: '随机作答',
-      tip: '无答案时,随机选择或者填入答案,随机不保证正确!',
+      tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
     },
-    { title: '答错暂停', tip: '每周答题时,答错暂停答题!' },
+    { title: '答错暂停', tip: '每周答题时, 答错暂停答题!' },
   ];
 
   for (const i in settingExamLabel) {
@@ -1922,12 +1965,10 @@ async function renderMenu() {
         // 设置
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
-        const { destroy } = await createTip(
+        createTip(
           `${settingExamLabel[i].title} ${checked ? '打开' : '关闭'}!`,
           2
         );
-        // 销毁
-        destroy();
       }
     }, 300);
     // 选项
@@ -2016,7 +2057,7 @@ async function renderMenu() {
   // 已经登录
   if (login) {
     // 完成任务
-    if (tasks.every((task) => task.status)) {
+    if (tasks.every((task, i) => !settings[i] || task.status)) {
       finishTask();
       return;
     }
@@ -2030,22 +2071,29 @@ async function renderMenu() {
   }
   // 自动答题
   if (login && settings[6]) {
-    await createTip('即将开始自动答题', 5);
+    // 创建提示
+    const tip = createTip('即将开始自动答题', 5);
+    // 等待倒计时结束
+    await tip.waitCountDown();
     // 再次查看是否开启
     if (settings[6] && !started) {
+      // 创建提示
       createTip('开始自动答题', 2);
       start();
     } else {
+      // 创建提示
       createTip('已取消自动答题!', 2);
     }
   }
 }
 
-// 是否显示目录
-function showMenu(isShow = true) {
+// 是否显示目菜单
+function setVisible(isShow: boolean) {
   // 菜单
   const menu = $$('.egg_menu')[0];
-  menu.style.display = isShow ? 'block' : 'none';
+  if (menu) {
+    menu.style.display = isShow ? 'block' : 'none';
+  }
 }
 // 登录状态
 function loginStatus() {
@@ -2133,7 +2181,7 @@ async function study() {
       const res = await doExamWeekly();
       // 无题可做
       if (!res) {
-        // 如果是全都完成了,已经没有能做的了
+        // 如果是全都完成了, 已经没有能做的了
         tasks[3].status = true;
         // 进度条对象
         const taskProgressList = $$('.egg_progress');
@@ -2157,7 +2205,7 @@ async function study() {
     const res = await doExamPaper();
     // 无题可做
     if (!res) {
-      // 如果是全都完成了,已经没有能做的了
+      // 如果是全都完成了, 已经没有能做的了
       tasks[4].status = true;
       // 进度条对象
       const taskProgressList = $$('.egg_progress');
@@ -2206,7 +2254,7 @@ function continueTask() {
   }
   // 开始按钮
   const startButton = $$('#startButton')[0];
-  startButton.innerText = '正在学习,点击暂停';
+  startButton.innerText = '正在学习, 点击暂停';
   startButton.classList.add('loading');
   startButton.removeEventListener('click', continueTask);
   startButton.addEventListener('click', pauseTask);
@@ -2237,14 +2285,14 @@ async function start() {
     }
     // 开始按钮
     const startButton = $$('#startButton')[0];
-    startButton.innerText = '正在学习,点击暂停';
+    startButton.innerText = '正在学习, 点击暂停';
     startButton.classList.add('loading');
     startButton.removeEventListener('click', start);
     // 点击暂停
     startButton.addEventListener('click', pauseTask);
-    // 隐藏菜单
+    // 隐藏界面
     if (settings[5]) {
-      showMenu(false);
+      setVisible(false);
     }
     // 查询今天还有什么任务没做完
     console.log('检查今天还有什么任务没做完');
@@ -2253,7 +2301,7 @@ async function start() {
       // 学习
       await study();
       // 未完成
-      if (!tasks.every((task) => task.status)) {
+      if (!tasks.every((task, i) => !settings[i] || task.status)) {
         await study();
       }
       // 刷新菜单数据
@@ -2261,9 +2309,9 @@ async function start() {
       finishTask();
       console.log('已完成');
     }
-
+    // 显示界面
     if (settings[5]) {
-      showMenu();
+      setVisible(true);
     }
   } else {
     // 提醒登录

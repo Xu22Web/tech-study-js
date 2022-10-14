@@ -76,6 +76,7 @@ const SCRIPT_CONFIG = {
     'GM_deleteValue',
     'GM_openInTab',
     'GM_addElement',
+    'unsafeWindow',
   ],
 };
 

@@ -9,7 +9,8 @@ import {
   waitingTime,
   waitingClose,
   creatElementNode,
-  createTextNode,
+  createRandomPoint,
+  createRandomPath,
 } from './utils';
 import css from './css/index.css?raw';
 // 嵌入样式
@@ -82,8 +83,12 @@ function pauseLock(callback?: (msg: string) => void) {
 // 暂停学习锁
 function pauseStudyLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
+    // 暂停
+    const pauseStudy = GM_getValue('pauseStudy') || false;
     if (pauseStudy) {
       const doing = setInterval(() => {
+        // 暂停
+        const pauseStudy = GM_getValue('pauseStudy') || false;
         if (!pauseStudy) {
           // 停止定时器
           clearInterval(doing);
@@ -342,8 +347,6 @@ let settings = [true, true, true, true, true, false, false, false, false];
 let started = false;
 // 是否暂停答题
 let pause = false;
-// 是否暂停学习
-let pauseStudy = false;
 // 初始化登录状态
 let login = !!getCookie('token');
 // 用户信息
@@ -514,7 +517,9 @@ async function reading(type: number) {
   let secendTime = 12;
   // 滚动长度
   const scrollLength = document.body.scrollHeight / 2;
-  await createTip('距离关闭页面还剩', time, (time) => {
+  await createTip('距离关闭页面还剩', time, async (time) => {
+    // 暂停锁
+    await pauseStudyLock();
     if (time === firstTime) {
       window.scrollTo(0, 394);
     }
@@ -601,10 +606,10 @@ async function createTip(
       tipInfo.appendChild(countdown);
       operate.show();
       // 倒计时
-      const countDown = () => {
+      const countDown = async () => {
         countdown.innerText = `${delay}s`;
         if (typeof delay === 'number' && callback) {
-          callback(delay, operate);
+          await callback(delay, operate);
         }
         // 倒计时结束
         if (!delay) {
@@ -958,12 +963,53 @@ function pauseExam(flag: boolean) {
     manualButton.classList.add('manual');
   }
 }
-// 等待验证
-function waitVerify() {
-  return new Promise((resolve) => {
+// 处理滑动验证
+function handleSlideVerify() {
+  return new Promise(async (resolve) => {
     // 滑动验证
     const mask = $$('#nc_mask')[0];
     if (mask && getComputedStyle(mask).display !== 'none') {
+      const track = $$<HTMLElement>('.nc_scale')[0];
+      const slide = $$<HTMLElement>('.btn_slide')[0];
+      const rectTrack = track.getBoundingClientRect();
+      const rectSlide = slide.getBoundingClientRect();
+      const window = unsafeWindow;
+      // 范围内随机起点
+      const start = createRandomPoint(rectSlide);
+      // 终点
+      const end = {
+        x: rectTrack.x + rectTrack.width,
+        y: rectTrack.y + rectTrack.height / 2,
+      };
+      // 路径
+      const path = createRandomPath(start, end, 8);
+      // 鼠标按下
+      const mousedown = new MouseEvent('mousedown', {
+        clientX: path[0].x,
+        clientY: path[0].y,
+        bubbles: true,
+        view: window,
+      });
+      slide.dispatchEvent(mousedown);
+      // 鼠标滑动
+      for (const i in path) {
+        const mousemove = new MouseEvent('mousemove', {
+          clientX: path[i].x,
+          clientY: path[i].y,
+          bubbles: true,
+          view: window,
+        });
+        slide.dispatchEvent(mousemove);
+        await waitingTime(10);
+      }
+      // 鼠标抬起
+      const mouseup = new MouseEvent('mouseup', {
+        clientX: path[path.length - 1].x,
+        clientY: path[path.length - 1].y,
+        bubbles: true,
+        view: window,
+      });
+      slide.dispatchEvent(mouseup);
       // 定时器
       const timer = setInterval(() => {
         // 滑动验证
@@ -1408,7 +1454,7 @@ async function doingExam() {
         }
       }
       // 滑动验证
-      await waitVerify();
+      await handleSlideVerify();
     }
     // 获取按钮
     nextButton = await getNextButton();
@@ -1650,7 +1696,7 @@ async function loadTaskList() {
       }
       if (rate > 0) {
         // 设置进度条
-        setProgress(Number(i), Number(rate.toFixed(2)));
+        setProgress(Number(i), Number(rate.toFixed(1)));
       }
     }
   }
@@ -2141,13 +2187,12 @@ function setProgress(index: number, progress: number) {
 }
 // 暂停任务
 function pauseTask() {
-  // 开始按钮
-  const startButton = $$('#startButton')[0];
-  pauseStudy = true;
   // 全局暂停
   if (GM_getValue('pauseStudy') !== true) {
     GM_setValue('pauseStudy', true);
   }
+  // 开始按钮
+  const startButton = $$('#startButton')[0];
   startButton.innerText = '继续学习';
   startButton.classList.remove('loading');
   startButton.removeEventListener('click', pauseTask);
@@ -2161,7 +2206,6 @@ function continueTask() {
   }
   // 开始按钮
   const startButton = $$('#startButton')[0];
-  pauseStudy = false;
   startButton.innerText = '正在学习,点击暂停';
   startButton.classList.add('loading');
   startButton.removeEventListener('click', continueTask);

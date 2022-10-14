@@ -167,7 +167,7 @@
 .egg_progress .egg_percent {
   font-size: 1.2rem;
   padding-left: 0.5rem;
-  width: 3.5rem;
+  width: 4rem;
 }
 input[type='checkbox'].egg_setting_switch {
   cursor: pointer;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221014
+// @version   20221016
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -17,6 +17,8 @@
 // @grant   GM_openInTab
 // @grant   GM_addElement
 // @grant   unsafeWindow
+// @updateURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
+// @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // ==/UserScript==
 /**
  * @description url配置
@@ -1561,7 +1563,7 @@ async function doingExam() {
         // 点击提示
         $$('.tips')[0]?.click();
         // 所有提示
-        const allTips = $$('font[color=red]');
+        const allTips = $$('.line-feed font[color]');
         // 答案
         const answers = allTips.map((tip) => tip.innerText.trim());
         // 获取题目的文本内容
@@ -1611,9 +1613,9 @@ async function doingExam() {
                 else {
                     // 暂停答题
                     pauseExam(true);
+                    // 提交答案
+                    shouldSaveAnswer = true;
                 }
-                // 提交答案
-                shouldSaveAnswer = true;
                 break;
             }
             case '多选题': {
@@ -1670,9 +1672,9 @@ async function doingExam() {
                 else {
                     // 暂停答题
                     pauseExam(true);
+                    // 提交答案
+                    shouldSaveAnswer = true;
                 }
-                // 提交答案
-                shouldSaveAnswer = true;
                 break;
             }
             case '单选题': {
@@ -1758,9 +1760,9 @@ async function doingExam() {
                 else {
                     // 暂停答题
                     pauseExam(true);
+                    // 提交答案
+                    shouldSaveAnswer = true;
                 }
-                // 提交答案
-                shouldSaveAnswer = true;
                 break;
             }
         }

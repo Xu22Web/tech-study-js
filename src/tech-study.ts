@@ -1236,7 +1236,7 @@ async function doingExam() {
     // 点击提示
     $$('.tips')[0]?.click();
     // 所有提示
-    const allTips = $$<HTMLFontElement>('font[color=red]');
+    const allTips = $$<HTMLFontElement>('.line-feed font[color]');
     // 答案
     const answers = allTips.map((tip) => tip.innerText.trim());
     // 获取题目的文本内容
@@ -1287,9 +1287,9 @@ async function doingExam() {
         } else {
           // 暂停答题
           pauseExam(true);
+          // 提交答案
+          shouldSaveAnswer = true;
         }
-        // 提交答案
-        shouldSaveAnswer = true;
         break;
       }
       case '多选题': {
@@ -1347,9 +1347,9 @@ async function doingExam() {
         } else {
           // 暂停答题
           pauseExam(true);
+          // 提交答案
+          shouldSaveAnswer = true;
         }
-        // 提交答案
-        shouldSaveAnswer = true;
         break;
       }
       case '单选题': {
@@ -1432,9 +1432,9 @@ async function doingExam() {
         } else {
           // 暂停答题
           pauseExam(true);
+          // 提交答案
+          shouldSaveAnswer = true;
         }
-        // 提交答案
-        shouldSaveAnswer = true;
         break;
       }
     }

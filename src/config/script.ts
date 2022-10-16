@@ -78,6 +78,10 @@ const SCRIPT_CONFIG = {
     'GM_addElement',
     'unsafeWindow',
   ],
+  updateURL:
+    'https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js',
+  downloadURL:
+    'https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js',
 };
 
 export default SCRIPT_CONFIG;

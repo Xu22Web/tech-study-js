@@ -2015,22 +2015,33 @@ async function loadScoreInfo() {
         const todayScore = await getTodayScore();
         // 分数信息
         const infoItem = $$('.egg_info_item')[0];
+        // 总分
+        const totalScoreSpan = $$('.egg_totalscore span')[0];
+        //  当天分数
+        const todayScoreSpan = $$('.egg_todayscore span')[0];
         if (infoItem) {
-            // 总分
-            const totalScoreSpan = creatElementNode('span', {
-                innerText: totalScore,
-            });
-            const totalScoreDiv = creatElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
-            // 当天总分
-            const todayScoreSpan = creatElementNode('span', {
-                innerText: todayScore,
-            });
-            const todayScoreDiv = creatElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
-            // 分数信息
-            const scoreInfo = creatElementNode('div', undefined, {
-                class: 'egg_scoreinfo',
-            }, [totalScoreDiv, todayScoreDiv]);
-            infoItem.append(scoreInfo);
+            // 刷新分数
+            if (totalScoreSpan && todayScoreSpan) {
+                totalScoreSpan.innerText = totalScore;
+                todayScoreSpan.innerText = todayScore;
+            }
+            else {
+                // 总分
+                const totalScoreSpan = creatElementNode('span', {
+                    innerText: totalScore,
+                });
+                const totalScoreDiv = creatElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
+                // 当天总分
+                const todayScoreSpan = creatElementNode('span', {
+                    innerText: todayScore,
+                });
+                const todayScoreDiv = creatElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
+                // 分数信息
+                const scoreInfo = creatElementNode('div', undefined, {
+                    class: 'egg_scoreinfo',
+                }, [totalScoreDiv, todayScoreDiv]);
+                infoItem.append(scoreInfo);
+            }
         }
     }
 }

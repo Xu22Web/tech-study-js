@@ -7,9 +7,6 @@
   :root {
     --scale: 0.8;
   }
-  .egg_setting_box {
-    top: 1rem;
-  }
 }
 .icon {
   width: 1em;
@@ -45,6 +42,11 @@
   transition: 80ms ease-out;
   z-index: 99999;
   font-family: Noto Sans SC;
+}
+@media (max-height: 768px) {
+  .egg_setting_box {
+    top: 2rem;
+  }
 }
 .egg_setting_box hr {
   height: 0.1rem;

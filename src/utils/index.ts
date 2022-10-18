@@ -41,8 +41,11 @@ function debounce(callback, delay) {
  * @param selector
  * @returns
  */
-function $$<T extends Element = any>(selector: string) {
-  return Array.from(document.querySelectorAll<T>(selector));
+function $$<T extends Element = any>(
+  selector: string,
+  parent: Document | Element = document
+) {
+  return Array.from(parent.querySelectorAll<T>(selector));
 }
 /**
  * @description 关闭子窗口

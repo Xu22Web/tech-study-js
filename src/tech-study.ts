@@ -258,7 +258,7 @@ async function getExamWeekly(pageNo: number) {
 }
 // 获取答案
 async function getAnswer(question: string) {
-  console.log('获取网络答案');
+  console.log('正在获取网络答案...');
   // 数据
   const data = {
     question,
@@ -289,6 +289,7 @@ async function getAnswer(question: string) {
       }
     }
   } catch (error) {}
+  console.log('获取网络答案失败!');
   return [];
 }
 // 保存答案
@@ -349,16 +350,16 @@ let started = false;
 let pause = false;
 // 初始化登录状态
 let login = !!getCookie('token');
-// 用户信息
-let userInfo;
 // 新闻
 let news: { url: string }[] = [];
 // 视频
 let videos: { url: string }[] = [];
+// 登录定时器
+let loginTimer: any;
 
 // load
 window.addEventListener('load', () => {
-  console.log('加载脚本');
+  console.log('正在加载脚本...');
   // 主页
   if (URL_CONFIG.home.test(href)) {
     console.log('进入主页面!');
@@ -386,7 +387,7 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
-    console.log('初始化设置');
+    console.log('初始化设置!');
     console.log(settings);
     reading(0);
   } else if (
@@ -395,7 +396,7 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
-    console.log('初始化设置');
+    console.log('初始化设置!');
     console.table(settings);
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
@@ -405,7 +406,7 @@ window.addEventListener('load', () => {
           temp.video.muted = true;
         }
         if (temp.video.paused) {
-          console.log('正在尝试播放视频');
+          console.log('正在尝试播放视频...');
           if (randNum === 0) {
             // 尝试使用js的方式播放
             try {
@@ -419,12 +420,12 @@ window.addEventListener('load', () => {
             randNum--;
           }
         } else {
-          console.log('成功播放');
+          console.log('视频成功播放!');
           clearInterval(checkVideoPlayingInterval);
           reading(1);
         }
       } else {
-        console.log('等待加载');
+        console.log('等待加载...');
       }
     }, 800);
   } else if (
@@ -434,7 +435,7 @@ window.addEventListener('load', () => {
   ) {
     // 初始化设置
     initSetting();
-    console.log('初始化设置');
+    console.log('初始化设置!');
     console.table(settings);
     console.log('进入答题页面!');
     // 答题页面
@@ -718,7 +719,7 @@ async function readNews() {
     await pauseStudyLock();
     // 链接
     GM_setValue('readingUrl', news[i].url);
-    console.log(`正在看第${Number(i) + 1}个新闻`);
+    console.log(`正在看第${Number(i) + 1}个新闻...`);
     // 新页面
     const newPage = GM_openInTab(news[i].url, {
       active: true,
@@ -752,7 +753,7 @@ async function watchVideo() {
     await pauseStudyLock();
     // 链接
     GM_setValue('watchingUrl', videos[i].url);
-    console.log(`正在观看第${Number(i) + 1}个视频`);
+    console.log(`正在观看第${Number(i) + 1}个视频...`);
     // 页面
     const newPage = GM_openInTab(videos[i].url, {
       active: true,
@@ -781,7 +782,7 @@ async function watchVideo() {
 async function doExamPractice() {
   // 暂停
   await pauseStudyLock();
-  console.log('正在完成每日答题');
+  console.log('正在完成每日答题...');
   // 新页面
   const newPage = GM_openInTab(URL_CONFIG.examPractice, {
     active: true,
@@ -882,12 +883,13 @@ async function initExam(type: number) {
 
 // 查询每周答题列表看看还有没有没做过的, 有则返回id
 async function findExamWeekly() {
-  console.log('初始化每周答题');
+  console.log('初始化每周答题!');
   // 获取总页数
   const total = await initExam(0);
   // 当前页数
   let current = examPaperReverse ? total : 1;
-  console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
+  examPaperReverse &&
+    console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
   console.log('正在寻找未完成的每周答题...');
   while (current <= total && current) {
     // 请求数据
@@ -929,7 +931,8 @@ async function findExamPaper() {
   const total = await initExam(1);
   // 当前页数
   let current = examPaperReverse ? total : 1;
-  console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
+  examPaperReverse &&
+    console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
   console.log('正在寻找未完成的专项练习...');
   while (current <= total && current) {
     // 请求数据
@@ -1496,7 +1499,7 @@ async function doingExam() {
         const [, answer] = answerTemp.split('：');
         if (answer && answer.length) {
           answer.replaceAll(' ', ';');
-          console.log(`上传了错题答案 key:${key} answer:${answer}`);
+          console.log(`上传了错题答案 key:${key} answer:${answer}!`);
           await saveAnswer(key, answer);
         }
         // 每周答题
@@ -1591,15 +1594,24 @@ function clickManualButton() {
 }
 // 加载用户信息
 async function loadUserInfo() {
-  const egg_userinfo = $$('.egg_userinfo')[0];
-  egg_userinfo.innerHTML = '';
-  // 登录状态
-  const loginStatus = creatElementNode('div', undefined, {
-    class: 'egg_login_status',
-  });
+  // 分数信息
+  const infoItem = $$<HTMLDivElement>('.egg_info_item')[0];
   if (login) {
+    // 退出按钮
+    const logoutBtn = creatElementNode(
+      'button',
+      { innerText: '退出' },
+      {
+        type: 'button',
+        class: 'login_btn',
+        onclick: debounce(() => {
+          const logged = $$("a[class='logged-link']")[0];
+          logged.click();
+        }, 500),
+      }
+    );
     // 获取用户信息
-    userInfo = await getUserInfo();
+    const userInfo = await getUserInfo();
     if (userInfo) {
       const { avatarMediaUrl, nick } = userInfo;
       const avatarItems: Node[] = [];
@@ -1637,42 +1649,74 @@ async function loadUserInfo() {
         avatar,
         nickName,
       ]);
-
-      egg_userinfo.append(user);
-    }
-    // 退出按钮
-    const logoutBtn = creatElementNode(
-      'button',
-      { innerText: '退出' },
-      {
-        type: 'button',
-        onclick() {
-          const logged = $$("a[class='logged-link']")[0];
-          logged.click();
+      // 用户信息
+      const userInfoWrap = creatElementNode(
+        'div',
+        undefined,
+        {
+          class: 'egg_userinfo',
         },
-      }
-    );
-    loginStatus.classList.remove('active');
-    loginStatus.append(logoutBtn);
+        [user, logoutBtn]
+      );
+      infoItem.append(userInfoWrap);
+    }
   } else {
+    let refreshTimer: any;
     // 登录按钮
     const loginBtn = creatElementNode(
       'button',
       { innerText: '扫码登录' },
       {
         type: 'button',
-        onclick() {
-          loginWindow();
-        },
+        class: 'login_btn',
+        onclick: debounce(async () => {
+          if (refreshTimer) {
+            clearInterval(refreshTimer);
+          }
+          loginWindowLoad();
+          refreshTimer = setInterval(() => {
+            loginWindowLoad();
+          }, 100000);
+          // 登录状态
+          const res = await loginStatus();
+          if (res) {
+            console.log('登录成功!');
+            window.location.reload();
+          }
+        }, 500),
       }
     );
-    loginStatus.classList.add('active');
-    loginBtn.addEventListener('click', () => {
-      loginWindow();
+    // 窗口
+    const loginFrame = creatElementNode('div', undefined, {
+      class: 'egg_frame_login',
     });
-    loginStatus.append(loginBtn);
+    // 窗口项
+    const frameWrap = creatElementNode(
+      'div',
+      undefined,
+      { class: 'egg_frame' },
+      loginFrame
+    );
+    // 窗口项
+    const loginFrameItem = creatElementNode(
+      'div',
+      undefined,
+      {
+        class: 'egg_frame_item',
+      },
+      frameWrap
+    );
+    // 用户登录
+    const userLogin = creatElementNode(
+      'div',
+      undefined,
+      {
+        class: 'egg_user_login',
+      },
+      [loginBtn, loginFrameItem]
+    );
+    infoItem.append(userLogin);
   }
-  egg_userinfo.append(loginStatus);
 }
 // 加载分数
 async function loadScoreInfo() {
@@ -1681,11 +1725,41 @@ async function loadScoreInfo() {
     const totalScore = await getTotalScore();
     // 获取当天总分
     const todayScore = await getTodayScore();
-    // 更新分数
-    const totalScoreSpan = $$('.egg_scoreinfo .egg_totalscore span')[0];
-    const todayScoreSpan = $$('.egg_scoreinfo .egg_todayscore span')[0];
-    totalScoreSpan.innerText = totalScore;
-    todayScoreSpan.innerText = todayScore;
+    // 分数信息
+    const infoItem = $$<HTMLDivElement>('.egg_info_item')[0];
+    if (infoItem) {
+      // 总分
+      const totalScoreSpan = creatElementNode('span', {
+        innerText: totalScore,
+      });
+      const totalScoreDiv = creatElementNode(
+        'div',
+        { innerText: '总积分' },
+        { class: 'egg_totalscore' },
+        totalScoreSpan
+      );
+      // 当天总分
+      const todayScoreSpan = creatElementNode('span', {
+        innerText: todayScore,
+      });
+      const todayScoreDiv = creatElementNode(
+        'div',
+        { innerText: '当天积分' },
+        { class: 'egg_todayscore' },
+        todayScoreSpan
+      );
+      // 分数信息
+      const scoreInfo = creatElementNode(
+        'div',
+        undefined,
+        {
+          class: 'egg_scoreinfo',
+        },
+
+        [totalScoreDiv, todayScoreDiv]
+      );
+      infoItem.append(scoreInfo);
+    }
   }
 }
 // 加载任务列表
@@ -1765,44 +1839,11 @@ async function refreshMenu() {
 async function renderMenu() {
   // 设置项
   const settingItems: Node[] = [];
-
-  // 用户信息
-  const userinfo = creatElementNode('div', undefined, {
-    class: 'egg_userinfo',
-  });
-  // 总分
-  const totalScoreSpan = creatElementNode('span', { innerText: 0 });
-  const totalScoreDiv = creatElementNode(
-    'div',
-    { innerText: '总积分' },
-    { class: 'egg_totalscore' },
-    totalScoreSpan
-  );
-  // 当天总分
-  const todayScoreSpan = creatElementNode('span', { innerText: 0 });
-  const todayScoreDiv = creatElementNode(
-    'div',
-    { innerText: '当天积分' },
-    { class: 'egg_todayscore' },
-    todayScoreSpan
-  );
-  // 分数信息
-  const scoreinfo = creatElementNode(
-    'div',
-    undefined,
-    { class: 'egg_scoreinfo' },
-    [totalScoreDiv, todayScoreDiv]
-  );
-
   // 信息
-  const info = creatElementNode(
-    'div',
-    undefined,
-    { class: 'egg_setting_item egg_info' },
-    [userinfo, scoreinfo]
-  );
-
-  settingItems.push(info);
+  const infoItem = creatElementNode('div', undefined, {
+    class: 'egg_info_item',
+  });
+  settingItems.push(infoItem);
   // 任务标签
   const settingTaskLabels = [
     '文章选读',
@@ -1890,13 +1931,11 @@ async function renderMenu() {
   );
   // 运行设置标签
   const settingRunLabel = ['运行隐藏', '自动开始'];
-
   for (const i in settingRunLabel) {
     // 标签
     const label = creatElementNode('label', {
       innerText: settingRunLabel[i],
     });
-
     // 当前序号
     const currentIndex = Number(i) + settingTaskLabels.length;
     // 处理设置选项变化
@@ -1991,15 +2030,6 @@ async function renderMenu() {
     );
     settingItems.push(item);
   }
-  // 窗口项
-  const login_frame = creatElementNode('div', undefined, {
-    class: 'egg_frame_login',
-  });
-  // 窗口项
-  const frame = creatElementNode('div', undefined, { class: 'egg_frame' }, [
-    login_frame,
-  ]);
-  settingItems.push(frame);
   // 设置
   const settingBox = creatElementNode(
     'div',
@@ -2017,7 +2047,6 @@ async function renderMenu() {
     },
     settingBox
   );
-
   // 根容器
   const base = creatElementNode('div', undefined, undefined, menu);
   // 已经登录
@@ -2030,7 +2059,6 @@ async function renderMenu() {
         id: 'startButton',
         class: 'egg_study_btn loading',
         type: 'button',
-        onclick: start,
         disabled: 'disabled',
       }
     );
@@ -2045,15 +2073,15 @@ async function renderMenu() {
   }
   // 插入节点
   document.body.append(base);
+  console.log('正在加载用户信息...');
   // 加载用户信息
   await loadUserInfo();
-  console.log('加载用户信息');
+  console.log('正在加载分数信息...');
   // 加载分数信息
   await loadScoreInfo();
-  console.log('加载分数信息');
+  console.log('正在加载任务列表...');
   // 加载任务列表
   await loadTaskList();
-  console.log('加载任务列表');
   // 已经登录
   if (login) {
     // 完成任务
@@ -2062,11 +2090,12 @@ async function renderMenu() {
       return;
     }
     // 开始学习按钮
-    const startButton = $$('#startButton')[0];
+    const startButton = $$<HTMLButtonElement>('#startButton')[0];
     if (startButton) {
       startButton.removeAttribute('disabled');
       startButton.classList.remove('loading');
       startButton.innerText = '开始学习';
+      startButton.addEventListener('click', start);
     }
   }
   // 自动答题
@@ -2086,7 +2115,6 @@ async function renderMenu() {
     }
   }
 }
-
 // 是否显示目菜单
 function setVisible(isShow: boolean) {
   // 菜单
@@ -2098,10 +2126,14 @@ function setVisible(isShow: boolean) {
 // 登录状态
 function loginStatus() {
   return new Promise((resolve) => {
-    const timer = setInterval(() => {
+    // 清楚之前的定时器
+    if (loginTimer) {
+      clearInterval(loginTimer);
+    }
+    loginTimer = setInterval(() => {
       // 获取token
       if (getCookie('token')) {
-        clearInterval(timer);
+        clearInterval(loginTimer);
         resolve(true);
       }
     }, 100);
@@ -2109,36 +2141,23 @@ function loginStatus() {
 }
 
 // 登录窗口
-async function loginWindow() {
+function loginWindowLoad() {
   // egg_frame_login
-  const frame_login = $$('.egg_frame_login')[0];
+  const frameLogin = $$('.egg_frame_login')[0];
   // 配置
-  const frame = $$('.egg_frame')[0];
-  if (frame_login) {
-    let iframe = frame_login.querySelector('iframe');
+  const frameItem = $$('.egg_frame_item')[0];
+  if (frameLogin) {
+    let iframe = frameLogin.querySelector('iframe');
     if (!iframe) {
       iframe = creatElementNode('iframe');
-      frame_login.append(iframe);
+      frameLogin.append(iframe);
+      frameItem.classList.add('active');
+      console.log('加载登录二维码!');
+    } else {
+      console.log('刷新登录二维码!');
     }
-    frame.classList.add('active');
     // 登录页面
     iframe.src = URL_CONFIG.login;
-    // 刷新
-    const timer = window.setInterval(() => {
-      console.log('登录刷新');
-      // 登录刷新
-      iframe.src = URL_CONFIG.login;
-    }, 100000);
-    // 登录状态
-    const res = await loginStatus();
-    if (res) {
-      // 登录成功
-      window.clearInterval(timer);
-      console.log('登录成功!');
-      window.location.reload();
-      return;
-    }
-    return;
   }
 }
 
@@ -2275,9 +2294,8 @@ function finishTask() {
 // 开始
 async function start() {
   // 保存配置
-  console.log('初始化...');
-  console.log('检查是否登录...');
-  if (login) {
+  console.log('准备开始学习...');
+  if (login && !started) {
     started = true;
     // 初始化暂停
     if (GM_getValue('pauseStudy') !== false) {
@@ -2313,11 +2331,5 @@ async function start() {
     if (settings[5]) {
       setVisible(true);
     }
-  } else {
-    // 提醒登录
-    alert('请先登录');
-    console.log('登录中...');
-    // 登录窗口
-    await loginWindow();
   }
 }

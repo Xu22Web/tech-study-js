@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221016
+// @version   20221019
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -120,8 +120,8 @@ function debounce(callback, delay) {
  * @param selector
  * @returns
  */
-function $$(selector) {
-    return Array.from(document.querySelectorAll(selector));
+function $$(selector, parent = document) {
+    return Array.from(parent.querySelectorAll(selector));
 }
 /**
  * @description 关闭子窗口
@@ -374,7 +374,7 @@ function createRandomPath(start, end, steps) {
 }
 
 
-const css = ':root {\n  --themeColor: #fa3333;\n  --scale: 1;\n  font-size: calc(10px * var(--scale));\n}\n.icon {\n  width: 1em;\n  height: 1em;\n  vertical-align: -0.15em;\n  fill: currentColor;\n  overflow: hidden;\n}\n.egg_btn {\n  transition: 0.5s;\n  outline: none;\n  border: none;\n  padding: 1.2rem 2rem;\n  border-radius: 1.2rem;\n  cursor: pointer;\n  font-size: 1.8rem;\n  font-weight: bold;\n  text-align: center;\n  color: rgb(255, 255, 255);\n  background: #666777;\n}\n.egg_btn.manual {\n  background: #e3484b;\n}\n.egg_setting_box {\n  position: fixed;\n  top: 7rem;\n  left: 1rem;\n  padding: 1.2rem 2rem;\n  border-radius: 1rem;\n  background: #fff;\n  box-shadow: 0 0 0.4rem 0.1rem #ccc;\n  transition: 80ms ease-out;\n  z-index: 99999;\n  font-family: Noto Sans SC;\n}\n.egg_setting_box hr {\n  height: 0.1rem;\n  border: none;\n  background: #eee;\n  position: relative;\n  margin: 0.8rem 0;\n}\n.egg_setting_box hr:after {\n  content: attr(data-category);\n  position: absolute;\n  transform: translate(calc(-50%), calc(-50%));\n  left: 50%;\n  top: 50%;\n  font-size: 1.2rem;\n  color: #999;\n  background: white;\n  padding: 0.1rem 0.6rem;\n}\n.egg_setting_item {\n  margin-top: 0.5rem;\n  min-height: 3rem;\n  min-width: 20rem;\n  font-size: 1.6rem;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.egg_info {\n  flex-direction: column;\n  align-items: stretch;\n}\n.egg_userinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.egg_login_status {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.egg_login_status button {\n  outline: none;\n  padding: 0.4rem 0.8rem;\n  background: #ccc;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n}\n.egg_login_status.active {\n  flex-grow: 1;\n}\n.egg_login_status.active button {\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n}\n.egg_userinfo .egg_user {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_userinfo .egg_user .egg_sub_nickname,\n.egg_userinfo .egg_user .egg_avatar_img {\n  height: 5rem;\n  width: 5rem;\n  border-radius: 50%;\n  background: var(--themeColor);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  font-size: 2rem;\n  color: white;\n}\n.egg_userinfo .egg_user .egg_name {\n  padding-left: 0.5rem;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  max-width: 10rem;\n}\n.egg_scoreinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding-top: 0.8rem;\n}\n.egg_scoreinfo .egg_totalscore,\n.egg_scoreinfo .egg_todayscore {\n  font-size: 1.2rem;\n}\n.egg_scoreinfo span {\n  color: var(--themeColor);\n  padding-left: 0.4rem;\n  font-weight: bold;\n}\n.egg_setting_item label {\n  flex-grow: 1;\n}\n.egg_progress {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_progress .egg_track {\n  background: #ccc;\n  height: 0.5rem;\n  border-radius: 1rem;\n  flex: 1 1 auto;\n  overflow: hidden;\n  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,\n    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;\n}\n.egg_progress .egg_track .egg_bar {\n  height: 0.5rem;\n  background: var(--themeColor);\n  border-radius: 1rem;\n  width: 0;\n  transition: width 0.5s;\n}\n.egg_progress .egg_percent {\n  font-size: 1.2rem;\n  padding-left: 0.5rem;\n  width: 4rem;\n}\ninput[type=\'checkbox\'].egg_setting_switch {\n  cursor: pointer;\n  margin: 0;\n  outline: 0;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  position: relative;\n  width: 4.2rem;\n  height: 2.2rem;\n  background: #ccc;\n  border-radius: 5rem;\n  transition: background 0.3s;\n  --border-padding: 0.5rem;\n  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,\n    0.1rem 0 0.1rem -0.1rem #999 inset;\n}\ninput[type=\'checkbox\'].egg_setting_switch::after {\n  content: \'\';\n  display: inline-block;\n  width: 1.4rem;\n  height: 1.4rem;\n  border-radius: 50%;\n  background: #fff;\n  box-shadow: 0 0 0.2rem #999;\n  transition: 0.4s;\n  position: absolute;\n  top: calc(50% - (1.4rem / 2));\n  position: absolute;\n  left: var(--border-padding);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked {\n  background: var(--themeColor);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked::after {\n  left: calc(100% - var(--border-padding) - 1.4rem);\n}\n.tip {\n  background: #ccc;\n  color: white;\n  border-radius: 10rem;\n  font-size: 1.2rem;\n  width: 1.6rem;\n  height: 1.6rem;\n  margin-left: 0.4rem;\n  display: inline-block;\n  text-align: center;\n  line-height: 1.6rem;\n  cursor: pointer;\n}\n.egg_start_btn {\n  justify-content: center;\n}\n.egg_study_btn {\n  outline: none;\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n  transition: all 0.3s;\n}\n.egg_study_btn:hover {\n  opacity: 0.8;\n}\n@keyframes fade {\n  from {\n    opacity: 0.8;\n  }\n  to {\n    opacity: 0.4;\n    background: #ccc;\n  }\n}\n.egg_study_btn.loading {\n  animation: fade 2s ease infinite alternate;\n}\n.egg_study_btn.disabled {\n  background: #ccc;\n}\n.egg_tip {\n  position: fixed;\n  bottom: 2rem;\n  left: 2rem;\n  padding: 1.2rem 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  background: var(--themeColor);\n  color: white;\n  font-size: 1.4rem;\n  transition: 0.3s ease-in-out;\n  font-family: Noto Sans SC;\n  z-index: 99999;\n  opacity: 0;\n  transform: scale(0.9) translateY(1rem);\n}\n.egg_tip.active {\n  opacity: 1;\n  transform: scale(1) translateY(0);\n}\n.egg_tip .egg_countdown {\n  display: inline-block;\n  color: var(--themeColor);\n  background: white;\n  border-radius: 0.5rem;\n  padding: 0.2rem 0.4rem;\n  font-weight: bold;\n  margin-left: 0.4rem;\n  font-size: 1.2rem;\n}\n.egg_frame {\n  position: relative;\n  box-sizing: border-box;\n  margin: 0 auto;\n}\n.egg_frame.active {\n  padding: 0.4rem;\n  width: 21.8rem;\n  height: 21.8rem;\n  overflow: hidden;\n}\n.egg_frame .egg_frame_login {\n  position: absolute;\n  left: -6.9rem;\n  top: -2.6rem;\n}\n.egg_frame iframe {\n  width: 284px;\n  height: 241px;\n  border: none;\n  transform: scale(var(--scale));\n  transform-origin: top left;\n}\n';
+const css = ':root {\n  --themeColor: #fa3333;\n  --scale: 1;\n  font-size: calc(10px * var(--scale));\n}\n@media (max-height: 768px) {\n  :root {\n    --scale: 0.8;\n  }\n  .egg_setting_box {\n    top: 1rem;\n  }\n}\n.icon {\n  width: 1em;\n  height: 1em;\n  vertical-align: -0.15em;\n  fill: currentColor;\n  overflow: hidden;\n}\n.egg_btn {\n  transition: 0.5s;\n  outline: none;\n  border: none;\n  padding: 1.2rem 2rem;\n  border-radius: 1.2rem;\n  cursor: pointer;\n  font-size: 1.8rem;\n  font-weight: bold;\n  text-align: center;\n  color: rgb(255, 255, 255);\n  background: #666777;\n}\n.egg_btn.manual {\n  background: #e3484b;\n}\n.egg_setting_box {\n  position: fixed;\n  top: 5rem;\n  left: 1rem;\n  padding: 1.2rem 2rem;\n  border-radius: 1rem;\n  background: #fff;\n  box-shadow: 0 0 0.4rem 0.1rem #ccc;\n  transition: 80ms ease-out;\n  z-index: 99999;\n  font-family: Noto Sans SC;\n}\n.egg_setting_box hr {\n  height: 0.1rem;\n  border: none;\n  background: #eee;\n  position: relative;\n  margin: 0.8rem 0;\n}\n.egg_setting_box hr:after {\n  content: attr(data-category);\n  position: absolute;\n  transform: translate(calc(-50%), calc(-50%));\n  left: 50%;\n  top: 50%;\n  font-size: 1.2rem;\n  color: #999;\n  background: white;\n  padding: 0 0.6rem;\n}\n.egg_setting_item {\n  margin-top: 0.5rem;\n  min-height: 3rem;\n  min-width: 20rem;\n  font-size: 1.6rem;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.egg_info_item {\n  flex-direction: column;\n  align-items: stretch;\n}\n.egg_userinfo .login_btn,\n.egg_user_login .login_btn {\n  outline: none;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  cursor: pointer;\n  transition: 80ms ease;\n  color: white;\n}\n.egg_userinfo .login_btn {\n  background: #ccc;\n  padding: 0.4rem 0.8rem;\n}\n.egg_userinfo .login_btn:active,\n.egg_user_login .login_btn:active {\n  opacity: 0.8;\n}\n.egg_user_login .login_btn {\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n}\n.egg_user_login {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  flex-direction: column;\n  padding: 0.5rem 0;\n}\n.egg_user_login .egg_frame_item {\n  height: 0;\n  overflow: hidden;\n}\n.egg_user_login .egg_frame_item.active {\n  --rate: 0.8;\n  margin-top: 0.8rem;\n  height: calc(21.8rem * var(--rate));\n}\n.egg_frame {\n  position: relative;\n  box-sizing: border-box;\n  margin: 0 auto;\n}\n.egg_frame_item.active .egg_frame {\n  transform: scale(var(--rate));\n  transform-origin: top center;\n  overflow: hidden;\n  padding: 0.4rem;\n  width: 21.8rem;\n  height: 21.8rem;\n}\n.egg_frame .egg_frame_login {\n  position: absolute;\n  left: -6.9rem;\n  top: -2.6rem;\n}\n.egg_frame iframe {\n  width: 284px;\n  height: 241px;\n  border: none;\n  transform: scale(var(--scale));\n  transform-origin: top left;\n}\n.egg_userinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.egg_userinfo .egg_user {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_userinfo .egg_user .egg_sub_nickname,\n.egg_userinfo .egg_user .egg_avatar_img {\n  height: 5rem;\n  width: 5rem;\n  border-radius: 50%;\n  background: var(--themeColor);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  font-size: 2rem;\n  color: white;\n}\n.egg_userinfo .egg_user .egg_name {\n  padding-left: 0.5rem;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  max-width: 10rem;\n  font-size: 1.6rem;\n}\n.egg_scoreinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_scoreinfo .egg_totalscore,\n.egg_scoreinfo .egg_todayscore {\n  font-size: 1.2rem;\n}\n.egg_scoreinfo span {\n  color: var(--themeColor);\n  padding-left: 0.4rem;\n  font-weight: bold;\n}\n.egg_setting_item label {\n  flex-grow: 1;\n}\n.egg_progress {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_progress .egg_track {\n  background: #ccc;\n  height: 0.5rem;\n  border-radius: 1rem;\n  flex: 1 1 auto;\n  overflow: hidden;\n  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,\n    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;\n}\n.egg_progress .egg_track .egg_bar {\n  height: 0.5rem;\n  background: var(--themeColor);\n  border-radius: 1rem;\n  width: 0;\n  transition: width 0.5s;\n}\n.egg_progress .egg_percent {\n  font-size: 1.2rem;\n  padding-left: 0.5rem;\n  width: 4rem;\n}\ninput[type=\'checkbox\'].egg_setting_switch {\n  cursor: pointer;\n  margin: 0;\n  outline: 0;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  position: relative;\n  width: 4.2rem;\n  height: 2.2rem;\n  background: #ccc;\n  border-radius: 5rem;\n  transition: background 0.3s;\n  --border-padding: 0.5rem;\n  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,\n    0.1rem 0 0.1rem -0.1rem #999 inset;\n}\ninput[type=\'checkbox\'].egg_setting_switch::after {\n  content: \'\';\n  display: inline-block;\n  width: 1.4rem;\n  height: 1.4rem;\n  border-radius: 50%;\n  background: #fff;\n  box-shadow: 0 0 0.2rem #999;\n  transition: 0.4s;\n  position: absolute;\n  top: calc(50% - (1.4rem / 2));\n  position: absolute;\n  left: var(--border-padding);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked {\n  background: var(--themeColor);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked::after {\n  left: calc(100% - var(--border-padding) - 1.4rem);\n}\n.tip {\n  background: #ccc;\n  color: white;\n  border-radius: 10rem;\n  font-size: 1.2rem;\n  width: 1.6rem;\n  height: 1.6rem;\n  margin-left: 0.4rem;\n  display: inline-block;\n  text-align: center;\n  line-height: 1.6rem;\n  cursor: pointer;\n}\n.egg_start_btn {\n  justify-content: center;\n}\n.egg_study_btn {\n  outline: none;\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n  transition: all 0.3s;\n}\n.egg_study_btn:hover {\n  opacity: 0.8;\n}\n@keyframes fade {\n  from {\n    opacity: 0.8;\n  }\n  to {\n    opacity: 0.4;\n    background: #ccc;\n  }\n}\n.egg_study_btn.loading {\n  animation: fade 2s ease infinite alternate;\n}\n.egg_study_btn.disabled {\n  background: #ccc;\n}\n.egg_tip {\n  position: fixed;\n  bottom: 2rem;\n  left: 2rem;\n  padding: 1.2rem 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  background: var(--themeColor);\n  color: white;\n  font-size: 1.4rem;\n  transition: 0.3s ease-in-out;\n  font-family: Noto Sans SC;\n  z-index: 99999;\n  opacity: 0;\n  transform: scale(0.9) translateY(1rem);\n}\n.egg_tip.active {\n  opacity: 1;\n  transform: scale(1) translateY(0);\n}\n.egg_tip .egg_countdown {\n  display: inline-block;\n  color: var(--themeColor);\n  background: white;\n  border-radius: 0.5rem;\n  padding: 0.2rem 0.4rem;\n  font-weight: bold;\n  margin-left: 0.4rem;\n  font-size: 1.2rem;\n}\n';
 // 嵌入样式
 GM_addStyle(css);
 GM_addElement(document.head, 'link', {
@@ -623,7 +623,7 @@ async function getExamWeekly(pageNo) {
 }
 // 获取答案
 async function getAnswer(question) {
-    console.log('获取网络答案');
+    console.log('正在获取网络答案...');
     // 数据
     const data = {
         question,
@@ -652,6 +652,7 @@ async function getAnswer(question) {
         }
     }
     catch (error) { }
+    console.log('获取网络答案失败!');
     return [];
 }
 // 保存答案
@@ -707,15 +708,15 @@ let started = false;
 let pause = false;
 // 初始化登录状态
 let login = !!getCookie('token');
-// 用户信息
-let userInfo;
 // 新闻
 let news = [];
 // 视频
 let videos = [];
+// 登录定时器
+let loginTimer;
 // load
 window.addEventListener('load', () => {
-    console.log('加载脚本');
+    console.log('正在加载脚本...');
     // 主页
     if (URL_CONFIG.home.test(href)) {
         console.log('进入主页面!');
@@ -742,7 +743,7 @@ window.addEventListener('load', () => {
         href === GM_getValue('readingUrl')) {
         // 初始化设置
         initSetting();
-        console.log('初始化设置');
+        console.log('初始化设置!');
         console.log(settings);
         reading(0);
     }
@@ -750,7 +751,7 @@ window.addEventListener('load', () => {
         href === GM_getValue('watchingUrl')) {
         // 初始化设置
         initSetting();
-        console.log('初始化设置');
+        console.log('初始化设置!');
         console.table(settings);
         let randNum = 0;
         const checkVideoPlayingInterval = setInterval(() => {
@@ -760,7 +761,7 @@ window.addEventListener('load', () => {
                     temp.video.muted = true;
                 }
                 if (temp.video.paused) {
-                    console.log('正在尝试播放视频');
+                    console.log('正在尝试播放视频...');
                     if (randNum === 0) {
                         // 尝试使用js的方式播放
                         try {
@@ -778,13 +779,13 @@ window.addEventListener('load', () => {
                     }
                 }
                 else {
-                    console.log('成功播放');
+                    console.log('视频成功播放!');
                     clearInterval(checkVideoPlayingInterval);
                     reading(1);
                 }
             }
             else {
-                console.log('等待加载');
+                console.log('等待加载...');
             }
         }, 800);
     }
@@ -793,7 +794,7 @@ window.addEventListener('load', () => {
         href.includes(URL_CONFIG.examWeekly)) {
         // 初始化设置
         initSetting();
-        console.log('初始化设置');
+        console.log('初始化设置!');
         console.table(settings);
         console.log('进入答题页面!');
         // 答题页面
@@ -1052,7 +1053,7 @@ async function readNews() {
         await pauseStudyLock();
         // 链接
         GM_setValue('readingUrl', news[i].url);
-        console.log(`正在看第${Number(i) + 1}个新闻`);
+        console.log(`正在看第${Number(i) + 1}个新闻...`);
         // 新页面
         const newPage = GM_openInTab(news[i].url, {
             active: true,
@@ -1086,7 +1087,7 @@ async function watchVideo() {
         await pauseStudyLock();
         // 链接
         GM_setValue('watchingUrl', videos[i].url);
-        console.log(`正在观看第${Number(i) + 1}个视频`);
+        console.log(`正在观看第${Number(i) + 1}个视频...`);
         // 页面
         const newPage = GM_openInTab(videos[i].url, {
             active: true,
@@ -1114,7 +1115,7 @@ async function watchVideo() {
 async function doExamPractice() {
     // 暂停
     await pauseStudyLock();
-    console.log('正在完成每日答题');
+    console.log('正在完成每日答题...');
     // 新页面
     const newPage = GM_openInTab(URL_CONFIG.examPractice, {
         active: true,
@@ -1210,12 +1211,13 @@ async function initExam(type) {
 }
 // 查询每周答题列表看看还有没有没做过的, 有则返回id
 async function findExamWeekly() {
-    console.log('初始化每周答题');
+    console.log('初始化每周答题!');
     // 获取总页数
     const total = await initExam(0);
     // 当前页数
     let current = examPaperReverse ? total : 1;
-    console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
+    examPaperReverse &&
+        console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
     console.log('正在寻找未完成的每周答题...');
     while (current <= total && current) {
         // 请求数据
@@ -1258,7 +1260,8 @@ async function findExamPaper() {
     const total = await initExam(1);
     // 当前页数
     let current = examPaperReverse ? total : 1;
-    console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
+    examPaperReverse &&
+        console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
     console.log('正在寻找未完成的专项练习...');
     while (current <= total && current) {
         // 请求数据
@@ -1824,7 +1827,7 @@ async function doingExam() {
                 const [, answer] = answerTemp.split('：');
                 if (answer && answer.length) {
                     answer.replaceAll(' ', ';');
-                    console.log(`上传了错题答案 key:${key} answer:${answer}`);
+                    console.log(`上传了错题答案 key:${key} answer:${answer}!`);
                     await saveAnswer(key, answer);
                 }
                 // 每周答题
@@ -1918,15 +1921,20 @@ function clickManualButton() {
 }
 // 加载用户信息
 async function loadUserInfo() {
-    const egg_userinfo = $$('.egg_userinfo')[0];
-    egg_userinfo.innerHTML = '';
-    // 登录状态
-    const loginStatus = creatElementNode('div', undefined, {
-        class: 'egg_login_status',
-    });
+    // 分数信息
+    const infoItem = $$('.egg_info_item')[0];
     if (login) {
+        // 退出按钮
+        const logoutBtn = creatElementNode('button', { innerText: '退出' }, {
+            type: 'button',
+            class: 'login_btn',
+            onclick: debounce(() => {
+                const logged = $$("a[class='logged-link']")[0];
+                logged.click();
+            }, 500),
+        });
         // 获取用户信息
-        userInfo = await getUserInfo();
+        const userInfo = await getUserInfo();
         if (userInfo) {
             const { avatarMediaUrl, nick } = userInfo;
             const avatarItems = [];
@@ -1952,34 +1960,51 @@ async function loadUserInfo() {
                 avatar,
                 nickName,
             ]);
-            egg_userinfo.append(user);
+            // 用户信息
+            const userInfoWrap = creatElementNode('div', undefined, {
+                class: 'egg_userinfo',
+            }, [user, logoutBtn]);
+            infoItem.append(userInfoWrap);
         }
-        // 退出按钮
-        const logoutBtn = creatElementNode('button', { innerText: '退出' }, {
-            type: 'button',
-            onclick() {
-                const logged = $$("a[class='logged-link']")[0];
-                logged.click();
-            },
-        });
-        loginStatus.classList.remove('active');
-        loginStatus.append(logoutBtn);
     }
     else {
+        let refreshTimer;
         // 登录按钮
         const loginBtn = creatElementNode('button', { innerText: '扫码登录' }, {
             type: 'button',
-            onclick() {
-                loginWindow();
-            },
+            class: 'login_btn',
+            onclick: debounce(async () => {
+                if (refreshTimer) {
+                    clearInterval(refreshTimer);
+                }
+                loginWindowLoad();
+                refreshTimer = setInterval(() => {
+                    loginWindowLoad();
+                }, 100000);
+                // 登录状态
+                const res = await loginStatus();
+                if (res) {
+                    console.log('登录成功!');
+                    window.location.reload();
+                }
+            }, 500),
         });
-        loginStatus.classList.add('active');
-        loginBtn.addEventListener('click', () => {
-            loginWindow();
+        // 窗口
+        const loginFrame = creatElementNode('div', undefined, {
+            class: 'egg_frame_login',
         });
-        loginStatus.append(loginBtn);
+        // 窗口项
+        const frameWrap = creatElementNode('div', undefined, { class: 'egg_frame' }, loginFrame);
+        // 窗口项
+        const loginFrameItem = creatElementNode('div', undefined, {
+            class: 'egg_frame_item',
+        }, frameWrap);
+        // 用户登录
+        const userLogin = creatElementNode('div', undefined, {
+            class: 'egg_user_login',
+        }, [loginBtn, loginFrameItem]);
+        infoItem.append(userLogin);
     }
-    egg_userinfo.append(loginStatus);
 }
 // 加载分数
 async function loadScoreInfo() {
@@ -1988,11 +2013,25 @@ async function loadScoreInfo() {
         const totalScore = await getTotalScore();
         // 获取当天总分
         const todayScore = await getTodayScore();
-        // 更新分数
-        const totalScoreSpan = $$('.egg_scoreinfo .egg_totalscore span')[0];
-        const todayScoreSpan = $$('.egg_scoreinfo .egg_todayscore span')[0];
-        totalScoreSpan.innerText = totalScore;
-        todayScoreSpan.innerText = todayScore;
+        // 分数信息
+        const infoItem = $$('.egg_info_item')[0];
+        if (infoItem) {
+            // 总分
+            const totalScoreSpan = creatElementNode('span', {
+                innerText: totalScore,
+            });
+            const totalScoreDiv = creatElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
+            // 当天总分
+            const todayScoreSpan = creatElementNode('span', {
+                innerText: todayScore,
+            });
+            const todayScoreDiv = creatElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
+            // 分数信息
+            const scoreInfo = creatElementNode('div', undefined, {
+                class: 'egg_scoreinfo',
+            }, [totalScoreDiv, todayScoreDiv]);
+            infoItem.append(scoreInfo);
+        }
     }
 }
 // 加载任务列表
@@ -2071,21 +2110,11 @@ async function refreshMenu() {
 async function renderMenu() {
     // 设置项
     const settingItems = [];
-    // 用户信息
-    const userinfo = creatElementNode('div', undefined, {
-        class: 'egg_userinfo',
-    });
-    // 总分
-    const totalScoreSpan = creatElementNode('span', { innerText: 0 });
-    const totalScoreDiv = creatElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
-    // 当天总分
-    const todayScoreSpan = creatElementNode('span', { innerText: 0 });
-    const todayScoreDiv = creatElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
-    // 分数信息
-    const scoreinfo = creatElementNode('div', undefined, { class: 'egg_scoreinfo' }, [totalScoreDiv, todayScoreDiv]);
     // 信息
-    const info = creatElementNode('div', undefined, { class: 'egg_setting_item egg_info' }, [userinfo, scoreinfo]);
-    settingItems.push(info);
+    const infoItem = creatElementNode('div', undefined, {
+        class: 'egg_info_item',
+    });
+    settingItems.push(infoItem);
     // 任务标签
     const settingTaskLabels = [
         '文章选读',
@@ -2218,15 +2247,6 @@ async function renderMenu() {
         const item = creatElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
         settingItems.push(item);
     }
-    // 窗口项
-    const login_frame = creatElementNode('div', undefined, {
-        class: 'egg_frame_login',
-    });
-    // 窗口项
-    const frame = creatElementNode('div', undefined, { class: 'egg_frame' }, [
-        login_frame,
-    ]);
-    settingItems.push(frame);
     // 设置
     const settingBox = creatElementNode('div', undefined, { class: 'egg_setting_box' }, settingItems);
     // 菜单
@@ -2243,7 +2263,6 @@ async function renderMenu() {
             id: 'startButton',
             class: 'egg_study_btn loading',
             type: 'button',
-            onclick: start,
             disabled: 'disabled',
         });
         // 设置项
@@ -2252,15 +2271,15 @@ async function renderMenu() {
     }
     // 插入节点
     document.body.append(base);
+    console.log('正在加载用户信息...');
     // 加载用户信息
     await loadUserInfo();
-    console.log('加载用户信息');
+    console.log('正在加载分数信息...');
     // 加载分数信息
     await loadScoreInfo();
-    console.log('加载分数信息');
+    console.log('正在加载任务列表...');
     // 加载任务列表
     await loadTaskList();
-    console.log('加载任务列表');
     // 已经登录
     if (login) {
         // 完成任务
@@ -2274,6 +2293,7 @@ async function renderMenu() {
             startButton.removeAttribute('disabled');
             startButton.classList.remove('loading');
             startButton.innerText = '开始学习';
+            startButton.addEventListener('click', start);
         }
     }
     // 自动答题
@@ -2305,46 +2325,38 @@ function setVisible(isShow) {
 // 登录状态
 function loginStatus() {
     return new Promise((resolve) => {
-        const timer = setInterval(() => {
+        // 清楚之前的定时器
+        if (loginTimer) {
+            clearInterval(loginTimer);
+        }
+        loginTimer = setInterval(() => {
             // 获取token
             if (getCookie('token')) {
-                clearInterval(timer);
+                clearInterval(loginTimer);
                 resolve(true);
             }
         }, 100);
     });
 }
 // 登录窗口
-async function loginWindow() {
+function loginWindowLoad() {
     // egg_frame_login
-    const frame_login = $$('.egg_frame_login')[0];
+    const frameLogin = $$('.egg_frame_login')[0];
     // 配置
-    const frame = $$('.egg_frame')[0];
-    if (frame_login) {
-        let iframe = frame_login.querySelector('iframe');
+    const frameItem = $$('.egg_frame_item')[0];
+    if (frameLogin) {
+        let iframe = frameLogin.querySelector('iframe');
         if (!iframe) {
             iframe = creatElementNode('iframe');
-            frame_login.append(iframe);
+            frameLogin.append(iframe);
+            frameItem.classList.add('active');
+            console.log('加载登录二维码!');
         }
-        frame.classList.add('active');
+        else {
+            console.log('刷新登录二维码!');
+        }
         // 登录页面
         iframe.src = URL_CONFIG.login;
-        // 刷新
-        const timer = window.setInterval(() => {
-            console.log('登录刷新');
-            // 登录刷新
-            iframe.src = URL_CONFIG.login;
-        }, 100000);
-        // 登录状态
-        const res = await loginStatus();
-        if (res) {
-            // 登录成功
-            window.clearInterval(timer);
-            console.log('登录成功!');
-            window.location.reload();
-            return;
-        }
-        return;
     }
 }
 // 学习
@@ -2480,9 +2492,8 @@ function finishTask() {
 // 开始
 async function start() {
     // 保存配置
-    console.log('初始化...');
-    console.log('检查是否登录...');
-    if (login) {
+    console.log('准备开始学习...');
+    if (login && !started) {
         started = true;
         // 初始化暂停
         if (GM_getValue('pauseStudy') !== false) {
@@ -2518,13 +2529,6 @@ async function start() {
         if (settings[5]) {
             setVisible(true);
         }
-    }
-    else {
-        // 提醒登录
-        alert('请先登录');
-        console.log('登录中...');
-        // 登录窗口
-        await loginWindow();
     }
 }
 

@@ -3,6 +3,14 @@
   --scale: 1;
   font-size: calc(10px * var(--scale));
 }
+@media (max-height: 768px) {
+  :root {
+    --scale: 0.8;
+  }
+  .egg_setting_box {
+    top: 1rem;
+  }
+}
 .icon {
   width: 1em;
   height: 1em;
@@ -28,7 +36,7 @@
 }
 .egg_setting_box {
   position: fixed;
-  top: 7rem;
+  top: 5rem;
   left: 1rem;
   padding: 1.2rem 2rem;
   border-radius: 1rem;
@@ -54,7 +62,7 @@
   font-size: 1.2rem;
   color: #999;
   background: white;
-  padding: 0.1rem 0.6rem;
+  padding: 0 0.6rem;
 }
 .egg_setting_item {
   margin-top: 0.5rem;
@@ -65,36 +73,77 @@
   align-items: center;
   justify-content: space-between;
 }
-.egg_info {
+.egg_info_item {
   flex-direction: column;
   align-items: stretch;
+}
+.egg_userinfo .login_btn,
+.egg_user_login .login_btn {
+  outline: none;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: 80ms ease;
+  color: white;
+}
+.egg_userinfo .login_btn {
+  background: #ccc;
+  padding: 0.4rem 0.8rem;
+}
+.egg_userinfo .login_btn:active,
+.egg_user_login .login_btn:active {
+  opacity: 0.8;
+}
+.egg_user_login .login_btn {
+  background: var(--themeColor);
+  padding: 0.8rem 2.4rem;
+}
+.egg_user_login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+.egg_user_login .egg_frame_item {
+  height: 0;
+  overflow: hidden;
+}
+.egg_user_login .egg_frame_item.active {
+  --rate: 0.8;
+  margin-top: 0.8rem;
+  height: calc(21.8rem * var(--rate));
+}
+.egg_frame {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+.egg_frame_item.active .egg_frame {
+  transform: scale(var(--rate));
+  transform-origin: top center;
+  overflow: hidden;
+  padding: 0.4rem;
+  width: 21.8rem;
+  height: 21.8rem;
+}
+.egg_frame .egg_frame_login {
+  position: absolute;
+  left: -6.9rem;
+  top: -2.6rem;
+}
+.egg_frame iframe {
+  width: 284px;
+  height: 241px;
+  border: none;
+  transform: scale(var(--scale));
+  transform-origin: top left;
 }
 .egg_userinfo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.egg_login_status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.egg_login_status button {
-  outline: none;
-  padding: 0.4rem 0.8rem;
-  background: #ccc;
-  font-size: 1.4rem;
-  border: none;
-  border-radius: 1rem;
-  color: white;
-  cursor: pointer;
-}
-.egg_login_status.active {
-  flex-grow: 1;
-}
-.egg_login_status.active button {
-  background: var(--themeColor);
-  padding: 0.8rem 2.4rem;
 }
 .egg_userinfo .egg_user {
   display: flex;
@@ -123,12 +172,13 @@
   overflow: hidden;
   white-space: nowrap;
   max-width: 10rem;
+  font-size: 1.6rem;
 }
 .egg_scoreinfo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 0.8rem;
+  padding: 0.5rem 0;
 }
 .egg_scoreinfo .egg_totalscore,
 .egg_scoreinfo .egg_todayscore {
@@ -280,27 +330,4 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   font-weight: bold;
   margin-left: 0.4rem;
   font-size: 1.2rem;
-}
-.egg_frame {
-  position: relative;
-  box-sizing: border-box;
-  margin: 0 auto;
-}
-.egg_frame.active {
-  padding: 0.4rem;
-  width: 21.8rem;
-  height: 21.8rem;
-  overflow: hidden;
-}
-.egg_frame .egg_frame_login {
-  position: absolute;
-  left: -6.9rem;
-  top: -2.6rem;
-}
-.egg_frame iframe {
-  width: 284px;
-  height: 241px;
-  border: none;
-  transform: scale(var(--scale));
-  transform-origin: top left;
 }

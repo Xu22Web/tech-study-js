@@ -46,9 +46,9 @@
 
 2. 解决滑动验证问题，基本实现了全局自动化
 
-3. 二维码变更位置，优化小尺寸设备二维码的显示，
+3. 二维码变更位置，优化小尺寸设备的显示
 
-4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化。
+4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
 
 ### 公告 announcement
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221019
+// @version   20221021
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -73,7 +73,7 @@ const API_CONFIG = {
     // 文本服务器保存答案
     answerSave: 'https://a6.qikekeji.com/txt/data/save',
     // 文本服务器获取答案
-    answerSearch: 'https://api.answer.uu988.xyz:4545/answer/search',
+    answerSearch: 'https://api.answer.uu988.xyz/answer/search',
 };
 
 

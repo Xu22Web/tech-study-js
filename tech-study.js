@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221021
+// @version   20221030
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -1775,41 +1775,47 @@ async function doingExam() {
         nextButton = await getNextButton();
         // 下一个文本
         nextText = nextButton.innerText.replaceAll(' ', '');
-        // 确认
-        if (nextButton.innerText.replaceAll(' ', '') === '确定') {
-            // 需要提交答案
-            if (shouldSaveAnswer) {
-                // 获取key
-                const key = getKey(question);
-                // 答案
-                const answers = [];
-                if (questionType === '填空题') {
-                    blanks.forEach((blank) => {
-                        answers.push(blank.value);
-                    });
-                }
-                if (questionType === '单选题' || questionType === '多选题') {
-                    allBtns.forEach((choice) => {
-                        if (choice.classList.contains('chosen')) {
-                            // 带字母的选项
-                            const answerTemp = choice.innerText;
-                            // 从字符串中拿出答案
-                            const [, answer] = answerTemp.split('. ');
-                            if (answer && answer.length) {
-                                answers.push(answer);
-                            }
-                        }
-                    });
-                }
-                // 答案
-                const answer = answers.join(';');
-                // 存在答案
-                if (answer.length) {
-                    // 答案
-                    console.log(`上传 key:${key}, 答案:${answer}`);
-                    await saveAnswer(key, answer);
-                }
+        // 需要提交答案
+        if (shouldSaveAnswer) {
+            // 获取key
+            const key = getKey(question);
+            // 答案
+            const answers = [];
+            if (questionType === '填空题') {
+                blanks.forEach((blank) => {
+                    answers.push(blank.value);
+                });
             }
+            if (questionType === '单选题' || questionType === '多选题') {
+                allBtns.forEach((choice) => {
+                    if (choice.classList.contains('chosen')) {
+                        // 带字母的选项
+                        const answerTemp = choice.innerText;
+                        // 从字符串中拿出答案
+                        const [, answer] = answerTemp.split('. ');
+                        if (answer && answer.length) {
+                            answers.push(answer);
+                        }
+                    }
+                });
+            }
+            // 答案
+            const answer = answers.join(';');
+            // 存在答案
+            if (answer.length) {
+                // 答案
+                console.log('正在上传中...');
+                console.log(`key:${key}, answers:${answer}`);
+                // 保存答案
+                await saveAnswer(key, answer);
+                // 答案
+                console.log('上传答案成功!');
+            }
+            // 重置
+            shouldSaveAnswer = false;
+        }
+        // 确认
+        if (nextText === '确定') {
             // 确认
             nextButton.click();
             // 等待一段时间

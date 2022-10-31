@@ -3,6 +3,12 @@
   --scale: 1;
   font-size: calc(10px * var(--scale));
 }
+.egg_icon {
+  width: 1em;
+  height: 1em;
+  font-size: 1.8rem;
+  fill: currentColor;
+}
 @media (max-height: 768px) {
   :root {
     --scale: 0.8;
@@ -16,7 +22,7 @@
   overflow: hidden;
 }
 .egg_btn {
-  transition: 0.5s;
+  transition: background 100ms;
   outline: none;
   border: none;
   padding: 1.2rem 2rem;
@@ -25,7 +31,7 @@
   font-size: 1.8rem;
   font-weight: bold;
   text-align: center;
-  color: rgb(255, 255, 255);
+  color: #ffffff;
   background: #666777;
 }
 .egg_btn.manual {
@@ -41,12 +47,53 @@
   box-shadow: 0 0 0.4rem 0.1rem #ccc;
   transition: 80ms ease-out;
   z-index: 99999;
-  font-family: Noto Sans SC;
+  color: #333;
 }
 @media (max-height: 768px) {
   .egg_setting_box {
     top: 2rem;
   }
+}
+.egg_setting_box.hide {
+  left: 0;
+  transform: translateX(-100%);
+}
+.egg_setting_box .egg_btns_wrap {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: 200ms ease;
+}
+.egg_setting_box.hide .egg_btns_wrap {
+  left: 100%;
+  transform: translate(0, -50%);
+}
+.egg_setting_box .egg_setting_show_btn,
+.egg_setting_box .frame_show_btn {
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  border: 0.2rem solid currentColor;
+  color: white;
+  display: grid;
+  place-items: center;
+}
+.egg_setting_box.hide .egg_setting_show_btn {
+  background: var(--themeColor);
+}
+.egg_setting_box .egg_setting_show_btn {
+  background: #ccc;
+}
+.egg_setting_box .frame_show_btn {
+  background: var(--themeColor);
+  margin-bottom: 1rem;
+}
+.egg_setting_box .frame_show_btn.hide {
+  display: none;
 }
 .egg_setting_box hr {
   height: 0.1rem;
@@ -314,7 +361,6 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   color: white;
   font-size: 1.4rem;
   transition: 0.3s ease-in-out;
-  font-family: Noto Sans SC;
   z-index: 99999;
   opacity: 0;
   transform: scale(0.9) translateY(1rem);
@@ -332,4 +378,88 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   font-weight: bold;
   margin-left: 0.4rem;
   font-size: 1.2rem;
+}
+.frame_container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  width: 100%;
+  height: 100vh;
+  visibility: visible;
+}
+.frame_container.hide {
+  visibility: hidden;
+}
+.frame_container.hide .frame_mask,
+.frame_container.hide .frame_wrap {
+  opacity: 0;
+}
+.frame_container.hide .frame_wrap {
+  transform: scale(0);
+}
+.frame_mask {
+  background: #00000030;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transition: 200ms ease;
+}
+.frame_wrap {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  top: 10%;
+  left: 10%;
+  display: flex;
+  flex-direction: column;
+  transition: 200ms ease;
+  border-radius: 1rem;
+  background: white;
+  overflow: hidden;
+  transform: scale(1);
+}
+.frame_wrap.max {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.frame_wrap .frame_controls_wrap {
+  width: 100%;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+.frame_controls_wrap .frame_title {
+  padding: 1rem 2rem;
+}
+.frame_controls .frame_btn {
+  outline: none;
+  border: none;
+  background: none;
+  padding: 1rem 2rem;
+  transition: 80ms ease;
+  cursor: pointer;
+  color: #333;
+}
+.frame_controls .frame_btn:active {
+  opacity: 0.8;
+}
+.frame_wrap .frame_content {
+  width: 100%;
+  flex-grow: 1;
+  border-top: 1px solid #ccc;
+  min-height: 40rem;
+  min-width: 30rem;
+}
+.frame_content .frame {
+  width: 100%;
+  height: 100%;
+  outline: none;
+  border: none;
+  background: white;
 }

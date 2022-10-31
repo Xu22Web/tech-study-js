@@ -41,21 +41,35 @@ function debounce(callback, delay) {
  * @param selector
  * @returns
  */
-function $$<T extends Element = any>(
+function $$<T extends Element = HTMLElement>(
   selector: string,
   parent: Document | Element = document
 ) {
   return Array.from(parent.querySelectorAll<T>(selector));
 }
 /**
+ * @description 打开新窗口
+ */
+function openWin(url: string) {
+  return GM_openInTab(url, {
+    active: true,
+    insert: true,
+    setParent: true,
+  });
+}
+/**
  * @description 关闭子窗口
  */
-function closeWin() {
+function closeWin(frame?: boolean, id?: string) {
   try {
-    window.opener = window;
-    const win = window.open('', '_self');
-    win?.close();
-    top?.close();
+    if (frame) {
+      window.parent.postMessage({ id, closed: true }, 'https://www.xuexi.cn');
+    } else {
+      window.opener = window;
+      const win = window.open('', '_self');
+      win?.close();
+      top?.close();
+    }
   } catch (e) {}
 }
 /**
@@ -116,7 +130,7 @@ function hasMobile() {
  * @param children
  * @returns
  */
-function creatElementNode(
+function createElementNode(
   eleName: string,
   props?: { [key: string]: any },
   attrs?: { [key: string]: any },
@@ -306,17 +320,62 @@ function createRandomPath(start: Point, end: Point, steps: number) {
   }
   return path;
 }
-
+/**
+ * @description 随机数字
+ * @returns
+ */
+function generateNumAsChar(): string {
+  return (~~(Math.random() * 10)).toString();
+}
+/**
+ * @description 随机大写字母
+ * @returns
+ */
+function generateUpperAsChar(): string {
+  return String.fromCharCode(~~(Math.random() * 26) + 65);
+}
+/**
+ * @description 随机小写字母
+ * @returns
+ */
+function generateLowerAsChar(): string {
+  return String.fromCharCode(~~(Math.random() * 26) + 97);
+}
+/**
+ * @description 随机混合字符
+ * @param length
+ * @returns
+ */
+function generateMix(length: number = 6): string {
+  // 随机字符串
+  const randomText: string[] = [];
+  // 生成器
+  const typeGenerator: (() => string)[] = [
+    generateNumAsChar,
+    generateUpperAsChar,
+    generateLowerAsChar,
+  ];
+  if (length) {
+    for (let i = 0; i < length; i++) {
+      // 随机位置
+      const randomIndex = ~~(Math.random() * typeGenerator.length);
+      randomText.push(typeGenerator[randomIndex]());
+    }
+  }
+  return randomText.join('');
+}
 export {
   $$,
+  openWin,
   closeWin,
+  waitingClose,
   debounce,
   hasMobile,
   getCookie,
   waitingTime,
-  waitingClose,
-  creatElementNode,
+  createElementNode,
   createTextNode,
   createRandomPoint,
   createRandomPath,
+  generateMix,
 };

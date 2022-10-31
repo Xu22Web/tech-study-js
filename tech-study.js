@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221030
+// @version   20221101
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -20,23 +20,6 @@
 // @updateURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // ==/UserScript==
-/**
- * @description url配置
- */
-const URL_CONFIG = {
-    // 主页
-    home: /^https\:\/\/www\.xuexi\.cn(\/(index\.html)?)?$/,
-    // 每日答题页面
-    examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
-    // 每周答题页面
-    examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
-    // 专项练习页面
-    examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
-    // 登录界面
-    login: 'https://login.xuexi.cn/login/xuexiWeb?appid=dingoankubyrfkttorhpou&goto=https%3A%2F%2Foa.xuexi.cn&type=1&state=ffdea2ded23f45ab%2FKQreTlDFe1Id3B7BVdaaYcTMp6lsTBB%2Fs3gGevuMKfvpbABDEl9ymG3bbOgtpSN&check_login=https%3A%2F%2Fpc-api.xuexi.cn',
-};
-
-
 /**
  * @description api配置
  */
@@ -74,6 +57,23 @@ const API_CONFIG = {
     answerSave: 'https://a6.qikekeji.com/txt/data/save',
     // 文本服务器获取答案
     answerSearch: 'https://api.answer.uu988.xyz/answer/search',
+};
+
+
+/**
+ * @description url配置
+ */
+const URL_CONFIG = {
+    // 主页
+    home: /^https\:\/\/www\.xuexi\.cn(\/(index\.html)?)?$/,
+    // 每日答题页面
+    examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
+    // 每周答题页面
+    examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
+    // 专项练习页面
+    examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
+    // 登录界面
+    login: 'https://login.xuexi.cn/login/xuexiWeb?appid=dingoankubyrfkttorhpou&goto=https%3A%2F%2Foa.xuexi.cn&type=1&state=ffdea2ded23f45ab%2FKQreTlDFe1Id3B7BVdaaYcTMp6lsTBB%2Fs3gGevuMKfvpbABDEl9ymG3bbOgtpSN&check_login=https%3A%2F%2Fpc-api.xuexi.cn',
 };
 
 
@@ -124,14 +124,29 @@ function $$(selector, parent = document) {
     return Array.from(parent.querySelectorAll(selector));
 }
 /**
+ * @description 打开新窗口
+ */
+function openWin(url) {
+    return GM_openInTab(url, {
+        active: true,
+        insert: true,
+        setParent: true,
+    });
+}
+/**
  * @description 关闭子窗口
  */
-function closeWin() {
+function closeWin(frame, id) {
     try {
-        window.opener = window;
-        const win = window.open('', '_self');
-        win?.close();
-        top?.close();
+        if (frame) {
+            window.parent.postMessage({ id, closed: true }, 'https://www.xuexi.cn');
+        }
+        else {
+            window.opener = window;
+            const win = window.open('', '_self');
+            win?.close();
+            top?.close();
+        }
     }
     catch (e) { }
 }
@@ -189,7 +204,7 @@ function hasMobile() {
  * @param children
  * @returns
  */
-function creatElementNode(eleName, props, attrs, children) {
+function createElementNode(eleName, props, attrs, children) {
     // 元素
     let ele;
     // 格式化元素名
@@ -372,47 +387,83 @@ function createRandomPath(start, end, steps) {
     }
     return path;
 }
+/**
+ * @description 随机数字
+ * @returns
+ */
+function generateNumAsChar() {
+    return (~~(Math.random() * 10)).toString();
+}
+/**
+ * @description 随机大写字母
+ * @returns
+ */
+function generateUpperAsChar() {
+    return String.fromCharCode(~~(Math.random() * 26) + 65);
+}
+/**
+ * @description 随机小写字母
+ * @returns
+ */
+function generateLowerAsChar() {
+    return String.fromCharCode(~~(Math.random() * 26) + 97);
+}
+/**
+ * @description 随机混合字符
+ * @param length
+ * @returns
+ */
+function generateMix(length = 6) {
+    // 随机字符串
+    const randomText = [];
+    // 生成器
+    const typeGenerator = [
+        generateNumAsChar,
+        generateUpperAsChar,
+        generateLowerAsChar,
+    ];
+    if (length) {
+        for (let i = 0; i < length; i++) {
+            // 随机位置
+            const randomIndex = ~~(Math.random() * typeGenerator.length);
+            randomText.push(typeGenerator[randomIndex]());
+        }
+    }
+    return randomText.join('');
+}
 
 
-const css = ':root {\n  --themeColor: #fa3333;\n  --scale: 1;\n  font-size: calc(10px * var(--scale));\n}\n@media (max-height: 768px) {\n  :root {\n    --scale: 0.8;\n  }\n}\n.icon {\n  width: 1em;\n  height: 1em;\n  vertical-align: -0.15em;\n  fill: currentColor;\n  overflow: hidden;\n}\n.egg_btn {\n  transition: 0.5s;\n  outline: none;\n  border: none;\n  padding: 1.2rem 2rem;\n  border-radius: 1.2rem;\n  cursor: pointer;\n  font-size: 1.8rem;\n  font-weight: bold;\n  text-align: center;\n  color: rgb(255, 255, 255);\n  background: #666777;\n}\n.egg_btn.manual {\n  background: #e3484b;\n}\n.egg_setting_box {\n  position: fixed;\n  top: 5rem;\n  left: 1rem;\n  padding: 1.2rem 2rem;\n  border-radius: 1rem;\n  background: #fff;\n  box-shadow: 0 0 0.4rem 0.1rem #ccc;\n  transition: 80ms ease-out;\n  z-index: 99999;\n  font-family: Noto Sans SC;\n}\n@media (max-height: 768px) {\n  .egg_setting_box {\n    top: 2rem;\n  }\n}\n.egg_setting_box hr {\n  height: 0.1rem;\n  border: none;\n  background: #eee;\n  position: relative;\n  margin: 0.8rem 0;\n}\n.egg_setting_box hr:after {\n  content: attr(data-category);\n  position: absolute;\n  transform: translate(calc(-50%), calc(-50%));\n  left: 50%;\n  top: 50%;\n  font-size: 1.2rem;\n  color: #999;\n  background: white;\n  padding: 0 0.6rem;\n}\n.egg_setting_item {\n  margin-top: 0.5rem;\n  min-height: 3rem;\n  min-width: 20rem;\n  font-size: 1.6rem;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.egg_info_item {\n  flex-direction: column;\n  align-items: stretch;\n}\n.egg_userinfo .login_btn,\n.egg_user_login .login_btn {\n  outline: none;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  cursor: pointer;\n  transition: 80ms ease;\n  color: white;\n}\n.egg_userinfo .login_btn {\n  background: #ccc;\n  padding: 0.4rem 0.8rem;\n}\n.egg_userinfo .login_btn:active,\n.egg_user_login .login_btn:active {\n  opacity: 0.8;\n}\n.egg_user_login .login_btn {\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n}\n.egg_user_login {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  flex-direction: column;\n  padding: 0.5rem 0;\n}\n.egg_user_login .egg_frame_item {\n  height: 0;\n  overflow: hidden;\n}\n.egg_user_login .egg_frame_item.active {\n  --rate: 0.8;\n  margin-top: 0.8rem;\n  height: calc(21.8rem * var(--rate));\n}\n.egg_frame {\n  position: relative;\n  box-sizing: border-box;\n  margin: 0 auto;\n}\n.egg_frame_item.active .egg_frame {\n  transform: scale(var(--rate));\n  transform-origin: top center;\n  overflow: hidden;\n  padding: 0.4rem;\n  width: 21.8rem;\n  height: 21.8rem;\n}\n.egg_frame .egg_frame_login {\n  position: absolute;\n  left: -6.9rem;\n  top: -2.6rem;\n}\n.egg_frame iframe {\n  width: 284px;\n  height: 241px;\n  border: none;\n  transform: scale(var(--scale));\n  transform-origin: top left;\n}\n.egg_userinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.egg_userinfo .egg_user {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_userinfo .egg_user .egg_sub_nickname,\n.egg_userinfo .egg_user .egg_avatar_img {\n  height: 5rem;\n  width: 5rem;\n  border-radius: 50%;\n  background: var(--themeColor);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  font-size: 2rem;\n  color: white;\n}\n.egg_userinfo .egg_user .egg_name {\n  padding-left: 0.5rem;\n  text-overflow: ellipsis;\n  overflow: hidden;\n  white-space: nowrap;\n  max-width: 10rem;\n  font-size: 1.6rem;\n}\n.egg_scoreinfo {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_scoreinfo .egg_totalscore,\n.egg_scoreinfo .egg_todayscore {\n  font-size: 1.2rem;\n}\n.egg_scoreinfo span {\n  color: var(--themeColor);\n  padding-left: 0.4rem;\n  font-weight: bold;\n}\n.egg_setting_item label {\n  flex-grow: 1;\n}\n.egg_progress {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0.5rem 0;\n}\n.egg_progress .egg_track {\n  background: #ccc;\n  height: 0.5rem;\n  border-radius: 1rem;\n  flex: 1 1 auto;\n  overflow: hidden;\n  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,\n    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;\n}\n.egg_progress .egg_track .egg_bar {\n  height: 0.5rem;\n  background: var(--themeColor);\n  border-radius: 1rem;\n  width: 0;\n  transition: width 0.5s;\n}\n.egg_progress .egg_percent {\n  font-size: 1.2rem;\n  padding-left: 0.5rem;\n  width: 4rem;\n}\ninput[type=\'checkbox\'].egg_setting_switch {\n  cursor: pointer;\n  margin: 0;\n  outline: 0;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  position: relative;\n  width: 4.2rem;\n  height: 2.2rem;\n  background: #ccc;\n  border-radius: 5rem;\n  transition: background 0.3s;\n  --border-padding: 0.5rem;\n  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,\n    0.1rem 0 0.1rem -0.1rem #999 inset;\n}\ninput[type=\'checkbox\'].egg_setting_switch::after {\n  content: \'\';\n  display: inline-block;\n  width: 1.4rem;\n  height: 1.4rem;\n  border-radius: 50%;\n  background: #fff;\n  box-shadow: 0 0 0.2rem #999;\n  transition: 0.4s;\n  position: absolute;\n  top: calc(50% - (1.4rem / 2));\n  position: absolute;\n  left: var(--border-padding);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked {\n  background: var(--themeColor);\n}\ninput[type=\'checkbox\'].egg_setting_switch:checked::after {\n  left: calc(100% - var(--border-padding) - 1.4rem);\n}\n.tip {\n  background: #ccc;\n  color: white;\n  border-radius: 10rem;\n  font-size: 1.2rem;\n  width: 1.6rem;\n  height: 1.6rem;\n  margin-left: 0.4rem;\n  display: inline-block;\n  text-align: center;\n  line-height: 1.6rem;\n  cursor: pointer;\n}\n.egg_start_btn {\n  justify-content: center;\n}\n.egg_study_btn {\n  outline: none;\n  background: var(--themeColor);\n  padding: 0.8rem 2.4rem;\n  font-size: 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  color: white;\n  cursor: pointer;\n  transition: all 0.3s;\n}\n.egg_study_btn:hover {\n  opacity: 0.8;\n}\n@keyframes fade {\n  from {\n    opacity: 0.8;\n  }\n  to {\n    opacity: 0.4;\n    background: #ccc;\n  }\n}\n.egg_study_btn.loading {\n  animation: fade 2s ease infinite alternate;\n}\n.egg_study_btn.disabled {\n  background: #ccc;\n}\n.egg_tip {\n  position: fixed;\n  bottom: 2rem;\n  left: 2rem;\n  padding: 1.2rem 1.4rem;\n  border: none;\n  border-radius: 1rem;\n  background: var(--themeColor);\n  color: white;\n  font-size: 1.4rem;\n  transition: 0.3s ease-in-out;\n  font-family: Noto Sans SC;\n  z-index: 99999;\n  opacity: 0;\n  transform: scale(0.9) translateY(1rem);\n}\n.egg_tip.active {\n  opacity: 1;\n  transform: scale(1) translateY(0);\n}\n.egg_tip .egg_countdown {\n  display: inline-block;\n  color: var(--themeColor);\n  background: white;\n  border-radius: 0.5rem;\n  padding: 0.2rem 0.4rem;\n  font-weight: bold;\n  margin-left: 0.4rem;\n  font-size: 1.2rem;\n}\n';
-// 嵌入样式
+const css = ':root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}.egg_icon {  width: 1em;  height: 1em;  font-size: 1.8rem;  fill: currentColor;}@media (max-height: 768px) {  :root {    --scale: 0.8;  }}.icon {  width: 1em;  height: 1em;  vertical-align: -0.15em;  fill: currentColor;  overflow: hidden;}.egg_btn {  transition: background 100ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_btn.manual {  background: #e3484b;}.egg_setting_box {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #fff;  box-shadow: 0 0 0.4rem 0.1rem #ccc;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}@media (max-height: 768px) {  .egg_setting_box {    top: 2rem;  }}.egg_setting_box.hide {  left: 0;  transform: translateX(-100%);}.egg_setting_box .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 200ms ease;}.egg_setting_box.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_setting_box .egg_setting_show_btn,.egg_setting_box .frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  cursor: pointer;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;}.egg_setting_box.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_setting_box .egg_setting_show_btn {  background: #ccc;}.egg_setting_box .frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_setting_box .frame_show_btn.hide {  display: none;}.egg_setting_box hr {  height: 0.1rem;  border: none;  background: #eee;  position: relative;  margin: 0.8rem 0;}.egg_setting_box hr:after {  content: attr(data-category);  position: absolute;  transform: translate(calc(-50%), calc(-50%));  left: 50%;  top: 50%;  font-size: 1.2rem;  color: #999;  background: white;  padding: 0 0.6rem;}.egg_setting_item {  margin-top: 0.5rem;  min-height: 3rem;  min-width: 20rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_info_item {  flex-direction: column;  align-items: stretch;}.egg_userinfo .login_btn,.egg_user_login .login_btn {  outline: none;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  cursor: pointer;  transition: 80ms ease;  color: white;}.egg_userinfo .login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_userinfo .login_btn:active,.egg_user_login .login_btn:active {  opacity: 0.8;}.egg_user_login .login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_login {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_user_login .egg_frame_item {  height: 0;  overflow: hidden;}.egg_user_login .egg_frame_item.active {  --rate: 0.8;  margin-top: 0.8rem;  height: calc(21.8rem * var(--rate));}.egg_frame {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_frame_item.active .egg_frame {  transform: scale(var(--rate));  transform-origin: top center;  overflow: hidden;  padding: 0.4rem;  width: 21.8rem;  height: 21.8rem;}.egg_frame .egg_frame_login {  position: absolute;  left: -6.9rem;  top: -2.6rem;}.egg_frame iframe {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;}.egg_userinfo {  display: flex;  justify-content: space-between;  align-items: center;}.egg_userinfo .egg_user {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_user .egg_sub_nickname,.egg_userinfo .egg_user .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_user .egg_name {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;}.egg_scoreinfo span {  color: var(--themeColor);  padding-left: 0.4rem;  font-weight: bold;}.egg_setting_item label {  flex-grow: 1;}.egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}input[type=\'checkbox\'].egg_setting_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}input[type=\'checkbox\'].egg_setting_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}input[type=\'checkbox\'].egg_setting_switch:checked {  background: var(--themeColor);}input[type=\'checkbox\'].egg_setting_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.tip {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_start_btn {  justify-content: center;}.egg_study_btn {  outline: none;  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  color: white;  cursor: pointer;  transition: all 0.3s;}.egg_study_btn:hover {  opacity: 0.8;}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_btn.disabled {  background: #ccc;}.egg_tip {  position: fixed;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 0.3s ease-in-out;  z-index: 99999;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.frame_container {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100vh;  visibility: visible;}.frame_container.hide {  visibility: hidden;}.frame_container.hide .frame_mask,.frame_container.hide .frame_wrap {  opacity: 0;}.frame_container.hide .frame_wrap {  transform: scale(0);}.frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.frame_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: white;  overflow: hidden;  transform: scale(1);}.frame_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.frame_wrap .frame_controls_wrap {  width: 100%;  background: white;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.frame_controls_wrap .frame_title {  padding: 1rem 2rem;}.frame_controls .frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;}.frame_controls .frame_btn:active {  opacity: 0.8;}.frame_wrap .frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.frame_content .frame {  width: 100%;  height: 100%;  outline: none;  border: none;  background: white;}';
+/**
+ * @description 嵌入样式
+ */
 GM_addStyle(css);
-GM_addElement(document.head, 'link', {
-    rel: 'preconnect',
-    href: 'https://fonts.googleapis.com',
-});
-GM_addElement(document.head, 'link', {
-    rel: 'preconnect',
-    href: 'https://fonts.gstatic.com',
-    crossorigin: 'crossorigin',
-});
-GM_addElement(document.head, 'link', {
-    rel: 'preconnect',
-    href: 'https://fonts.googleapis.com',
-    crossorigin: 'crossorigin',
-});
-GM_addElement(document.head, 'link', {
-    href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap',
-    crossorigin: 'crossorigin',
-    rel: 'stylesheet',
-});
-// <link rel="preconnect" href="https://fonts.googleapis.com">
-// <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-// <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap" rel="stylesheet">
 /* Config·配置 */
-// 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
+/**
+ * @description 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
+ */
 const examWeeklyReverse = true;
-// 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
+/**
+ * @description 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
+ */
 const examPaperReverse = true;
-//  答题请求速率限制
+/**
+ * @description  答题请求速率限制
+ */
 const ratelimitms = 3000;
-// 单次最大新闻数
+/**
+ * @description 单次最大新闻数
+ */
 const maxNewsNum = 6;
-// 单次最大视频数
+/**
+ * @description 单次最大视频数
+ */
 const maxVideoNum = 6;
 /* Config End·配置结束 */
 /* Tools·工具函数  */
-// 暂停锁
+/**
+ * @description 暂停锁
+ */
 function pauseLock(callback) {
     return new Promise((resolve) => {
         // 学习暂停
@@ -442,7 +493,9 @@ function pauseLock(callback) {
         resolve('done');
     });
 }
-// 暂停学习锁
+/**
+ * @description 暂停学习锁
+ */
 function pauseStudyLock(callback) {
     return new Promise((resolve) => {
         // 暂停
@@ -473,7 +526,9 @@ function pauseStudyLock(callback) {
 }
 /* Tools End·工具函数结束 */
 /* API请求函数 */
-// 获取用户信息
+/**
+ * @description 获取用户信息
+ */
 async function getUserInfo() {
     try {
         const res = await fetch(API_CONFIG.userInfo, {
@@ -488,7 +543,9 @@ async function getUserInfo() {
     }
     catch (err) { }
 }
-// 获取总积分
+/**
+ * @description 获取总积分
+ */
 async function getTotalScore() {
     try {
         const res = await fetch(API_CONFIG.totalScore, {
@@ -505,7 +562,9 @@ async function getTotalScore() {
     }
     catch (err) { }
 }
-// 获取当天总积分
+/**
+ * @description 获取当天总积分
+ */
 async function getTodayScore() {
     try {
         const res = await fetch(API_CONFIG.todayScore, {
@@ -522,7 +581,9 @@ async function getTodayScore() {
     }
     catch (err) { }
 }
-// 获取任务列表
+/**
+ * @description 获取任务列表
+ */
 async function getTaskList() {
     try {
         const res = await fetch(API_CONFIG.taskList, {
@@ -539,7 +600,9 @@ async function getTaskList() {
     }
     catch (err) { }
 }
-// 获取新闻数据
+/**
+ * @description 获取新闻数据
+ */
 async function getTodayNews() {
     // 随机
     const randNum = ~~(Math.random() * API_CONFIG.todayNews.length);
@@ -556,7 +619,9 @@ async function getTodayNews() {
     }
     catch (err) { }
 }
-// 获取视频数据
+/**
+ * @description 获取视频数据
+ */
 async function getTodayVideos() {
     // 随机
     const randNum = ~~(Math.random() * API_CONFIG.todayVideos.length);
@@ -573,7 +638,9 @@ async function getTodayVideos() {
     }
     catch (err) { }
 }
-// 专项练习数据
+/**
+ * @description 专项练习数据
+ */
 async function getExamPaper(pageNo) {
     // 链接
     const url = `${API_CONFIG.paperList}?pageSize=50&pageNo=${pageNo}`;
@@ -597,7 +664,9 @@ async function getExamPaper(pageNo) {
     }
     return [];
 }
-// 每周答题数据
+/**
+ * @description 每周答题数据
+ */
 async function getExamWeekly(pageNo) {
     // 链接
     const url = `${API_CONFIG.weeklyList}?pageSize=50&pageNo=${pageNo}`;
@@ -621,7 +690,9 @@ async function getExamWeekly(pageNo) {
     }
     return [];
 }
-// 获取答案
+/**
+ * @description 获取答案
+ */
 async function getAnswer(question) {
     console.log('正在获取网络答案...');
     // 数据
@@ -655,7 +726,9 @@ async function getAnswer(question) {
     console.log('获取网络答案失败!');
     return [];
 }
-// 保存答案
+/**
+ * @description 保存答案
+ */
 async function saveAnswer(key, value) {
     // 内容
     const content = JSON.stringify([{ title: key, content: value }]);
@@ -696,25 +769,68 @@ async function saveAnswer(key, value) {
 }
 /* API请求函数结束 */
 /* 变量 */
-// 任务进度
+/**
+ * @description 任务进度
+ */
 const tasks = [];
-// 获取 URL
+/**
+ * @description 获取 URL
+ */
 const { href } = window.location;
-// 设置
-let settings = [true, true, true, true, true, false, false, false, false];
-// 已经开始
+/**
+ * @description 设置
+ */
+let settings = [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+];
+/**
+ * @description 已经开始
+ */
 let started = false;
-// 是否暂停答题
+/**
+ * @description 是否暂停答题
+ */
 let pause = false;
-// 初始化登录状态
+/**
+ * @description 初始化登录状态
+ */
 let login = !!getCookie('token');
-// 新闻
+/**
+ * @description 新闻
+ */
 let news = [];
-// 视频
+/**
+ * @description 视频
+ */
 let videos = [];
-// 登录定时器
+/**
+ * @description 登录定时器
+ */
 let loginTimer;
-// load
+/**
+ * @description frame 关闭
+ */
+let closed = true;
+/**
+ * @description frame 隐藏
+ */
+let hidden = true;
+/**
+ * @description id
+ */
+let id;
+/**
+ * @description load
+ */
 window.addEventListener('load', () => {
     console.log('正在加载脚本...');
     // 主页
@@ -736,6 +852,8 @@ window.addEventListener('load', () => {
                 initSetting();
                 // 渲染菜单
                 renderMenu();
+                // 渲染窗口
+                renderFrame();
             }
         }, 800);
     }
@@ -745,6 +863,8 @@ window.addEventListener('load', () => {
         initSetting();
         console.log('初始化设置!');
         console.log(settings);
+        // 初始化 id
+        initFrameID();
         reading(0);
     }
     else if (typeof GM_getValue('watchingUrl') === 'string' &&
@@ -752,7 +872,9 @@ window.addEventListener('load', () => {
         // 初始化设置
         initSetting();
         console.log('初始化设置!');
-        console.table(settings);
+        console.log(settings);
+        // 初始化 id
+        initFrameID();
         let randNum = 0;
         const checkVideoPlayingInterval = setInterval(() => {
             let temp = getVideoTag();
@@ -795,7 +917,9 @@ window.addEventListener('load', () => {
         // 初始化设置
         initSetting();
         console.log('初始化设置!');
-        console.table(settings);
+        console.log(settings);
+        // 初始化 id
+        initFrameID();
         console.log('进入答题页面!');
         // 答题页面
         const ready = setInterval(() => {
@@ -812,7 +936,9 @@ window.addEventListener('load', () => {
         console.log('此页面不支持加载学习脚本!');
     }
 });
-// 获取video标签
+/**
+ * @description 获取video标签
+ */
 function getVideoTag() {
     let iframe = $$('iframe')[0];
     let video;
@@ -852,8 +978,12 @@ function getVideoTag() {
         };
     }
 }
-// 读新闻或者看视频
-// type:0为新闻,1为视频
+/**
+ * @description 读新闻或者看视频
+ */
+/**
+ * @description type:0为新闻,1为视频
+ */
 async function reading(type) {
     // 看文章或者视频
     let time = 1;
@@ -892,9 +1022,11 @@ async function reading(type) {
         GM_setValue('watchingUrl', null);
     }
     // 关闭窗口
-    closeWin();
+    closeWin(settings[7], id);
 }
-// 创建学习提示
+/**
+ * @description 创建学习提示
+ */
 function createTip(text, delay = 2, callback, show = true) {
     // 提前去除
     const studyTip = $$('#studyTip')[0];
@@ -902,18 +1034,18 @@ function createTip(text, delay = 2, callback, show = true) {
         studyTip.destroy();
     }
     // 提示
-    const tipInfo = creatElementNode('div', undefined, {
+    const tipInfo = createElementNode('div', undefined, {
         id: 'studyTip',
         class: 'egg_tip',
     });
     // 倒计时
-    const countdown = creatElementNode('span', {
+    const countdown = createElementNode('span', {
         innerText: `${delay}s`,
     }, {
         class: 'egg_countdown',
     });
     // 文本
-    const span = creatElementNode('span', {
+    const span = createElementNode('span', {
         innerText: text,
     }, {
         class: 'egg_text',
@@ -990,7 +1122,9 @@ function createTip(text, delay = 2, callback, show = true) {
     countDown();
     return operate;
 }
-// 获取新闻列表
+/**
+ * @description 获取新闻列表
+ */
 function getNews() {
     return new Promise(async (resolve) => {
         // 需要学习的新闻数量
@@ -1017,7 +1151,9 @@ function getNews() {
         resolve('done');
     });
 }
-// 获取视频列表
+/**
+ * @description 获取视频列表
+ */
 function getVideos() {
     return new Promise(async (resolve) => {
         // 需要学习的视频数量
@@ -1045,23 +1181,21 @@ function getVideos() {
         resolve('done');
     });
 }
-// 阅读文章
+/**
+ * @description 阅读文章
+ */
 async function readNews() {
     await getNews();
     for (const i in news) {
         // 暂停
         await pauseStudyLock();
-        // 链接
-        GM_setValue('readingUrl', news[i].url);
         console.log(`正在看第${Number(i) + 1}个新闻...`);
-        // 新页面
-        const newPage = GM_openInTab(news[i].url, {
-            active: true,
-            insert: true,
-            setParent: true,
-        });
-        // 等待窗口关闭
-        await waitingClose(newPage);
+        // 链接
+        const { url } = news[i];
+        // 链接
+        GM_setValue('readingUrl', url);
+        // 等待任务窗口
+        await waitTaskWin(url);
         // 等待一段时间
         await waitingTime(1500);
         // 刷新菜单数据
@@ -1077,7 +1211,9 @@ async function readNews() {
         await readNews();
     }
 }
-// 看学习视频
+/**
+ * @description 看学习视频
+ */
 async function watchVideo() {
     // 获取视频
     await getVideos();
@@ -1085,17 +1221,14 @@ async function watchVideo() {
     for (const i in videos) {
         // 暂停
         await pauseStudyLock();
-        // 链接
-        GM_setValue('watchingUrl', videos[i].url);
         console.log(`正在观看第${Number(i) + 1}个视频...`);
-        // 页面
-        const newPage = GM_openInTab(videos[i].url, {
-            active: true,
-            insert: true,
-            setParent: true,
-        });
+        // 链接
+        const { url } = videos[i];
+        // 链接
+        GM_setValue('watchingUrl', url);
+        // 等待任务窗口
+        await waitTaskWin(url);
         // 等待窗口关闭
-        await waitingClose(newPage);
         // 等待一段时间
         await waitingTime(1500);
         // 刷新菜单数据pauseStudyLock
@@ -1111,19 +1244,17 @@ async function watchVideo() {
         await watchVideo();
     }
 }
-// 做每日答题
+/**
+ * @description 做每日答题
+ */
 async function doExamPractice() {
     // 暂停
     await pauseStudyLock();
     console.log('正在完成每日答题...');
-    // 新页面
-    const newPage = GM_openInTab(URL_CONFIG.examPractice, {
-        active: true,
-        insert: true,
-        setParent: true,
-    });
-    // 等待窗口关闭
-    await waitingClose(newPage);
+    // 链接
+    const url = URL_CONFIG.examPractice;
+    // 等待任务窗口
+    await waitTaskWin(url);
     // 等待一段时间
     await waitingTime(1500);
     // 刷新菜单数据
@@ -1134,7 +1265,9 @@ async function doExamPractice() {
         await doExamPractice();
     }
 }
-// 做每周答题
+/**
+ * @description 做每周答题
+ */
 async function doExamWeekly() {
     // id
     const examWeeklyId = await findExamWeekly();
@@ -1142,10 +1275,10 @@ async function doExamWeekly() {
         // 暂停
         await pauseStudyLock();
         console.log('正在做每周答题...');
-        // 新页面
-        const newPage = GM_openInTab(`${URL_CONFIG.examWeekly}?id=${examWeeklyId}`, { active: true, insert: true, setParent: true });
-        // 等待窗口关闭
-        await waitingClose(newPage);
+        // 链接
+        const url = `${URL_CONFIG.examWeekly}?id=${examWeeklyId}`;
+        // 等待任务窗口
+        await waitTaskWin(url);
         // 等待一段时间
         await waitingTime(1500);
         // 刷新菜单数据
@@ -1159,7 +1292,9 @@ async function doExamWeekly() {
     }
     return false;
 }
-// 做专项练习
+/**
+ * @description 做专项练习
+ */
 async function doExamPaper() {
     // id
     const examPaperId = await findExamPaper();
@@ -1167,14 +1302,10 @@ async function doExamPaper() {
         // 暂停
         await pauseStudyLock();
         console.log('正在做专项练习...');
-        // 新页面
-        const newPage = GM_openInTab(`${URL_CONFIG.examPaper}?id=${examPaperId}`, {
-            active: true,
-            insert: true,
-            setParent: true,
-        });
-        // 等待窗口关闭
-        await waitingClose(newPage);
+        // 链接
+        const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
+        // 等待窗口任务
+        await waitTaskWin(url);
         // 等待一段时间
         await waitingTime(1500);
         // 刷新菜单数据
@@ -1188,7 +1319,9 @@ async function doExamPaper() {
     }
     return false;
 }
-// 初始化每周答题总页数属性
+/**
+ * @description 初始化每周答题总页数属性
+ */
 async function initExam(type) {
     if (type === 0) {
         // 默认从第一页获取全部页属性
@@ -1209,7 +1342,9 @@ async function initExam(type) {
         }
     }
 }
-// 查询每周答题列表看看还有没有没做过的, 有则返回id
+/**
+ * @description 查询每周答题列表看看还有没有没做过的, 有则返回id
+ */
 async function findExamWeekly() {
     console.log('初始化每周答题!');
     // 获取总页数
@@ -1253,7 +1388,9 @@ async function findExamWeekly() {
         }
     }
 }
-// 查询专项练习列表看看还有没有没做过的, 有则返回id
+/**
+ * @description 查询专项练习列表看看还有没有没做过的, 有则返回id
+ */
 async function findExamPaper() {
     console.log('初始化专项练习');
     // 获取总页数
@@ -1290,7 +1427,9 @@ async function findExamPaper() {
         }
     }
 }
-// 获取答题按钮
+/**
+ * @description 获取答题按钮
+ */
 function getNextButton() {
     return new Promise((resolve) => {
         const timer = setInterval(() => {
@@ -1308,7 +1447,9 @@ function getNextButton() {
         }, 500);
     });
 }
-// 暂停答题
+/**
+ * @description 暂停答题
+ */
 function pauseExam(flag) {
     // 按钮
     const manualButton = $$('#manualButton')[0];
@@ -1326,7 +1467,9 @@ function pauseExam(flag) {
         manualButton.classList.add('manual');
     }
 }
-// 处理滑动验证
+/**
+ * @description 处理滑动验证
+ */
 function handleSlideVerify() {
     return new Promise(async (resolve) => {
         // 滑动验证
@@ -1400,7 +1543,9 @@ function handleSlideVerify() {
         resolve(true);
     });
 }
-// 处理选项
+/**
+ * @description 处理选项
+ */
 function handleChoiceBtn(answers) {
     // 选项按钮
     const allBtns = $$('.q-answer');
@@ -1452,7 +1597,9 @@ function handleChoiceBtn(answers) {
     }
     return false;
 }
-// 随机处理单选
+/**
+ * @description 随机处理单选
+ */
 function handleSingleChoiceRand() {
     // 选项按钮
     const allBtns = $$('.q-answer');
@@ -1466,7 +1613,9 @@ function handleSingleChoiceRand() {
         }
     }
 }
-// 随机处理多选
+/**
+ * @description 随机处理多选
+ */
 function handleMutiplyChoiceRand() {
     // 选项按钮
     const allBtns = $$('.q-answer');
@@ -1480,7 +1629,9 @@ function handleMutiplyChoiceRand() {
         });
     }
 }
-// 处理填空
+/**
+ * @description 处理填空
+ */
 const handleBlankInput = (answers) => {
     // 所有填空
     const blanks = $$('.blank');
@@ -1524,7 +1675,9 @@ const handleBlankInput = (answers) => {
     }
     return false;
 };
-// 处理填空随机
+/**
+ * @description 处理填空随机
+ */
 async function handleBlankInputRand() {
     // 所有填空
     const blanks = $$('.blank');
@@ -1541,7 +1694,9 @@ async function handleBlankInputRand() {
         });
     }
 }
-// 答题过程(整合)
+/**
+ * @description 答题过程(整合)
+ */
 async function doingExam() {
     // 下一个按钮
     let nextButton;
@@ -1607,7 +1762,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[7]) {
+                if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!', 2);
@@ -1633,7 +1788,7 @@ async function doingExam() {
                     // 空格
                     const blanks = question.match(/（）/g);
                     // 填空数量、选项数量、答案数量相同 | 选项全文等于答案全文
-                    if (allBtns.length === blanks.length ||
+                    if ((blanks && allBtns.length === blanks.length) ||
                         question === choicesContent ||
                         allBtns.length === 2) {
                         // 全选
@@ -1666,7 +1821,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[7]) {
+                if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!', 2);
@@ -1754,7 +1909,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[7]) {
+                if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!', 2);
@@ -1837,7 +1992,7 @@ async function doingExam() {
                     await saveAnswer(key, answer);
                 }
                 // 每周答题
-                if (href.includes(URL_CONFIG.examWeekly) && settings[8]) {
+                if (href.includes(URL_CONFIG.examWeekly) && settings[9]) {
                     console.log('每周答题, 答错暂停!');
                     // 暂停答题
                     pauseExam(true);
@@ -1859,16 +2014,20 @@ async function doingExam() {
             nextButton.click();
         }
     }
-    closeWin();
+    closeWin(settings[7], id);
 }
-// 获取关键字
+/**
+ * @description 获取关键字
+ */
 function getKey(content) {
     // 外部引用md5加密
     const key = md5(content);
     console.log(`获取 key:${key}`);
     return key;
 }
-// 初始化配置
+/**
+ * @description 初始化配置
+ */
 function initSetting() {
     try {
         let settingTemp = JSON.parse(GM_getValue('studySetting'));
@@ -1876,15 +2035,39 @@ function initSetting() {
             settings = settingTemp;
         }
         else {
-            settings = [true, true, true, true, true, false, false, false, false];
+            settings = [
+                true,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+            ];
         }
     }
     catch (e) {
         // 没有则直接初始化
-        settings = [true, true, true, true, true, false, false, false, false];
+        settings = [
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+        ];
     }
 }
-// 初始化配置
+/**
+ * @description 初始化配置
+ */
 function initFontSize() {
     // 移动端
     const moblie = hasMobile();
@@ -1899,20 +2082,24 @@ function initFontSize() {
         });
     }
 }
-// 创建“手动答题”按钮
+/**
+ * @description 创建“手动答题”按钮
+ */
 function createManualButton() {
     const title = $$('.title')[0];
     // 按钮
-    const manualButton = creatElementNode('button', { innerText: '关闭自动答题' }, {
+    const manualButton = createElementNode('button', { innerText: '关闭自动答题' }, {
         id: 'manualButton',
         class: 'egg_btn',
         type: 'button',
         onclick: clickManualButton,
     });
     // 插入节点
-    title.parentNode.insertBefore(manualButton, title.nextSibling);
+    title.parentNode?.insertBefore(manualButton, title.nextSibling);
 }
-// 点击手动学习按钮
+/**
+ * @description 点击手动学习按钮
+ */
 function clickManualButton() {
     const manualButton = $$('#manualButton')[0];
     pause = !pause;
@@ -1925,13 +2112,15 @@ function clickManualButton() {
         manualButton.classList.remove('manual');
     }
 }
-// 加载用户信息
+/**
+ * @description 加载用户信息
+ */
 async function loadUserInfo() {
     // 分数信息
     const infoItem = $$('.egg_info_item')[0];
     if (login) {
         // 退出按钮
-        const logoutBtn = creatElementNode('button', { innerText: '退出' }, {
+        const logoutBtn = createElementNode('button', { innerText: '退出' }, {
             type: 'button',
             class: 'login_btn',
             onclick: debounce(() => {
@@ -1946,7 +2135,7 @@ async function loadUserInfo() {
             const avatarItems = [];
             if (avatarMediaUrl) {
                 // 图片
-                const img = creatElementNode('img', undefined, {
+                const img = createElementNode('img', undefined, {
                     src: avatarMediaUrl,
                     class: 'egg_avatar_img',
                 });
@@ -1954,20 +2143,20 @@ async function loadUserInfo() {
             }
             else {
                 // 文字
-                const subNickName = creatElementNode('div', { innerText: nick.substring(1, 3) }, { class: 'egg_sub_nickname' });
+                const subNickName = createElementNode('div', { innerText: nick.substring(1, 3) }, { class: 'egg_sub_nickname' });
                 avatarItems.push(subNickName);
             }
             // 头像
-            const avatar = creatElementNode('div', undefined, { class: 'egg_avatar' }, avatarItems);
+            const avatar = createElementNode('div', undefined, { class: 'egg_avatar' }, avatarItems);
             // 昵称
-            const nickName = creatElementNode('div', { innerText: nick }, { class: 'egg_name' });
+            const nickName = createElementNode('div', { innerText: nick }, { class: 'egg_name' });
             // 关于用户
-            const user = creatElementNode('div', undefined, { class: 'egg_user' }, [
+            const user = createElementNode('div', undefined, { class: 'egg_user' }, [
                 avatar,
                 nickName,
             ]);
             // 用户信息
-            const userInfoWrap = creatElementNode('div', undefined, {
+            const userInfoWrap = createElementNode('div', undefined, {
                 class: 'egg_userinfo',
             }, [user, logoutBtn]);
             infoItem.append(userInfoWrap);
@@ -1976,7 +2165,7 @@ async function loadUserInfo() {
     else {
         let refreshTimer;
         // 登录按钮
-        const loginBtn = creatElementNode('button', { innerText: '扫码登录' }, {
+        const loginBtn = createElementNode('button', { innerText: '扫码登录' }, {
             type: 'button',
             class: 'login_btn',
             onclick: debounce(async () => {
@@ -1996,23 +2185,25 @@ async function loadUserInfo() {
             }, 500),
         });
         // 窗口
-        const loginFrame = creatElementNode('div', undefined, {
+        const loginFrame = createElementNode('div', undefined, {
             class: 'egg_frame_login',
         });
         // 窗口项
-        const frameWrap = creatElementNode('div', undefined, { class: 'egg_frame' }, loginFrame);
+        const frameWrap = createElementNode('div', undefined, { class: 'egg_frame' }, loginFrame);
         // 窗口项
-        const loginFrameItem = creatElementNode('div', undefined, {
+        const loginFrameItem = createElementNode('div', undefined, {
             class: 'egg_frame_item',
         }, frameWrap);
         // 用户登录
-        const userLogin = creatElementNode('div', undefined, {
+        const userLogin = createElementNode('div', undefined, {
             class: 'egg_user_login',
         }, [loginBtn, loginFrameItem]);
         infoItem.append(userLogin);
     }
 }
-// 加载分数
+/**
+ * @description 加载分数
+ */
 async function loadScoreInfo() {
     if (login) {
         // 获取总分
@@ -2033,17 +2224,17 @@ async function loadScoreInfo() {
             }
             else {
                 // 总分
-                const totalScoreSpan = creatElementNode('span', {
+                const totalScoreSpan = createElementNode('span', {
                     innerText: totalScore,
                 });
-                const totalScoreDiv = creatElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
+                const totalScoreDiv = createElementNode('div', { innerText: '总积分' }, { class: 'egg_totalscore' }, totalScoreSpan);
                 // 当天总分
-                const todayScoreSpan = creatElementNode('span', {
+                const todayScoreSpan = createElementNode('span', {
                     innerText: todayScore,
                 });
-                const todayScoreDiv = creatElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
+                const todayScoreDiv = createElementNode('div', { innerText: '当天积分' }, { class: 'egg_todayscore' }, todayScoreSpan);
                 // 分数信息
-                const scoreInfo = creatElementNode('div', undefined, {
+                const scoreInfo = createElementNode('div', undefined, {
                     class: 'egg_scoreinfo',
                 }, [totalScoreDiv, todayScoreDiv]);
                 infoItem.append(scoreInfo);
@@ -2051,7 +2242,9 @@ async function loadScoreInfo() {
         }
     }
 }
-// 加载任务列表
+/**
+ * @description 加载任务列表
+ */
 async function loadTaskList() {
     // 原始任务进度
     const taskProgress = await getTaskList();
@@ -2116,19 +2309,24 @@ async function loadTaskList() {
         }
     }
 }
-// 刷新菜单数据
+/**
+ * @description 刷新菜单数据
+ */
 async function refreshMenu() {
     // 加载分数信息
     await loadScoreInfo();
     // 加载任务列表
     await loadTaskList();
 }
-// 渲染菜单
+/**
+ * @description 渲染菜单
+ * @returns
+ */
 async function renderMenu() {
     // 设置项
     const settingItems = [];
     // 信息
-    const infoItem = creatElementNode('div', undefined, {
+    const infoItem = createElementNode('div', undefined, {
         class: 'egg_info_item',
     });
     settingItems.push(infoItem);
@@ -2141,20 +2339,20 @@ async function renderMenu() {
         '专项练习',
     ];
     // 分割线
-    settingItems.push(creatElementNode('hr', undefined, { 'data-category': '任务' }));
+    settingItems.push(createElementNode('hr', undefined, { 'data-category': '任务' }));
     for (const i in settingTaskLabels) {
         // 进度条
-        const bar = creatElementNode('div', undefined, { class: 'egg_bar' });
+        const bar = createElementNode('div', undefined, { class: 'egg_bar' });
         // 轨道
-        const track = creatElementNode('div', undefined, { class: 'egg_track' }, bar);
+        const track = createElementNode('div', undefined, { class: 'egg_track' }, bar);
         // 百分比符号
-        const percentSymbol = creatElementNode('span', { innerText: '%' }, { class: 'egg_percentsymbol' });
+        const percentSymbol = createElementNode('span', { innerText: '%' }, { class: 'egg_percentsymbol' });
         // 数值
-        const percent = creatElementNode('div', { innerText: '0' }, { class: 'egg_percent' }, percentSymbol);
+        const percent = createElementNode('div', { innerText: '0' }, { class: 'egg_percent' }, percentSymbol);
         // 进度
-        const progress = creatElementNode('div', undefined, { class: 'egg_progress' }, [track, percent]);
+        const progress = createElementNode('div', undefined, { class: 'egg_progress' }, [track, percent]);
         // 标签
-        const label = creatElementNode('label', {
+        const label = createElementNode('label', {
             innerText: settingTaskLabels[i],
         }, undefined, progress);
         // 处理设置选项变化
@@ -2168,7 +2366,7 @@ async function renderMenu() {
             }
         }, 500);
         // 选项
-        const input = creatElementNode('input', undefined, {
+        const input = createElementNode('input', undefined, {
             title: settingTaskLabels[i],
             class: 'egg_setting_switch',
             type: 'checkbox',
@@ -2179,18 +2377,35 @@ async function renderMenu() {
             },
         });
         // 设置项
-        const item = creatElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
+        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
         settingItems.push(item);
     }
     // 分割线
-    settingItems.push(creatElementNode('hr', undefined, { 'data-category': '运行' }));
+    settingItems.push(createElementNode('hr', undefined, { 'data-category': '运行' }));
     // 运行设置标签
-    const settingRunLabel = ['运行隐藏', '自动开始'];
+    const settingRunLabel = [
+        {
+            title: '运行隐藏',
+            tip: '运行时, 隐藏任务面板以及弹窗提示',
+        },
+        {
+            title: '自动开始',
+            tip: '启动时, 自动开始任务, 在倒计时结束前自动开始可随时取消; 如果在自动开始前手动开始任务, 此次自动开始将取消',
+        },
+        {
+            title: '同屏任务',
+            tip: '所有任务不在打开的新页面进行, 而在当前页面运行',
+        },
+    ];
     for (const i in settingRunLabel) {
         // 标签
-        const label = creatElementNode('label', {
-            innerText: settingRunLabel[i],
+        const label = createElementNode('label', {
+            innerText: settingRunLabel[i].title,
         });
+        if (settingRunLabel[i].tip.length) {
+            const tip = createElementNode('span', { innerText: 'i' }, { class: 'tip', title: settingRunLabel[i].tip });
+            label.appendChild(tip);
+        }
         // 当前序号
         const currentIndex = Number(i) + settingTaskLabels.length;
         // 处理设置选项变化
@@ -2200,12 +2415,12 @@ async function renderMenu() {
                 // 设置
                 GM_setValue('studySetting', JSON.stringify(settings));
                 // 创建提示
-                createTip(`${settingRunLabel[i]} ${checked ? '打开' : '关闭'}!`, 2);
+                createTip(`${settingRunLabel[i].title} ${checked ? '打开' : '关闭'}!`, 2);
             }
         }, 300);
         // 选项
-        const input = creatElementNode('input', undefined, {
-            title: settingRunLabel[i],
+        const input = createElementNode('input', undefined, {
+            title: settingRunLabel[i].tip,
             class: 'egg_setting_switch',
             type: 'checkbox',
             checked: settings[currentIndex] ? 'checked' : '',
@@ -2215,11 +2430,11 @@ async function renderMenu() {
             },
         });
         // 设置项
-        const item = creatElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
+        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
         settingItems.push(item);
     }
     // 分割线
-    settingItems.push(creatElementNode('hr', undefined, { 'data-category': '答题' }));
+    settingItems.push(createElementNode('hr', undefined, { 'data-category': '答题' }));
     // 运行设置标签
     const settingExamLabel = [
         {
@@ -2230,11 +2445,11 @@ async function renderMenu() {
     ];
     for (const i in settingExamLabel) {
         // 标签
-        const label = creatElementNode('label', {
+        const label = createElementNode('label', {
             innerText: settingExamLabel[i].title,
         });
         if (settingExamLabel[i].tip.length) {
-            const tip = creatElementNode('span', { innerText: 'i' }, { class: 'tip', title: settingExamLabel[i].tip });
+            const tip = createElementNode('span', { innerText: 'i' }, { class: 'tip', title: settingExamLabel[i].tip });
             label.appendChild(tip);
         }
         // 当前序号
@@ -2250,7 +2465,7 @@ async function renderMenu() {
             }
         }, 300);
         // 选项
-        const input = creatElementNode('input', undefined, {
+        const input = createElementNode('input', undefined, {
             title: settingExamLabel[i].tip,
             class: 'egg_setting_switch',
             type: 'checkbox',
@@ -2261,29 +2476,68 @@ async function renderMenu() {
             },
         });
         // 设置项
-        const item = creatElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
+        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
         settingItems.push(item);
     }
+    const frameShowPath = createElementNode('path', undefined, {
+        d: 'M836.224 106.666667h-490.666667a85.589333 85.589333 0 0 0-85.333333 85.333333V256h-64a85.589333 85.589333 0 0 0-85.333333 85.333333v490.666667a85.589333 85.589333 0 0 0 85.333333 85.333333h490.666667a85.589333 85.589333 0 0 0 85.333333-85.333333V768h64a85.589333 85.589333 0 0 0 85.333333-85.333333V192a85.589333 85.589333 0 0 0-85.333333-85.333333z m-132.266667 725.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-490.666667a20.138667 20.138667 0 0 1-21.333333-21.333333V341.333333a20.138667 20.138667 0 0 1 21.333333-21.333333h494.933334a20.138667 20.138667 0 0 1 21.333333 21.333333v490.666667z m153.6-149.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-64V341.333333a85.589333 85.589333 0 0 0-85.333333-85.333333h-362.666667V192a20.138667 20.138667 0 0 1 21.333333-21.333333h490.666667a20.138667 20.138667 0 0 1 21.333333 21.333333z',
+    });
+    const frameShowIcon = createElementNode('svg', undefined, {
+        viewBox: '0 0 1024 1024',
+        class: 'egg_icon',
+    }, frameShowPath);
+    // 隐藏
+    const frameShowBtn = createElementNode('button', undefined, {
+        class: `frame_show_btn hide`,
+        type: 'button',
+        onclick: () => {
+            // 显示窗口
+            setFrameVisible(true);
+        },
+    }, frameShowIcon);
+    // 显示状况
+    let hidden = false;
+    const showPath = createElementNode('path', undefined, {
+        d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
+    });
+    const showIcon = createElementNode('svg', undefined, {
+        viewBox: '0 0 1024 1024',
+        class: 'egg_icon',
+    }, showPath);
+    // 隐藏
+    const showBtn = createElementNode('button', undefined, {
+        class: `egg_setting_show_btn`,
+        type: 'button',
+        onclick: () => {
+            hidden = !hidden;
+            settingBox.classList.toggle('hide', hidden);
+        },
+    }, showIcon);
+    // 按钮集合
+    const btnsWrap = createElementNode('div', undefined, {
+        class: 'egg_btns_wrap',
+    }, [frameShowBtn, showBtn]);
+    settingItems.push(btnsWrap);
     // 设置
-    const settingBox = creatElementNode('div', undefined, { class: 'egg_setting_box' }, settingItems);
+    const settingBox = createElementNode('div', undefined, { class: 'egg_setting_box' }, settingItems);
     // 菜单
-    const menu = creatElementNode('div', undefined, {
+    const menu = createElementNode('div', undefined, {
         id: 'settingData',
         class: `egg_menu${hasMobile() ? ' mobile' : ''}`,
     }, settingBox);
     // 根容器
-    const base = creatElementNode('div', undefined, undefined, menu);
+    const base = createElementNode('div', undefined, undefined, menu);
     // 已经登录
     if (login) {
         // 开始学习按钮
-        const startButton = creatElementNode('button', { innerText: '等待中' }, {
+        const startButton = createElementNode('button', { innerText: '等待中' }, {
             id: 'startButton',
             class: 'egg_study_btn loading',
             type: 'button',
             disabled: 'disabled',
         });
         // 设置项
-        const item = creatElementNode('div', undefined, { class: 'egg_setting_item egg_start_btn' }, startButton);
+        const item = createElementNode('div', undefined, { class: 'egg_setting_item egg_start_btn' }, startButton);
         settingBox.append(item);
     }
     // 插入节点
@@ -2331,7 +2585,205 @@ async function renderMenu() {
         }
     }
 }
-// 是否显示目菜单
+/**
+ * @description 渲染窗口
+ */
+function renderFrame() {
+    if (settings[7]) {
+        // 标题
+        const title = createElementNode('div', undefined, { class: 'frame_title' });
+        const hidePath = createElementNode('path', undefined, {
+            d: 'M863.7 552.5H160.3c-10.6 0-19.2-8.6-19.2-19.2v-41.7c0-10.6 8.6-19.2 19.2-19.2h703.3c10.6 0 19.2 8.6 19.2 19.2v41.7c0 10.6-8.5 19.2-19.1 19.2z',
+        });
+        const hideIcon = createElementNode('svg', undefined, {
+            viewBox: '0 0 1024 1024',
+            class: 'egg_icon',
+        }, hidePath);
+        // 隐藏
+        const hideBtn = createElementNode('button', undefined, {
+            class: 'frame_btn',
+            type: 'button',
+            onclick: () => {
+                // 隐藏窗口
+                setFrameVisible(false);
+            },
+        }, hideIcon);
+        // 最大化
+        let max = false;
+        const resizePath = createElementNode('path', undefined, {
+            d: 'M609.52 584.92a35.309 35.309 0 0 1 24.98-10.36c9.37 0 18.36 3.73 24.98 10.36l189.29 189.22-0.07-114.3 0.57-6.35c3.25-17.98 19.7-30.5 37.9-28.85 18.2 1.65 32.12 16.92 32.09 35.2v200.23c-0.05 1.49-0.19 2.97-0.42 4.45l-0.21 1.13c-0.22 1.44-0.55 2.85-0.99 4.24l-0.57 1.62-0.56 1.41a34.163 34.163 0 0 1-7.62 11.36l2.12-2.4-0.14 0.14-0.92 1.06-1.06 1.2-0.57 0.57-0.56 0.57a36.378 36.378 0 0 1-16.23 8.39l-3.53 0.5-4.02 0.35h-199.6l-6.35-0.63c-16.73-3.06-28.9-17.63-28.93-34.64l0.56-6.35c3.07-16.76 17.67-28.93 34.71-28.92l114.29-0.14-189.07-189.1-4.09-4.94c-9.71-14.01-8.01-32.95 4.02-45.02z m-162.06 0c12.06 12.05 13.78 30.99 4.09 45.01l-4.09 4.94-189.15 189.08 114.3 0.14c17.04-0.01 31.65 12.17 34.71 28.92l0.57 6.35c-0.03 17.01-12.19 31.58-28.92 34.64l-6.35 0.63H173.09l-4.23-0.42-3.39-0.49a36.38 36.38 0 0 1-17.36-9.52l-1.06-1.13-0.98-1.13 0.98 1.06-1.97-2.26 0.85 1.06-0.42-0.56a35.137 35.137 0 0 1-3.74-5.64l-1.13-2.68a34.71 34.71 0 0 1-2.11-7.33l-0.28-1.13c-0.21-1.47-0.33-2.96-0.36-4.45V659.78c-0.03-18.28 13.89-33.55 32.09-35.2 18.2-1.65 34.65 10.87 37.9 28.85l0.57 6.35-0.07 114.36 189.29-189.22c13.77-13.77 36.11-13.77 49.88 0h-0.09z m-74.71-471.71l6.35 0.57c16.76 3.06 28.93 17.67 28.92 34.71l-0.63 6.35c-3.07 16.76-17.67 28.93-34.71 28.92l-114.3 0.14 189.15 189.08 4.09 4.94c10.26 15.02 7.42 35.37-6.55 47.01-13.98 11.63-34.51 10.74-47.42-2.07L208.29 233.71l0.07 114.3-0.57 6.35c-3.25 17.98-19.7 30.5-37.9 28.85-18.2-1.65-32.12-16.92-32.09-35.2V147.78c0-1.55 0.14-3.03 0.35-4.51l0.21-1.13c0.24-1.44 0.59-2.85 1.06-4.23a34.97 34.97 0 0 1 8.68-14.39l-2.12 2.4-0.42 0.57 1.55-1.84-0.99 1.06 0.92-0.98 2.26-2.33c3.04-2.73 6.52-4.92 10.3-6.49l2.82-1.06c3.45-1.07 7.04-1.62 10.65-1.62l-3.6 0.14h0.49l1.48-0.14h201.31z m512.91 0l1.41 0.14h0.42c2.43 0.29 4.84 0.79 7.19 1.48l2.82 1.06 2.61 1.2 3.04 1.76c2.09 1.33 4.03 2.89 5.78 4.66l1.13 1.2 0.78 0.98 0.21 0.14 0.49 0.64 2.33 3.17c2.35 3.83 3.98 8.07 4.8 12.49l0.21 1.13c0.21 1.48 0.35 2.96 0.35 4.44v200.37c-0.16 18.13-14.03 33.19-32.08 34.83-18.06 1.64-34.42-10.67-37.83-28.48l-0.57-6.35V233.65L659.54 422.87c-12.9 12.95-33.56 13.91-47.59 2.2-14.04-11.71-16.81-32.2-6.38-47.22l4.02-4.86 189.22-189.08-114.29-0.14c-17.06 0.04-31.71-12.14-34.78-28.92l-0.63-6.35c-0.01-17.04 12.16-31.65 28.93-34.71l6.35-0.57h201.27z m0 0',
+        });
+        const resizeIcon = createElementNode('svg', undefined, {
+            viewBox: '0 0 1024 1024',
+            class: 'egg_icon',
+        }, resizePath);
+        // 改变大小
+        const resizeBtn = createElementNode('button', undefined, {
+            class: 'frame_btn',
+            type: 'button',
+            onclick: () => {
+                max = !max;
+                wrap.classList.toggle('max', max);
+            },
+        }, resizeIcon);
+        const closePath = createElementNode('path', undefined, {
+            d: 'M453.44 512L161.472 220.032a41.408 41.408 0 0 1 58.56-58.56L512 453.44 803.968 161.472a41.408 41.408 0 0 1 58.56 58.56L570.56 512l291.968 291.968a41.408 41.408 0 0 1-58.56 58.56L512 570.56 220.032 862.528a41.408 41.408 0 0 1-58.56-58.56L453.44 512z',
+        });
+        const closeIcon = createElementNode('svg', undefined, {
+            viewBox: '0 0 1024 1024',
+            class: 'egg_icon',
+        }, closePath);
+        // 关闭窗口
+        const closeBtn = createElementNode('button', undefined, {
+            class: 'frame_btn',
+            type: 'button',
+            onclick: () => {
+                // 关闭窗口
+                closeFrame();
+            },
+        }, closeIcon);
+        // 控制器
+        const controls = createElementNode('div', undefined, {
+            class: 'frame_controls',
+        }, [hideBtn, resizeBtn, closeBtn]);
+        const controlsWrap = createElementNode('div', undefined, { class: 'frame_controls_wrap' }, [title, controls]);
+        // 窗口
+        const frame = createElementNode('iframe', undefined, {
+            class: 'frame',
+        });
+        // 窗口内容
+        const frameContent = createElementNode('div', undefined, {
+            class: 'frame_content',
+        }, [frame]);
+        // 容器
+        const wrap = createElementNode('div', undefined, { class: 'frame_wrap' }, [
+            controlsWrap,
+            frameContent,
+        ]);
+        // 遮罩
+        const mask = createElementNode('div', undefined, { class: 'frame_mask' });
+        // 容器
+        const conn = createElementNode('div', undefined, {
+            class: 'frame_container hide',
+        }, [mask, wrap]);
+        document.body.append(conn);
+    }
+}
+/**
+ * @description 初始化 id
+ */
+function initFrameID() {
+    if (settings[7]) {
+        const win = unsafeWindow;
+        win.addEventListener('message', (msg) => {
+            const { data } = msg;
+            if (data.id) {
+                id = data.id;
+                console.log('初始化 id!', id);
+            }
+        });
+    }
+}
+/**
+ * @description 打开窗口
+ * @param url
+ * @returns
+ */
+function openFrame(url) {
+    const conn = $$('.frame_container')[0];
+    if (conn) {
+        setFrameVisible(true);
+        // 窗口
+        const frame = $$('.frame', conn)[0];
+        // 打开
+        closed = false;
+        // id
+        const id = generateMix(10);
+        frame.src = url;
+        frame.addEventListener('load', () => {
+            frame.contentWindow?.postMessage({ id, closed: false }, url);
+        });
+        return {
+            id,
+            frame,
+        };
+    }
+}
+/**
+ * @description 改变窗口可见性
+ */
+function setFrameVisible(show) {
+    const conn = $$('.frame_container')[0];
+    const frameBtn = $$('.frame_show_btn')[0];
+    if (conn && frameBtn) {
+        if (hidden === show) {
+            // 隐藏
+            hidden = !show;
+            conn.classList.toggle('hide', !show);
+            frameBtn.classList.toggle('hide', show);
+        }
+    }
+}
+/**
+ * @description 关闭窗口
+ */
+function closeFrame() {
+    const conn = $$('.frame_container')[0];
+    const frameBtn = $$('.frame_show_btn')[0];
+    if (conn && frameBtn) {
+        // 隐藏窗口
+        conn.classList.toggle('hide', true);
+        // 隐藏按钮
+        frameBtn.classList.toggle('hide', true);
+        // 窗口
+        const frame = $$('.frame', conn)[0];
+        // 关闭
+        closed = true;
+        frame.src = '';
+    }
+}
+/**
+ * @description 等待窗口任务结束
+ * @param id
+ * @returns
+ */
+function waitFrameClose(id) {
+    return new Promise((resolve) => {
+        window.addEventListener('message', (msg) => {
+            const { data } = msg;
+            if (data.id === id && data.closed) {
+                resolve(true);
+            }
+        });
+        setInterval(() => {
+            if (closed) {
+                resolve(true);
+            }
+        }, 100);
+    });
+}
+/**
+ * @description 打开并等待任务结束
+ */
+async function waitTaskWin(url) {
+    if (settings[7]) {
+        const newFrame = openFrame(url);
+        if (newFrame) {
+            // id
+            const { id } = newFrame;
+            // 等待窗口关闭
+            await waitFrameClose(id);
+        }
+    }
+    else {
+        // 页面
+        const newPage = openWin(url);
+        await waitingClose(newPage);
+    }
+}
+/**
+ * @description 是否显示目菜单
+ */
 function setVisible(isShow) {
     // 菜单
     const menu = $$('.egg_menu')[0];
@@ -2339,7 +2791,9 @@ function setVisible(isShow) {
         menu.style.display = isShow ? 'block' : 'none';
     }
 }
-// 登录状态
+/**
+ * @description 登录状态
+ */
 function loginStatus() {
     return new Promise((resolve) => {
         // 清楚之前的定时器
@@ -2355,16 +2809,18 @@ function loginStatus() {
         }, 100);
     });
 }
-// 登录窗口
+/**
+ * @description 登录窗口
+ */
 function loginWindowLoad() {
     // egg_frame_login
     const frameLogin = $$('.egg_frame_login')[0];
     // 配置
     const frameItem = $$('.egg_frame_item')[0];
     if (frameLogin) {
-        let iframe = frameLogin.querySelector('iframe');
+        let iframe = $$('iframe', frameLogin)[0];
         if (!iframe) {
-            iframe = creatElementNode('iframe');
+            iframe = createElementNode('iframe');
             frameLogin.append(iframe);
             frameItem.classList.add('active');
             console.log('加载登录二维码!');
@@ -2376,7 +2832,9 @@ function loginWindowLoad() {
         iframe.src = URL_CONFIG.login;
     }
 }
-// 学习
+/**
+ * @description 学习
+ */
 async function study() {
     console.log('开始学习');
     // 暂停
@@ -2419,10 +2877,12 @@ async function study() {
                 tasks[3].status = true;
                 // 进度条对象
                 const taskProgressList = $$('.egg_progress');
+                // 进度信息
+                const progressInfo = taskProgressList[3];
                 // 进度条
-                const bar = taskProgressList[3].querySelector('.egg_bar');
+                const bar = $$('.egg_bar', progressInfo)[0];
                 // 百分比
-                const percent = taskProgressList[3].querySelector('.egg_percent');
+                const percent = $$('.egg_percent', progressInfo)[0];
                 // 长度
                 bar.style.width = `100%`;
                 // 文字
@@ -2443,10 +2903,12 @@ async function study() {
             tasks[4].status = true;
             // 进度条对象
             const taskProgressList = $$('.egg_progress');
+            // 进度条信息
+            const progressInfo = taskProgressList[4];
             // 进度条
-            const bar = taskProgressList[4].querySelector('.egg_bar');
+            const bar = $$('.egg_bar', progressInfo)[0];
             // 百分比
-            const percent = taskProgressList[4].querySelector('.egg_percent');
+            const percent = $$('.egg_percent', progressInfo)[0];
             // 长度
             bar.style.width = `100%`;
             // 文字
@@ -2454,20 +2916,26 @@ async function study() {
         }
     }
 }
-// 设置进度条
+/**
+ * @description 设置进度条
+ */
 function setProgress(index, progress) {
     // 进度条对象
     const taskProgressList = $$('.egg_progress');
+    // 进度条信息
+    const progressInfo = taskProgressList[index];
     // 进度条
-    const bar = taskProgressList[index].querySelector('.egg_bar');
+    const bar = $$('.egg_bar', progressInfo)[0];
     // 百分比
-    const percent = taskProgressList[index].querySelector('.egg_percent');
+    const percent = $$('.egg_percent', progressInfo)[0];
     // 长度
     bar.style.width = `${progress}%`;
     // 文字
     percent.innerText = `${progress}%`;
 }
-// 暂停任务
+/**
+ * @description 暂停任务
+ */
 function pauseTask() {
     // 全局暂停
     if (GM_getValue('pauseStudy') !== true) {
@@ -2480,7 +2948,9 @@ function pauseTask() {
     startButton.removeEventListener('click', pauseTask);
     startButton.addEventListener('click', continueTask);
 }
-// 继续任务
+/**
+ * @description 继续任务
+ */
 function continueTask() {
     // 全局暂停
     if (GM_getValue('pauseStudy') !== false) {
@@ -2493,7 +2963,9 @@ function continueTask() {
     startButton.removeEventListener('click', continueTask);
     startButton.addEventListener('click', pauseTask);
 }
-// 完成任务
+/**
+ * @description 完成任务
+ */
 function finishTask() {
     // 全局暂停
     if (GM_getValue('pauseStudy') !== false) {
@@ -2506,7 +2978,9 @@ function finishTask() {
     startButton.classList.add('disabled');
     startButton.setAttribute('disabled', '');
 }
-// 开始
+/**
+ * @description 开始
+ */
 async function start() {
     // 保存配置
     console.log('准备开始学习...');
@@ -2540,6 +3014,10 @@ async function start() {
             // 刷新菜单数据
             await refreshMenu();
             finishTask();
+            // 关闭窗口
+            if (settings[7]) {
+                closeFrame();
+            }
             console.log('已完成');
         }
         // 显示界面

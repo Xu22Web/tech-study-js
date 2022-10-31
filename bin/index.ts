@@ -187,9 +187,11 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
           // 获取实际路径
           const filePath = path.resolve(rootDir, relativefilePath);
           // 获取文本信息
-          const content = fs.readFileSync(filePath, {
-            encoding: 'utf8',
-          });
+          const content = fs
+            .readFileSync(filePath, {
+              encoding: 'utf8',
+            })
+            .replace(/\n|\\n/g, '');
           // 创建变量标识符
           const name = ts.factory.createIdentifier(identifierText);
           // 创建字符串

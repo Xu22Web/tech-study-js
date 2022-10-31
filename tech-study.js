@@ -2716,12 +2716,10 @@ function setFrameVisible(show) {
     const conn = $$('.frame_container')[0];
     const frameBtn = $$('.frame_show_btn')[0];
     if (conn && frameBtn) {
-        if (hidden === show) {
-            // 隐藏
-            hidden = !show;
-            conn.classList.toggle('hide', !show);
-            frameBtn.classList.toggle('hide', show);
-        }
+        // 隐藏
+        hidden = !show;
+        conn.classList.toggle('hide', !show);
+        frameBtn.classList.toggle('hide', show);
     }
 }
 /**

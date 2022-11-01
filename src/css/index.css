@@ -350,8 +350,17 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 .egg_study_btn.disabled {
   background: #ccc;
 }
-.egg_tip {
+.egg_tip_wrap {
   position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 99999;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+.egg_tip {
+  position: absolute;
   bottom: 2rem;
   left: 2rem;
   padding: 1.2rem 1.4rem;
@@ -360,8 +369,7 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   background: var(--themeColor);
   color: white;
   font-size: 1.4rem;
-  transition: 0.3s ease-in-out;
-  z-index: 99999;
+  transition: 200ms ease;
   opacity: 0;
   transform: scale(0.9) translateY(1rem);
 }
@@ -384,7 +392,7 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   left: 0;
   top: 0;
   z-index: 999;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   visibility: visible;
 }

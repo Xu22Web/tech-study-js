@@ -440,6 +440,8 @@ window.addEventListener('load', () => {
         renderMenu();
         // 渲染窗口
         renderFrame();
+        // 渲染提示
+        renderTip();
       }
     }, 800);
   } else if (
@@ -450,8 +452,12 @@ window.addEventListener('load', () => {
     initSetting();
     console.log('初始化设置!');
     console.log(settings);
+    // 设置字体
+    initFontSize();
     // 初始化 id
     initFrameID();
+    // 渲染提示
+    renderTip();
     reading(0);
   } else if (
     typeof GM_getValue('watchingUrl') === 'string' &&
@@ -461,8 +467,12 @@ window.addEventListener('load', () => {
     initSetting();
     console.log('初始化设置!');
     console.log(settings);
+    // 设置字体
+    initFontSize();
     // 初始化 id
     initFrameID();
+    // 渲染提示
+    renderTip();
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
       let temp = getVideoTag();
@@ -502,9 +512,13 @@ window.addEventListener('load', () => {
     initSetting();
     console.log('初始化设置!');
     console.log(settings);
+    // 设置字体
+    initFontSize();
     // 初始化 id
     initFrameID();
     console.log('进入答题页面!');
+    // 渲染提示
+    renderTip();
     // 答题页面
     const ready = setInterval(() => {
       if ($$('.title')[0]) {
@@ -629,6 +643,7 @@ function createTip(
   callback?: (current: number, operate: object) => any,
   show: boolean = true
 ) {
+  const tipWrap = $$('.egg_tip_wrap')[0];
   // 提前去除
   const studyTip = $$<HTMLElement & { destroy: () => void }>('#studyTip')[0];
   if (studyTip) {
@@ -721,10 +736,9 @@ function createTip(
     },
   };
   Object.assign(tipInfo, operate);
-  tipInfo.append(span);
-  tipInfo.appendChild(countdown);
+  tipInfo.append(span, countdown);
   // 插入节点
-  document.body.append(tipInfo);
+  tipWrap.append(tipInfo);
   // 显示
   show && operate.show();
   // 倒计时
@@ -2400,17 +2414,17 @@ async function renderMenu() {
   // 自动答题
   if (login && settings[6]) {
     // 创建提示
-    const tip = createTip('即将开始自动答题', 5);
+    const tip = createTip('即将自动开始任务', 5);
     // 等待倒计时结束
     await tip.waitCountDown();
     // 再次查看是否开启
     if (settings[6] && !started) {
       // 创建提示
-      createTip('开始自动答题', 2);
+      createTip('自动开始任务', 2);
       start();
     } else {
       // 创建提示
-      createTip('已取消自动答题!', 2);
+      createTip('已取消自动开始任务!', 2);
     }
   }
 }
@@ -2547,6 +2561,15 @@ function renderFrame() {
     );
     document.body.append(conn);
   }
+}
+/**
+ * @description 渲染提示
+ */
+function renderTip() {
+  const tipWrap = createElementNode('div', undefined, {
+    class: 'egg_tip_wrap',
+  });
+  document.body.append(tipWrap);
 }
 /**
  * @description 初始化 id

@@ -433,7 +433,7 @@ function generateMix(length = 6) {
 }
 
 
-const css = ':root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}.egg_icon {  width: 1em;  height: 1em;  font-size: 1.8rem;  fill: currentColor;}@media (max-height: 768px) {  :root {    --scale: 0.8;  }}.icon {  width: 1em;  height: 1em;  vertical-align: -0.15em;  fill: currentColor;  overflow: hidden;}.egg_btn {  transition: background 100ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_btn.manual {  background: #e3484b;}.egg_setting_box {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #fff;  box-shadow: 0 0 0.4rem 0.1rem #ccc;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}@media (max-height: 768px) {  .egg_setting_box {    top: 2rem;  }}.egg_setting_box.hide {  left: 0;  transform: translateX(-100%);}.egg_setting_box .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 200ms ease;}.egg_setting_box.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_setting_box .egg_setting_show_btn,.egg_setting_box .frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  cursor: pointer;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;}.egg_setting_box.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_setting_box .egg_setting_show_btn {  background: #ccc;}.egg_setting_box .frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_setting_box .frame_show_btn.hide {  display: none;}.egg_setting_box hr {  height: 0.1rem;  border: none;  background: #eee;  position: relative;  margin: 0.8rem 0;}.egg_setting_box hr:after {  content: attr(data-category);  position: absolute;  transform: translate(calc(-50%), calc(-50%));  left: 50%;  top: 50%;  font-size: 1.2rem;  color: #999;  background: white;  padding: 0 0.6rem;}.egg_setting_item {  margin-top: 0.5rem;  min-height: 3rem;  min-width: 20rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_info_item {  flex-direction: column;  align-items: stretch;}.egg_userinfo .login_btn,.egg_user_login .login_btn {  outline: none;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  cursor: pointer;  transition: 80ms ease;  color: white;}.egg_userinfo .login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_userinfo .login_btn:active,.egg_user_login .login_btn:active {  opacity: 0.8;}.egg_user_login .login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_login {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_user_login .egg_frame_item {  height: 0;  overflow: hidden;}.egg_user_login .egg_frame_item.active {  --rate: 0.8;  margin-top: 0.8rem;  height: calc(21.8rem * var(--rate));}.egg_frame {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_frame_item.active .egg_frame {  transform: scale(var(--rate));  transform-origin: top center;  overflow: hidden;  padding: 0.4rem;  width: 21.8rem;  height: 21.8rem;}.egg_frame .egg_frame_login {  position: absolute;  left: -6.9rem;  top: -2.6rem;}.egg_frame iframe {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;}.egg_userinfo {  display: flex;  justify-content: space-between;  align-items: center;}.egg_userinfo .egg_user {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_user .egg_sub_nickname,.egg_userinfo .egg_user .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_user .egg_name {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;}.egg_scoreinfo span {  color: var(--themeColor);  padding-left: 0.4rem;  font-weight: bold;}.egg_setting_item label {  flex-grow: 1;}.egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}input[type=\'checkbox\'].egg_setting_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}input[type=\'checkbox\'].egg_setting_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}input[type=\'checkbox\'].egg_setting_switch:checked {  background: var(--themeColor);}input[type=\'checkbox\'].egg_setting_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.tip {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_start_btn {  justify-content: center;}.egg_study_btn {  outline: none;  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  color: white;  cursor: pointer;  transition: all 0.3s;}.egg_study_btn:hover {  opacity: 0.8;}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_btn.disabled {  background: #ccc;}.egg_tip {  position: fixed;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 0.3s ease-in-out;  z-index: 99999;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.frame_container {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100vh;  visibility: visible;}.frame_container.hide {  visibility: hidden;}.frame_container.hide .frame_mask,.frame_container.hide .frame_wrap {  opacity: 0;}.frame_container.hide .frame_wrap {  transform: scale(0);}.frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.frame_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: white;  overflow: hidden;  transform: scale(1);}.frame_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.frame_wrap .frame_controls_wrap {  width: 100%;  background: white;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.frame_controls_wrap .frame_title {  padding: 1rem 2rem;}.frame_controls .frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;}.frame_controls .frame_btn:active {  opacity: 0.8;}.frame_wrap .frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.frame_content .frame {  width: 100%;  height: 100%;  outline: none;  border: none;  background: white;}';
+const css = ':root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}.egg_icon {  width: 1em;  height: 1em;  font-size: 1.8rem;  fill: currentColor;}@media (max-height: 768px) {  :root {    --scale: 0.8;  }}.icon {  width: 1em;  height: 1em;  vertical-align: -0.15em;  fill: currentColor;  overflow: hidden;}.egg_btn {  transition: background 100ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_btn.manual {  background: #e3484b;}.egg_setting_box {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #fff;  box-shadow: 0 0 0.4rem 0.1rem #ccc;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}@media (max-height: 768px) {  .egg_setting_box {    top: 2rem;  }}.egg_setting_box.hide {  left: 0;  transform: translateX(-100%);}.egg_setting_box .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 200ms ease;}.egg_setting_box.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_setting_box .egg_setting_show_btn,.egg_setting_box .frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  cursor: pointer;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;}.egg_setting_box.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_setting_box .egg_setting_show_btn {  background: #ccc;}.egg_setting_box .frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_setting_box .frame_show_btn.hide {  display: none;}.egg_setting_box hr {  height: 0.1rem;  border: none;  background: #eee;  position: relative;  margin: 0.8rem 0;}.egg_setting_box hr:after {  content: attr(data-category);  position: absolute;  transform: translate(calc(-50%), calc(-50%));  left: 50%;  top: 50%;  font-size: 1.2rem;  color: #999;  background: white;  padding: 0 0.6rem;}.egg_setting_item {  margin-top: 0.5rem;  min-height: 3rem;  min-width: 20rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_info_item {  flex-direction: column;  align-items: stretch;}.egg_userinfo .login_btn,.egg_user_login .login_btn {  outline: none;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  cursor: pointer;  transition: 80ms ease;  color: white;}.egg_userinfo .login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_userinfo .login_btn:active,.egg_user_login .login_btn:active {  opacity: 0.8;}.egg_user_login .login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_login {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_user_login .egg_frame_item {  height: 0;  overflow: hidden;}.egg_user_login .egg_frame_item.active {  --rate: 0.8;  margin-top: 0.8rem;  height: calc(21.8rem * var(--rate));}.egg_frame {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_frame_item.active .egg_frame {  transform: scale(var(--rate));  transform-origin: top center;  overflow: hidden;  padding: 0.4rem;  width: 21.8rem;  height: 21.8rem;}.egg_frame .egg_frame_login {  position: absolute;  left: -6.9rem;  top: -2.6rem;}.egg_frame iframe {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;}.egg_userinfo {  display: flex;  justify-content: space-between;  align-items: center;}.egg_userinfo .egg_user {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_user .egg_sub_nickname,.egg_userinfo .egg_user .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_user .egg_name {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;}.egg_scoreinfo span {  color: var(--themeColor);  padding-left: 0.4rem;  font-weight: bold;}.egg_setting_item label {  flex-grow: 1;}.egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}input[type=\'checkbox\'].egg_setting_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}input[type=\'checkbox\'].egg_setting_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}input[type=\'checkbox\'].egg_setting_switch:checked {  background: var(--themeColor);}input[type=\'checkbox\'].egg_setting_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.tip {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_start_btn {  justify-content: center;}.egg_study_btn {  outline: none;  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  color: white;  cursor: pointer;  transition: all 0.3s;}.egg_study_btn:hover {  opacity: 0.8;}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100vw;  height: 100vh;  pointer-events: none;}.egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.frame_container {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100vw;  height: 100vh;  visibility: visible;}.frame_container.hide {  visibility: hidden;}.frame_container.hide .frame_mask,.frame_container.hide .frame_wrap {  opacity: 0;}.frame_container.hide .frame_wrap {  transform: scale(0);}.frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.frame_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: white;  overflow: hidden;  transform: scale(1);}.frame_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.frame_wrap .frame_controls_wrap {  width: 100%;  background: white;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.frame_controls_wrap .frame_title {  padding: 1rem 2rem;}.frame_controls .frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;}.frame_controls .frame_btn:active {  opacity: 0.8;}.frame_wrap .frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.frame_content .frame {  width: 100%;  height: 100%;  outline: none;  border: none;  background: white;}';
 /**
  * @description 嵌入样式
  */
@@ -854,6 +854,8 @@ window.addEventListener('load', () => {
                 renderMenu();
                 // 渲染窗口
                 renderFrame();
+                // 渲染提示
+                renderTip();
             }
         }, 800);
     }
@@ -863,8 +865,12 @@ window.addEventListener('load', () => {
         initSetting();
         console.log('初始化设置!');
         console.log(settings);
+        // 设置字体
+        initFontSize();
         // 初始化 id
         initFrameID();
+        // 渲染提示
+        renderTip();
         reading(0);
     }
     else if (typeof GM_getValue('watchingUrl') === 'string' &&
@@ -873,8 +879,12 @@ window.addEventListener('load', () => {
         initSetting();
         console.log('初始化设置!');
         console.log(settings);
+        // 设置字体
+        initFontSize();
         // 初始化 id
         initFrameID();
+        // 渲染提示
+        renderTip();
         let randNum = 0;
         const checkVideoPlayingInterval = setInterval(() => {
             let temp = getVideoTag();
@@ -918,9 +928,13 @@ window.addEventListener('load', () => {
         initSetting();
         console.log('初始化设置!');
         console.log(settings);
+        // 设置字体
+        initFontSize();
         // 初始化 id
         initFrameID();
         console.log('进入答题页面!');
+        // 渲染提示
+        renderTip();
         // 答题页面
         const ready = setInterval(() => {
             if ($$('.title')[0]) {
@@ -1028,6 +1042,7 @@ async function reading(type) {
  * @description 创建学习提示
  */
 function createTip(text, delay = 2, callback, show = true) {
+    const tipWrap = $$('.egg_tip_wrap')[0];
     // 提前去除
     const studyTip = $$('#studyTip')[0];
     if (studyTip) {
@@ -1112,10 +1127,9 @@ function createTip(text, delay = 2, callback, show = true) {
         },
     };
     Object.assign(tipInfo, operate);
-    tipInfo.append(span);
-    tipInfo.appendChild(countdown);
+    tipInfo.append(span, countdown);
     // 插入节点
-    document.body.append(tipInfo);
+    tipWrap.append(tipInfo);
     // 显示
     show && operate.show();
     // 倒计时
@@ -2629,18 +2643,18 @@ async function renderMenu() {
     // 自动答题
     if (login && settings[6]) {
         // 创建提示
-        const tip = createTip('即将开始自动答题', 5);
+        const tip = createTip('即将自动开始任务', 5);
         // 等待倒计时结束
         await tip.waitCountDown();
         // 再次查看是否开启
         if (settings[6] && !started) {
             // 创建提示
-            createTip('开始自动答题', 2);
+            createTip('自动开始任务', 2);
             start();
         }
         else {
             // 创建提示
-            createTip('已取消自动答题!', 2);
+            createTip('已取消自动开始任务!', 2);
         }
     }
 }
@@ -2727,6 +2741,15 @@ function renderFrame() {
         }, [mask, wrap]);
         document.body.append(conn);
     }
+}
+/**
+ * @description 渲染提示
+ */
+function renderTip() {
+    const tipWrap = createElementNode('div', undefined, {
+        class: 'egg_tip_wrap',
+    });
+    document.body.append(tipWrap);
 }
 /**
  * @description 初始化 id

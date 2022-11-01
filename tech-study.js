@@ -1496,33 +1496,92 @@ function handleSlideVerify() {
             };
             // 路径
             const path = createRandomPath(start, end, 10);
-            // 鼠标按下
-            const mousedown = new MouseEvent('mousedown', {
-                clientX: path[0].x,
-                clientY: path[0].y,
-                bubbles: true,
-                view: window,
-            });
-            slide.dispatchEvent(mousedown);
-            // 鼠标滑动
-            for (const i in path) {
-                const mousemove = new MouseEvent('mousemove', {
-                    clientX: path[i].x,
-                    clientY: path[i].y,
+            // 移动端
+            const mobile = hasMobile();
+            if (mobile) {
+                slide.style.touchAction = 'none';
+                const touchstartTouch = new Touch({
+                    identifier: 0,
+                    target: slide,
+                    clientX: path[0].x,
+                    clientY: path[0].y,
+                });
+                const touchstartList = [touchstartTouch];
+                // 开始触摸
+                const touchstart = new TouchEvent('touchstart', {
+                    targetTouches: touchstartList,
+                    touches: touchstartList,
+                    changedTouches: touchstartList,
+                    view: window,
+                    bubbles: true,
+                });
+                slide.dispatchEvent(touchstart);
+                // 触摸滑动
+                for (const i in path) {
+                    const touchmoveTouch = new Touch({
+                        identifier: 0,
+                        target: slide,
+                        clientX: path[i].x,
+                        clientY: path[i].y,
+                    });
+                    const touchmoveList = [touchmoveTouch];
+                    const touchmove = new TouchEvent('touchmove', {
+                        targetTouches: touchmoveList,
+                        touches: touchmoveList,
+                        changedTouches: touchmoveList,
+                        view: window,
+                        bubbles: true,
+                    });
+                    slide.dispatchEvent(touchmove);
+                    await waitingTime(10);
+                }
+                const touchendTouch = new Touch({
+                    identifier: 0,
+                    target: slide,
+                    clientX: path[path.length - 1].x,
+                    clientY: path[path.length - 1].y,
+                });
+                // 触摸结束
+                const touchendList = [touchendTouch];
+                // 开始触摸
+                const touchend = new TouchEvent('touchend', {
+                    targetTouches: [],
+                    touches: [],
+                    changedTouches: touchendList,
+                    view: window,
+                    bubbles: true,
+                });
+                slide.dispatchEvent(touchend);
+            }
+            else {
+                // 鼠标按下
+                const mousedown = new MouseEvent('mousedown', {
+                    clientX: path[0].x,
+                    clientY: path[0].y,
                     bubbles: true,
                     view: window,
                 });
-                slide.dispatchEvent(mousemove);
-                await waitingTime(10);
+                slide.dispatchEvent(mousedown);
+                // 鼠标滑动
+                for (const i in path) {
+                    const mousemove = new MouseEvent('mousemove', {
+                        clientX: path[i].x,
+                        clientY: path[i].y,
+                        bubbles: true,
+                        view: window,
+                    });
+                    slide.dispatchEvent(mousemove);
+                    await waitingTime(10);
+                }
+                // 鼠标抬起
+                const mouseup = new MouseEvent('mouseup', {
+                    clientX: path[path.length - 1].x,
+                    clientY: path[path.length - 1].y,
+                    bubbles: true,
+                    view: window,
+                });
+                slide.dispatchEvent(mouseup);
             }
-            // 鼠标抬起
-            const mouseup = new MouseEvent('mouseup', {
-                clientX: path[path.length - 1].x,
-                clientY: path[path.length - 1].y,
-                bubbles: true,
-                view: window,
-            });
-            slide.dispatchEvent(mouseup);
             // 创建提示
             createTip('滑动验证成功! ', 2);
             // 定时器

@@ -1,3 +1,6 @@
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 :root {
   --themeColor: #fa3333;
   --scale: 1;

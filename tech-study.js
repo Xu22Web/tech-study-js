@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221101
+// @version   20221102
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -1013,17 +1013,23 @@ async function reading(type) {
     let firstTime = time - 2;
     // 第二次滚动时间
     let secendTime = 12;
-    // 滚动长度
-    const scrollLength = document.body.scrollHeight / 2;
     // 创建提示
     const tip = createTip('距离关闭页面还剩', time, async (time) => {
         // 暂停锁
         await pauseStudyLock();
         if (time === firstTime) {
-            window.scrollTo(0, 394);
+            // 模拟滚动
+            const scroll = new Event('scroll', {
+                bubbles: true,
+            });
+            document.dispatchEvent(scroll);
         }
         if (time === secendTime) {
-            window.scrollTo(0, scrollLength / 3);
+            // 模拟滚动
+            const scroll = new Event('scroll', {
+                bubbles: true,
+            });
+            document.dispatchEvent(scroll);
         }
     }, !settings[5]);
     // 倒计时结束

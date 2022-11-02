@@ -605,8 +605,6 @@ async function reading(type: number) {
   let firstTime = time - 2;
   // 第二次滚动时间
   let secendTime = 12;
-  // 滚动长度
-  const scrollLength = document.body.scrollHeight / 2;
   // 创建提示
   const tip = createTip(
     '距离关闭页面还剩',
@@ -615,10 +613,18 @@ async function reading(type: number) {
       // 暂停锁
       await pauseStudyLock();
       if (time === firstTime) {
-        window.scrollTo(0, 394);
+        // 模拟滚动
+        const scroll = new Event('scroll', {
+          bubbles: true,
+        });
+        document.dispatchEvent(scroll);
       }
       if (time === secendTime) {
-        window.scrollTo(0, scrollLength / 3);
+        // 模拟滚动
+        const scroll = new Event('scroll', {
+          bubbles: true,
+        });
+        document.dispatchEvent(scroll);
       }
     },
     !settings[5]

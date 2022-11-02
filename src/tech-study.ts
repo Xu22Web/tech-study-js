@@ -1754,6 +1754,11 @@ function initFontSize() {
   // 移动端
   const moblie = hasMobile();
   if (moblie) {
+    // 清除缩放
+    const meta = $$<HTMLMetaElement>('meta[name=viewport]')[0];
+    if (meta) {
+      meta.content = 'initial-scale=0, user-scalable=yes';
+    }
     // 缩放比例
     const scale = ~~(window.innerWidth / window.outerWidth) || 1;
     document.documentElement.style.setProperty('--scale', String(scale));

@@ -410,8 +410,8 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   left: 0;
   top: 0;
   z-index: 99999;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 .egg_tip {
@@ -447,8 +447,8 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   left: 0;
   top: 0;
   z-index: 999;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   visibility: visible;
 }
 .frame_container.hide {

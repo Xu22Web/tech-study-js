@@ -13,7 +13,8 @@ import {
   hasMobile,
   openWin,
   waitingClose,
-  waitingTime,
+  sleep,
+  createTextNode,
 } from './utils';
 /**
  * @description 嵌入样式
@@ -353,6 +354,7 @@ async function saveAnswer(key, value) {
  * @description 任务进度
  */
 const tasks: {
+  title: string;
   dayMaxScore: number;
   currentScore: number;
   status: boolean;
@@ -371,6 +373,7 @@ let settings = [
   true,
   true,
   true,
+  false,
   false,
   false,
   false,
@@ -406,14 +409,9 @@ let loginTimer: any;
  */
 let closed = true;
 /**
- * @description frame 隐藏
- */
-let hidden = true;
-/**
  * @description id
  */
 let id: string;
-
 /**
  * @description load
  */
@@ -824,9 +822,9 @@ async function readNews() {
     // 链接
     GM_setValue('readingUrl', url);
     // 等待任务窗口
-    await waitTaskWin(url);
+    await waitTaskWin(url, '文章选读');
     // 等待一段时间
-    await waitingTime(1500);
+    await sleep(1500);
     // 刷新菜单数据
     await refreshMenu();
     // 任务完成跳出循环
@@ -856,10 +854,10 @@ async function watchVideo() {
     // 链接
     GM_setValue('watchingUrl', url);
     // 等待任务窗口
-    await waitTaskWin(url);
+    await waitTaskWin(url, '视听学习');
     // 等待窗口关闭
     // 等待一段时间
-    await waitingTime(1500);
+    await sleep(1500);
     // 刷新菜单数据pauseStudyLock
     await refreshMenu();
     // 任务完成跳出循环
@@ -884,14 +882,14 @@ async function doExamPractice() {
   // 链接
   const url = URL_CONFIG.examPractice;
   // 等待任务窗口
-  await waitTaskWin(url);
+  await waitTaskWin(url, '每日答题');
   // 等待一段时间
-  await waitingTime(1500);
+  await sleep(1500);
   // 刷新菜单数据
   await refreshMenu();
   // 任务完成状况
   if (settings[2] && !tasks[2].status) {
-    console.log('任务未完成, 继续完成每日答题!');
+    console.log('任务未完成, 继续每日答题!');
     await doExamPractice();
   }
 }
@@ -907,20 +905,18 @@ async function doExamWeekly() {
     console.log('正在做每周答题...');
     // 链接
     const url = `${URL_CONFIG.examWeekly}?id=${examWeeklyId}`;
+    console.log(`链接: ${url}`);
     // 等待任务窗口
-    await waitTaskWin(url);
+    await waitTaskWin(url, '每周答题');
     // 等待一段时间
-    await waitingTime(1500);
+    await sleep(1500);
     // 刷新菜单数据
     await refreshMenu();
-    // 任务完成状况
     if (settings[3] && !tasks[3].status) {
-      console.log('任务未完成, 继续完成每周答题!');
-      return await doExamWeekly();
+      console.log('任务未完成, 继续每周答题!');
+      doExamWeekly();
     }
-    return true;
   }
-  return false;
 }
 
 /**
@@ -935,20 +931,18 @@ async function doExamPaper() {
     console.log('正在做专项练习...');
     // 链接
     const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
+    console.log(`链接: ${url}`);
     // 等待窗口任务
-    await waitTaskWin(url);
+    await waitTaskWin(url, '专项练习');
     // 等待一段时间
-    await waitingTime(1500);
+    await sleep(1500);
     // 刷新菜单数据
     await refreshMenu();
-    // 任务完成状况
     if (settings[4] && !tasks[4].status) {
       console.log('任务未完成, 继续专项练习!');
-      return await doExamPaper();
+      doExamPaper();
     }
-    return true;
   }
-  return false;
 }
 /**
  * @description 初始化每周答题总页数属性
@@ -959,7 +953,7 @@ async function initExam(type: number) {
     const data = await getExamWeekly(1);
     if (data) {
       // 等待
-      await waitingTime(ratelimitms);
+      await sleep(ratelimitms);
       return data.totalPageCount;
     }
   }
@@ -968,7 +962,7 @@ async function initExam(type: number) {
     const data = await getExamPaper(1);
     if (data) {
       // 等待
-      await waitingTime(ratelimitms);
+      await sleep(ratelimitms);
       return data.totalPageCount;
     }
   }
@@ -1013,7 +1007,7 @@ async function findExamWeekly() {
       // 增加页码
       current += examWeeklyReverse ? -1 : 1;
       // 等待
-      await waitingTime(ratelimitms);
+      await sleep(ratelimitms);
     } else {
       break;
     }
@@ -1051,7 +1045,7 @@ async function findExamPaper() {
       // 增加页码 (若开启逆序翻页, 则减少页码)
       current += examPaperReverse ? -1 : 1;
       // 等待
-      await waitingTime(ratelimitms);
+      await sleep(ratelimitms);
     } else {
       break;
     }
@@ -1165,7 +1159,7 @@ function handleSlideVerify() {
             bubbles: true,
           });
           slide.dispatchEvent(touchmove);
-          await waitingTime(10);
+          await sleep(10);
         }
         const touchendTouch = new Touch({
           identifier: 0,
@@ -1202,7 +1196,7 @@ function handleSlideVerify() {
             view: window,
           });
           slide.dispatchEvent(mousemove);
-          await waitingTime(10);
+          await sleep(10);
         }
         // 鼠标抬起
         const mouseup = new MouseEvent('mouseup', {
@@ -1397,7 +1391,7 @@ async function doingExam() {
   let shouldSaveAnswer = false;
   while (true) {
     // 先等等再开始做题
-    await waitingTime(2500);
+    await sleep(2500);
     // 暂停
     await pauseLock();
     // 获取下一个按钮
@@ -1418,7 +1412,7 @@ async function doingExam() {
     // 获取题目的文本内容
     const question = $$('.q-body')[0].innerText;
     // 等待一段时间
-    await waitingTime(1500);
+    await sleep(1500);
     // 暂停
     await pauseLock();
     // 选项按钮
@@ -1648,9 +1642,7 @@ async function doingExam() {
       const answer = answers.join(';');
       // 存在答案
       if (answer.length) {
-        // 答案
-        console.log('正在上传中...');
-        console.log(`key:${key}, answers:${answer}`);
+        console.log('上传答案', { answer, key, question });
         // 保存答案
         await saveAnswer(key, answer);
         // 答案
@@ -1664,7 +1656,7 @@ async function doingExam() {
       // 确认
       nextButton.click();
       // 等待一段时间
-      await waitingTime(2000);
+      await sleep(2000);
       // 暂停
       await pauseLock();
       // 答案解析
@@ -1675,10 +1667,10 @@ async function doingExam() {
         const key = getKey(question);
         const answerTemp = answerBox.innerText;
         // 从字符串中拿出答案
-        const [, answer] = answerTemp.split('：');
-        if (answer && answer.length) {
-          answer.replaceAll(' ', ';');
-          console.log(`上传了错题答案 key:${key} answer:${answer}!`);
+        const [, answerText] = answerTemp.split('：');
+        if (answerText && answerText.length) {
+          const answer = answerText.replaceAll(' ', ';');
+          console.log('上传答案', { answer, key, question });
           await saveAnswer(key, answer);
         }
         // 每周答题
@@ -1699,7 +1691,7 @@ async function doingExam() {
     nextText = nextButton.innerText.replaceAll(' ', '');
     if (nextText === '下一题' || nextText === '完成' || nextText === '交卷') {
       // 等待一段时间
-      await waitingTime(2500);
+      await sleep(2500);
       // 下一题
       nextButton.click();
     }
@@ -1721,7 +1713,7 @@ function getKey(content: string) {
 function initSetting() {
   try {
     let settingTemp = JSON.parse(GM_getValue('studySetting'));
-    if (settingTemp) {
+    if (settingTemp && settingTemp.length === settings.length) {
       settings = settingTemp;
     } else {
       settings = [
@@ -1730,6 +1722,7 @@ function initSetting() {
         true,
         true,
         true,
+        false,
         false,
         false,
         false,
@@ -1745,6 +1738,7 @@ function initSetting() {
       true,
       true,
       true,
+      false,
       false,
       false,
       false,
@@ -1959,8 +1953,22 @@ async function loadScoreInfo() {
         const totalScoreDiv = createElementNode(
           'div',
           { innerText: '总积分' },
-          { class: 'egg_totalscore' },
+          {
+            class: 'egg_totalscore',
+          },
           totalScoreSpan
+        );
+        const showPath = createElementNode('path', undefined, {
+          d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
+        });
+        const showIcon = createElementNode(
+          'svg',
+          undefined,
+          {
+            viewBox: '0 0 1024 1024',
+            class: 'egg_icon',
+          },
+          showPath
         );
         // 当天总分
         const todayScoreSpan = createElementNode('span', {
@@ -1969,18 +1977,76 @@ async function loadScoreInfo() {
         const todayScoreDiv = createElementNode(
           'div',
           { innerText: '当天积分' },
-          { class: 'egg_todayscore' },
-          todayScoreSpan
+          {
+            class: 'egg_todayscore',
+            title: '查看分数详情',
+            onclick: () => {
+              const exists = scoreDetails.classList.contains('hide');
+              scoreDetails.classList.toggle('hide', !exists);
+            },
+          },
+          [todayScoreSpan, showIcon]
+        );
+        // 分数细节
+        const scoreDetails = createElementNode(
+          'div',
+          undefined,
+          {
+            class: 'egg_score_details hide',
+          },
+          [
+            createElementNode('div', undefined, { class: 'egg_score_title' }, [
+              createElementNode(
+                'svg',
+                undefined,
+                {
+                  viewBox: '0 0 1024 1024',
+                  class: 'egg_icon',
+                },
+                [
+                  createElementNode('path', undefined, {
+                    d: 'M314.81 304.01h415.86v58.91H314.81zM314.81 440.24h415.86v58.91H314.81z',
+                  }),
+                  createElementNode('path', undefined, {
+                    d: 'M814.8 892.74h-8.64l-283.51-182-283.51 182h-8.64A69.85 69.85 0 0 1 160.72 823V188.22a69.85 69.85 0 0 1 69.77-69.77H814.8a69.85 69.85 0 0 1 69.77 69.77V823a69.85 69.85 0 0 1-69.77 69.74zM230.5 177.35a10.87 10.87 0 0 0-10.86 10.86V823a10.86 10.86 0 0 0 5 9.11l298.01-191.42 298.06 191.38a10.86 10.86 0 0 0 5-9.11V188.22a10.87 10.87 0 0 0-10.86-10.86z',
+                  }),
+                ]
+              ),
+              createElementNode(
+                'div',
+                { innerText: '积分详情' },
+                { class: 'egg_score_title_text' }
+              ),
+            ]),
+            ...tasks.map((task) =>
+              createElementNode('div', undefined, { class: 'egg_score_item' }, [
+                createTextNode(task.title),
+                createElementNode(
+                  'span',
+                  { innerText: task.currentScore },
+                  {
+                    class: 'egg_score_detail',
+                  }
+                ),
+              ])
+            ),
+          ]
+        );
+        // wrap
+        const todayScoreWrap = createElementNode(
+          'div',
+          undefined,
+          {
+            class: 'egg_todayscore_wrap',
+          },
+          [todayScoreDiv, scoreDetails]
         );
         // 分数信息
         const scoreInfo = createElementNode(
           'div',
           undefined,
-          {
-            class: 'egg_scoreinfo',
-          },
-
-          [totalScoreDiv, todayScoreDiv]
+          { class: 'egg_scoreinfo' },
+          [totalScoreDiv, todayScoreWrap]
         );
         infoItem.append(scoreInfo);
       }
@@ -1994,48 +2060,51 @@ async function loadTaskList() {
   // 原始任务进度
   const taskProgress = await getTaskList();
   if (taskProgress) {
-    // 文章
-    const { currentScore: artCur, dayMaxScore: artMax } = taskProgress[0];
+    // 文章选读
     tasks[0] = {
-      currentScore: artCur,
-      dayMaxScore: artMax,
+      title: '文章选读',
+      currentScore: taskProgress[0].currentScore,
+      dayMaxScore: taskProgress[0].dayMaxScore,
+      need: taskProgress[0].dayMaxScore - taskProgress[0].currentScore,
       status: false,
-      need: artMax - artCur,
     };
-    // 视频
-    const { currentScore: videoCur1, dayMaxScore: videoMax1 } = taskProgress[1];
-    const { currentScore: videoCur2, dayMaxScore: videoMax2 } = taskProgress[3];
-
+    // 视听学习
     tasks[1] = {
-      currentScore: videoCur1 + videoCur2,
-      dayMaxScore: videoMax1 + videoMax2,
+      title: '视听学习',
+      currentScore: taskProgress[1].currentScore + taskProgress[3].currentScore,
+      dayMaxScore: taskProgress[1].dayMaxScore + taskProgress[3].dayMaxScore,
+      need:
+        taskProgress[1].dayMaxScore +
+        taskProgress[3].dayMaxScore -
+        (taskProgress[1].currentScore + taskProgress[3].currentScore),
       status: false,
-      need: videoMax1 + videoMax2 - (videoCur1 + videoCur2),
     };
     // 每日答题
-    const { currentScore: dayCur, dayMaxScore: dayMax } = taskProgress[6];
     tasks[2] = {
-      currentScore: dayCur,
-      dayMaxScore: dayMax,
+      title: '每日答题',
+      currentScore: taskProgress[6].currentScore,
+      dayMaxScore: taskProgress[6].dayMaxScore,
+      need: taskProgress[6].dayMaxScore - taskProgress[6].currentScore,
       status: false,
-      need: dayMax - dayCur,
     };
     // 每周答题
-    const { currentScore: weekCur, dayMaxScore: weekMax } = taskProgress[2];
     tasks[3] = {
-      currentScore: weekCur,
-      dayMaxScore: weekMax,
+      title: '每周答题',
+      currentScore: taskProgress[2].currentScore,
+      dayMaxScore: taskProgress[2].dayMaxScore,
+      need: taskProgress[2].dayMaxScore - taskProgress[2].currentScore,
       status: false,
-      need: weekMax - weekCur,
     };
     // 专项练习
-    const { currentScore: exerCur, dayMaxScore: exerMax } = taskProgress[5];
     tasks[4] = {
-      currentScore: exerCur,
-      dayMaxScore: exerMax,
+      title: '专项练习',
+      currentScore: taskProgress[5].currentScore,
+      dayMaxScore: taskProgress[5].dayMaxScore,
+      need: taskProgress[5].dayMaxScore - taskProgress[5].currentScore,
       status: false,
-      need: exerMax - exerCur,
     };
+    // 详情
+    const details = $$('.egg_score_details .egg_score_detail');
     // 更新数据
     for (const i in tasks) {
       const { currentScore, dayMaxScore } = tasks[i];
@@ -2045,24 +2114,40 @@ async function loadTaskList() {
       if (dayMaxScore <= currentScore) {
         rate = 100;
       }
+      // 每周答题 缺分补满
+      if (Number(i) === 3) {
+        if (!settings[10] && currentScore) {
+          rate = 100;
+        }
+      }
       if (rate === 100) {
         tasks[i].status = true;
       }
-      if (rate > 0) {
+      if (rate >= 0) {
         // 设置进度条
         setProgress(Number(i), Number(rate.toFixed(1)));
+        // 设置详情
+        if (details[i]) {
+          details[i].innerText = String(tasks[i].currentScore);
+        }
       }
     }
+    return;
   }
+  // 再次请求
+  await sleep(2000);
+  await loadTaskList();
 }
 /**
  * @description 刷新菜单数据
  */
 async function refreshMenu() {
-  // 加载分数信息
-  await loadScoreInfo();
+  console.log('正在加载任务列表...');
   // 加载任务列表
   await loadTaskList();
+  console.log('正在加载分数信息...');
+  // 加载分数信息
+  await loadScoreInfo();
 }
 /**
  * @description 渲染菜单
@@ -2078,17 +2163,33 @@ async function renderMenu() {
   settingItems.push(infoItem);
   // 任务标签
   const settingTaskLabels = [
-    '文章选读',
-    '视听学习',
-    '每日答题',
-    '每周答题',
-    '专项练习',
+    {
+      title: '文章选读',
+      tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
+    },
+    {
+      title: '视听学习',
+      tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
+    },
+    { title: '每日答题', tip: '每组答题每答对1道积1分。每日上限积5分。' },
+    {
+      title: '每周答题',
+      tip: '每组答题每答对1道积1分，同组答题不重复积分。每日上限积5分。',
+    },
+    {
+      title: '专项练习',
+      tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
+    },
   ];
   // 分割线
   settingItems.push(
     createElementNode('hr', undefined, { 'data-category': '任务' })
   );
   for (const i in settingTaskLabels) {
+    // 标签
+    const label = createElementNode('label', {
+      innerText: settingTaskLabels[i].title,
+    });
     // 进度条
     const bar = createElementNode('div', undefined, { class: 'egg_bar' });
     // 轨道
@@ -2119,13 +2220,11 @@ async function renderMenu() {
       [track, percent]
     );
     // 标签
-    const label = createElementNode(
-      'label',
-      {
-        innerText: settingTaskLabels[i],
-      },
+    const labelWrap = createElementNode(
+      'div',
       undefined,
-      progress
+      { class: 'egg_label_wrap' },
+      [label, progress]
     );
     // 处理设置选项变化
     const handleCheckChange = debounce(async (checked) => {
@@ -2134,12 +2233,15 @@ async function renderMenu() {
         // 设置
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
-        createTip(`${settingTaskLabels[i]} ${checked ? '打开' : '关闭'}!`, 2);
+        createTip(
+          `${settingTaskLabels[i].title} ${checked ? '打开' : '关闭'}!`,
+          2
+        );
       }
     }, 500);
     // 选项
     const input = createElementNode('input', undefined, {
-      title: settingTaskLabels[i],
+      title: settingTaskLabels[i].tip,
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[i] ? 'checked' : '',
@@ -2153,7 +2255,7 @@ async function renderMenu() {
       'div',
       undefined,
       { class: 'egg_setting_item' },
-      [label, input]
+      [labelWrap, input]
     );
     settingItems.push(item);
   }
@@ -2162,7 +2264,7 @@ async function renderMenu() {
     createElementNode('hr', undefined, { 'data-category': '运行' })
   );
   // 运行设置标签
-  const settingRunLabel = [
+  const settingRunLabels = [
     {
       title: '运行隐藏',
       tip: '运行时, 隐藏任务面板以及弹窗提示',
@@ -2176,16 +2278,16 @@ async function renderMenu() {
       tip: '所有任务不在打开的新页面进行, 而在当前页面运行',
     },
   ];
-  for (const i in settingRunLabel) {
+  for (const i in settingRunLabels) {
     // 标签
     const label = createElementNode('label', {
-      innerText: settingRunLabel[i].title,
+      innerText: settingRunLabels[i].title,
     });
-    if (settingRunLabel[i].tip.length) {
+    if (settingRunLabels[i].tip.length) {
       const tip = createElementNode(
         'span',
         { innerText: 'i' },
-        { class: 'tip', title: settingRunLabel[i].tip }
+        { class: 'egg_detail', title: settingRunLabels[i].tip }
       );
       label.appendChild(tip);
     }
@@ -2199,14 +2301,14 @@ async function renderMenu() {
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
         createTip(
-          `${settingRunLabel[i].title} ${checked ? '打开' : '关闭'}!`,
+          `${settingRunLabels[i].title} ${checked ? '打开' : '关闭'}!`,
           2
         );
       }
     }, 300);
     // 选项
     const input = createElementNode('input', undefined, {
-      title: settingRunLabel[i].tip,
+      title: settingRunLabels[i].tip,
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[currentIndex] ? 'checked' : '',
@@ -2229,29 +2331,33 @@ async function renderMenu() {
     createElementNode('hr', undefined, { 'data-category': '答题' })
   );
   // 运行设置标签
-  const settingExamLabel = [
+  const settingExamLabels = [
     {
       title: '随机作答',
       tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
     },
     { title: '答错暂停', tip: '每周答题时, 答错暂停答题!' },
+    {
+      title: '缺分补满',
+      tip: '每周答题完成后, 若当前分数非满分, 则再次答题补足!',
+    },
   ];
-  for (const i in settingExamLabel) {
+  for (const i in settingExamLabels) {
     // 标签
     const label = createElementNode('label', {
-      innerText: settingExamLabel[i].title,
+      innerText: settingExamLabels[i].title,
     });
-    if (settingExamLabel[i].tip.length) {
+    if (settingExamLabels[i].tip.length) {
       const tip = createElementNode(
         'span',
         { innerText: 'i' },
-        { class: 'tip', title: settingExamLabel[i].tip }
+        { class: 'egg_detail', title: settingExamLabels[i].tip }
       );
       label.appendChild(tip);
     }
     // 当前序号
     const currentIndex =
-      Number(i) + settingTaskLabels.length + settingRunLabel.length;
+      Number(i) + settingTaskLabels.length + settingRunLabels.length;
     // 处理设置选项变化
     const handleCheckChange = debounce(async (checked) => {
       if (settings[currentIndex] !== checked) {
@@ -2260,14 +2366,14 @@ async function renderMenu() {
         GM_setValue('studySetting', JSON.stringify(settings));
         // 创建提示
         createTip(
-          `${settingExamLabel[i].title} ${checked ? '打开' : '关闭'}!`,
+          `${settingExamLabels[i].title} ${checked ? '打开' : '关闭'}!`,
           2
         );
       }
     }, 300);
     // 选项
     const input = createElementNode('input', undefined, {
-      title: settingExamLabel[i].tip,
+      title: settingExamLabels[i].tip,
       class: 'egg_setting_switch',
       type: 'checkbox',
       checked: settings[currentIndex] ? 'checked' : '',
@@ -2311,8 +2417,6 @@ async function renderMenu() {
     },
     frameShowIcon
   );
-  // 显示状况
-  let hidden = false;
   const showPath = createElementNode('path', undefined, {
     d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
   });
@@ -2330,11 +2434,16 @@ async function renderMenu() {
     'button',
     undefined,
     {
-      class: `egg_setting_show_btn`,
+      class: 'egg_setting_show_btn',
       type: 'button',
       onclick: () => {
-        hidden = !hidden;
-        settingBox.classList.toggle('hide', hidden);
+        const settingsHidden = settingBox.classList.contains('hide');
+        settingBox.classList.toggle('hide', !settingsHidden);
+        if (!settingsHidden) {
+          // 积分详情
+          const scoreDetails = $$('.egg_score_details')[0];
+          scoreDetails.classList.add('hide');
+        }
       },
     },
     showIcon
@@ -2395,12 +2504,8 @@ async function renderMenu() {
   console.log('正在加载用户信息...');
   // 加载用户信息
   await loadUserInfo();
-  console.log('正在加载分数信息...');
-  // 加载分数信息
-  await loadScoreInfo();
-  console.log('正在加载任务列表...');
-  // 加载任务列表
-  await loadTaskList();
+  // 刷新菜单
+  await refreshMenu();
   // 已经登录
   if (login) {
     // 完成任务
@@ -2467,8 +2572,6 @@ function renderFrame() {
       },
       hideIcon
     );
-    // 最大化
-    let max = false;
     const resizePath = createElementNode('path', undefined, {
       d: 'M609.52 584.92a35.309 35.309 0 0 1 24.98-10.36c9.37 0 18.36 3.73 24.98 10.36l189.29 189.22-0.07-114.3 0.57-6.35c3.25-17.98 19.7-30.5 37.9-28.85 18.2 1.65 32.12 16.92 32.09 35.2v200.23c-0.05 1.49-0.19 2.97-0.42 4.45l-0.21 1.13c-0.22 1.44-0.55 2.85-0.99 4.24l-0.57 1.62-0.56 1.41a34.163 34.163 0 0 1-7.62 11.36l2.12-2.4-0.14 0.14-0.92 1.06-1.06 1.2-0.57 0.57-0.56 0.57a36.378 36.378 0 0 1-16.23 8.39l-3.53 0.5-4.02 0.35h-199.6l-6.35-0.63c-16.73-3.06-28.9-17.63-28.93-34.64l0.56-6.35c3.07-16.76 17.67-28.93 34.71-28.92l114.29-0.14-189.07-189.1-4.09-4.94c-9.71-14.01-8.01-32.95 4.02-45.02z m-162.06 0c12.06 12.05 13.78 30.99 4.09 45.01l-4.09 4.94-189.15 189.08 114.3 0.14c17.04-0.01 31.65 12.17 34.71 28.92l0.57 6.35c-0.03 17.01-12.19 31.58-28.92 34.64l-6.35 0.63H173.09l-4.23-0.42-3.39-0.49a36.38 36.38 0 0 1-17.36-9.52l-1.06-1.13-0.98-1.13 0.98 1.06-1.97-2.26 0.85 1.06-0.42-0.56a35.137 35.137 0 0 1-3.74-5.64l-1.13-2.68a34.71 34.71 0 0 1-2.11-7.33l-0.28-1.13c-0.21-1.47-0.33-2.96-0.36-4.45V659.78c-0.03-18.28 13.89-33.55 32.09-35.2 18.2-1.65 34.65 10.87 37.9 28.85l0.57 6.35-0.07 114.36 189.29-189.22c13.77-13.77 36.11-13.77 49.88 0h-0.09z m-74.71-471.71l6.35 0.57c16.76 3.06 28.93 17.67 28.92 34.71l-0.63 6.35c-3.07 16.76-17.67 28.93-34.71 28.92l-114.3 0.14 189.15 189.08 4.09 4.94c10.26 15.02 7.42 35.37-6.55 47.01-13.98 11.63-34.51 10.74-47.42-2.07L208.29 233.71l0.07 114.3-0.57 6.35c-3.25 17.98-19.7 30.5-37.9 28.85-18.2-1.65-32.12-16.92-32.09-35.2V147.78c0-1.55 0.14-3.03 0.35-4.51l0.21-1.13c0.24-1.44 0.59-2.85 1.06-4.23a34.97 34.97 0 0 1 8.68-14.39l-2.12 2.4-0.42 0.57 1.55-1.84-0.99 1.06 0.92-0.98 2.26-2.33c3.04-2.73 6.52-4.92 10.3-6.49l2.82-1.06c3.45-1.07 7.04-1.62 10.65-1.62l-3.6 0.14h0.49l1.48-0.14h201.31z m512.91 0l1.41 0.14h0.42c2.43 0.29 4.84 0.79 7.19 1.48l2.82 1.06 2.61 1.2 3.04 1.76c2.09 1.33 4.03 2.89 5.78 4.66l1.13 1.2 0.78 0.98 0.21 0.14 0.49 0.64 2.33 3.17c2.35 3.83 3.98 8.07 4.8 12.49l0.21 1.13c0.21 1.48 0.35 2.96 0.35 4.44v200.37c-0.16 18.13-14.03 33.19-32.08 34.83-18.06 1.64-34.42-10.67-37.83-28.48l-0.57-6.35V233.65L659.54 422.87c-12.9 12.95-33.56 13.91-47.59 2.2-14.04-11.71-16.81-32.2-6.38-47.22l4.02-4.86 189.22-189.08-114.29-0.14c-17.06 0.04-31.71-12.14-34.78-28.92l-0.63-6.35c-0.01-17.04 12.16-31.65 28.93-34.71l6.35-0.57h201.27z m0 0',
     });
@@ -2489,8 +2592,8 @@ function renderFrame() {
         class: 'frame_btn',
         type: 'button',
         onclick: () => {
-          max = !max;
-          wrap.classList.toggle('max', max);
+          const exists = wrap.classList.contains('max');
+          wrap.classList.toggle('max', !exists);
         },
       },
       resizeIcon
@@ -2587,7 +2690,7 @@ function initFrameID() {
       const { data } = msg;
       if (data.id) {
         id = data.id;
-        console.log('初始化 id!', id);
+        console.log('初始化窗口 id: ', id);
       }
     });
   }
@@ -2597,18 +2700,22 @@ function initFrameID() {
  * @param url
  * @returns
  */
-function openFrame(url: string) {
+function openFrame(url: string, title?: string) {
   const conn = $$('.frame_container')[0];
   if (conn) {
     setFrameVisible(true);
+    // 标题
+    const frameTitle = $$('.frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.frame', conn)[0];
     // 打开
     closed = false;
     // id
     const id = generateMix(10);
+    // 设置URL
     frame.src = url;
     frame.addEventListener('load', () => {
+      frameTitle.innerText = title || '';
       frame.contentWindow?.postMessage({ id, closed: false }, url);
     });
     return {
@@ -2624,8 +2731,6 @@ function setFrameVisible(show: boolean) {
   const conn = $$('.frame_container')[0];
   const frameBtn = $$('.frame_show_btn')[0];
   if (conn && frameBtn) {
-    // 隐藏
-    hidden = !show;
     conn.classList.toggle('hide', !show);
     frameBtn.classList.toggle('hide', show);
   }
@@ -2641,11 +2746,14 @@ function closeFrame() {
     conn.classList.toggle('hide', true);
     // 隐藏按钮
     frameBtn.classList.toggle('hide', true);
+    // 标题
+    const frameTitle = $$('.frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.frame', conn)[0];
     // 关闭
     closed = true;
     frame.src = '';
+    frameTitle.innerText = '';
   }
 }
 /**
@@ -2671,9 +2779,9 @@ function waitFrameClose(id: string) {
 /**
  * @description 打开并等待任务结束
  */
-async function waitTaskWin(url: string) {
+async function waitTaskWin(url: string, title?: string) {
   if (settings[7]) {
-    const newFrame = openFrame(url);
+    const newFrame = openFrame(url, title);
     if (newFrame) {
       // id
       const { id } = newFrame;
@@ -2747,14 +2855,16 @@ async function study() {
   if (tasks.length) {
     // 检查新闻
     if (settings[0] && !tasks[0].status) {
-      console.log('任务一：看新闻');
+      console.log('任务一：文章选读');
+      createTip('任务一：文章选读', 2);
       // 暂停
       await pauseStudyLock();
       // 看新闻
       await readNews();
     }
     if (settings[1] && !tasks[1].status) {
-      console.log('任务二：看视频');
+      console.log('任务二：视听学习');
+      createTip('任务二：视听学习', 2);
       // 暂停
       await pauseStudyLock();
       // 看视频
@@ -2762,7 +2872,8 @@ async function study() {
     }
     // 检查每日答题
     if (settings[2] && !tasks[2].status) {
-      console.log('任务三：做每日答题');
+      console.log('任务三：每日答题');
+      createTip('任务三：每日答题', 2);
       // 暂停
       await pauseStudyLock();
       // 做每日答题
@@ -2770,54 +2881,21 @@ async function study() {
     }
     // 检查每周答题
     if (settings[3] && !tasks[3].status) {
-      console.log('任务四：做每周答题');
+      console.log('任务四：每周答题');
+      createTip('任务四：每周答题', 2);
       // 暂停
       await pauseStudyLock();
       // 做每周答题
-      const res = await doExamWeekly();
-      // 无题可做
-      if (!res) {
-        // 如果是全都完成了, 已经没有能做的了
-        tasks[3].status = true;
-        // 进度条对象
-        const taskProgressList = $$('.egg_progress');
-        // 进度信息
-        const progressInfo = taskProgressList[3];
-        // 进度条
-        const bar = $$('.egg_bar', progressInfo)[0];
-        // 百分比
-        const percent = $$('.egg_percent', progressInfo)[0];
-        // 长度
-        bar.style.width = `100%`;
-        // 文字
-        percent.innerText = `100%`;
-      }
+      await doExamWeekly();
     }
   }
   // 检查专项练习
   if (settings[4] && !tasks[4].status) {
-    console.log('任务五：做专项练习');
+    console.log('任务五：专项练习');
     // 暂停
     await pauseStudyLock();
     // 做专项练习
-    const res = await doExamPaper();
-    // 无题可做
-    if (!res) {
-      // 如果是全都完成了, 已经没有能做的了
-      tasks[4].status = true;
-      // 进度条对象
-      const taskProgressList = $$('.egg_progress');
-      // 进度条信息
-      const progressInfo = taskProgressList[4];
-      // 进度条
-      const bar = $$('.egg_bar', progressInfo)[0];
-      // 百分比
-      const percent = $$('.egg_percent', progressInfo)[0];
-      // 长度
-      bar.style.width = `100%`;
-      // 文字
-      percent.innerText = `100%`;
-    }
+    await doExamPaper();
   }
 }
 /**
@@ -2911,12 +2989,12 @@ async function start() {
     if (tasks.length) {
       // 学习
       await study();
+      // 刷新菜单数据
+      await refreshMenu();
       // 未完成
       if (!tasks.every((task, i) => !settings[i] || task.status)) {
         await study();
       }
-      // 刷新菜单数据
-      await refreshMenu();
       finishTask();
       // 关闭窗口
       if (settings[7]) {

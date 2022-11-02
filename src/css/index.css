@@ -9,7 +9,6 @@
 .egg_icon {
   width: 1em;
   height: 1em;
-  font-size: 1.8rem;
   fill: currentColor;
 }
 @media (max-height: 768px) {
@@ -47,7 +46,7 @@
   padding: 1.2rem 2rem;
   border-radius: 1rem;
   background: #fff;
-  box-shadow: 0 0 0.4rem 0.1rem #ccc;
+  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;
   transition: 80ms ease-out;
   z-index: 99999;
   color: #333;
@@ -66,7 +65,7 @@
   left: 100%;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: 200ms ease;
+  transition: 80ms ease;
 }
 .egg_setting_box.hide .egg_btns_wrap {
   left: 100%;
@@ -84,6 +83,7 @@
   color: white;
   display: grid;
   place-items: center;
+  font-size: 1.8rem;
 }
 .egg_setting_box.hide .egg_setting_show_btn {
   background: var(--themeColor);
@@ -117,9 +117,8 @@
   padding: 0 0.6rem;
 }
 .egg_setting_item {
-  margin-top: 0.5rem;
   min-height: 3rem;
-  min-width: 20rem;
+  min-width: 18rem;
   font-size: 1.6rem;
   display: flex;
   align-items: center;
@@ -163,7 +162,7 @@
   overflow: hidden;
 }
 .egg_user_login .egg_frame_item.active {
-  --rate: 0.8;
+  --rate: 0.75;
   margin-top: 0.8rem;
   height: calc(21.8rem * var(--rate));
 }
@@ -233,18 +232,71 @@
   padding: 0.5rem 0;
 }
 .egg_scoreinfo .egg_totalscore,
-.egg_scoreinfo .egg_todayscore {
+.egg_scoreinfo .egg_todayscore_wrap {
   font-size: 1.2rem;
+  user-select: none;
 }
-.egg_scoreinfo span {
+.egg_scoreinfo .egg_totalscore span,
+.egg_scoreinfo .egg_todayscore_wrap .egg_todayscore span {
+  padding-left: 0.2rem;
+}
+.egg_scoreinfo .egg_totalscore span,
+.egg_todayscore_wrap .egg_todayscore span,
+.egg_todayscore_wrap .egg_score_details span {
   color: var(--themeColor);
-  padding-left: 0.4rem;
   font-weight: bold;
 }
-.egg_setting_item label {
+.egg_todayscore_wrap {
+  position: relative;
+}
+.egg_todayscore_wrap .egg_todayscore {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.egg_todayscore .egg_icon {
+  opacity: 0.3;
+}
+.egg_todayscore_wrap .egg_score_details {
+  position: absolute;
+  left: calc(100% + 1rem);
+  top: 0;
+  background: white;
+  border-radius: 0.5rem;
+  opacity: 1;
+  width: 10rem;
+  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;
+  transition: 80ms ease;
+  z-index: 9;
+}
+.egg_todayscore_wrap .egg_score_details.hide {
+  visibility: hidden;
+  opacity: 0;
+  left: 100%;
+}
+.egg_score_details .egg_score_title {
+  border-bottom: 0.1rem solid #eee;
+  padding: 0.5rem 0.8rem;
+  display: flex;
+  align-items: center;
+}
+.egg_score_details .egg_score_title .egg_icon {
+  font-size: 1.4rem;
+}
+.egg_score_details .egg_score_title .egg_score_title_text {
+  font-weight: bold;
+  padding-left: 0.2rem;
+}
+.egg_score_details .egg_score_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.8rem;
+}
+.egg_setting_item .egg_label_wrap {
   flex-grow: 1;
 }
-.egg_progress {
+.egg_label_wrap .egg_progress {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -308,7 +360,7 @@ input[type='checkbox'].egg_setting_switch:checked {
 input[type='checkbox'].egg_setting_switch:checked::after {
   left: calc(100% - var(--border-padding) - 1.4rem);
 }
-.tip {
+.egg_detail {
   background: #ccc;
   color: white;
   border-radius: 10rem;
@@ -447,6 +499,7 @@ input[type='checkbox'].egg_setting_switch:checked::after {
 }
 .frame_controls_wrap .frame_title {
   padding: 1rem 2rem;
+  font-size: 1.6rem;
 }
 .frame_controls .frame_btn {
   outline: none;
@@ -456,6 +509,7 @@ input[type='checkbox'].egg_setting_switch:checked::after {
   transition: 80ms ease;
   cursor: pointer;
   color: #333;
+  font-size: 1.8rem;
 }
 .frame_controls .frame_btn:active {
   opacity: 0.8;

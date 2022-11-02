@@ -92,7 +92,7 @@ function waitingClose(newPage) {
  * @param time
  * @returns
  */
-function waitingTime(time) {
+function sleep(time) {
   if (!Number.isInteger(time)) {
     time = 1000;
   }
@@ -372,7 +372,7 @@ export {
   debounce,
   hasMobile,
   getCookie,
-  waitingTime,
+  sleep,
   createElementNode,
   createTextNode,
   createRandomPoint,

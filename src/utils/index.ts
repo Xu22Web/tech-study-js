@@ -130,44 +130,21 @@ function hasMobile() {
  * @param children
  * @returns
  */
-function createElementNode(
-  eleName: string,
+function createElementNode<T extends keyof HTMLElementTagNameMap>(
+  tagName: T,
   props?: { [key: string]: any },
   attrs?: { [key: string]: any },
-  children?: Node | Node[]
-): HTMLElement {
-  // 元素
-  let ele;
-  // 格式化元素名
-  const formatEleName = eleName.toLowerCase();
-  // 需要命名空间的svg元素
-  const specficSVGElement = [
-    'svg',
-    'use',
-    'circle',
-    'rect',
-    'line',
-    'marker',
-    'linearGradient',
-    'g',
-    'path',
-  ];
-  // 需要命名空间的html元素
-  const specficHTMLElement = 'html';
-  if (formatEleName === specficHTMLElement) {
-    // html元素命名空间
-    const ns = 'http://www.w3.org/1999/xhtml';
-    // 创建普通元素
-    ele = document.createElementNS(ns, formatEleName);
-  } else if (specficSVGElement.includes(formatEleName)) {
-    // svg元素命名空间
-    const ns = 'http://www.w3.org/2000/svg';
-    // 创建普通元素
-    ele = document.createElementNS(ns, formatEleName);
-  } else {
-    // 创建普通元素
-    ele = document.createElement(formatEleName);
-  }
+  children?:
+    | HTMLElement
+    | SVGElement
+    | Text
+    | (HTMLElement | SVGElement | Text | undefined)[]
+    | Promise<HTMLElement>
+    | Promise<Text>
+    | Promise<HTMLElement | undefined>
+): HTMLElementTagNameMap[T] {
+  // 创建普通元素
+  const ele = document.createElement(tagName);
   // props属性设置
   for (const key in props) {
     if (props[key] instanceof Object) {
@@ -184,6 +161,8 @@ function createElementNode(
     const value = attrs[key];
     // 处理完的key
     const formatKey = key.toLowerCase();
+    // 特殊属性
+    const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
     // xlink命名空间
     if (formatKey.startsWith('xlink:')) {
       // xlink属性命名空间
@@ -212,33 +191,115 @@ function createElementNode(
           }
         }
       }
-    } else {
-      // 特殊属性
-      const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
-      if (specificAttrs.includes(key) && value) {
+    } else if (specificAttrs.includes(key)) {
+      if (value) {
         ele.setAttribute(key, '');
       } else {
-        if (value) {
-          ele.setAttribute(key, value);
-        } else {
-          ele.removeAttribute(key);
-        }
+        ele.removeAttribute(key);
       }
+    } else {
+      ele.setAttribute(key, value);
     }
   }
   // 子节点
   if (children) {
     if (children instanceof Array) {
-      if (children.length === 1) {
-        ele.append(children[0]);
+      // 过滤
+      const filterEle = <(HTMLElement | SVGElement | Text)[]>(
+        children.filter((child) => child)
+      );
+      ele.append(...filterEle);
+    } else {
+      if (children instanceof Promise) {
+        children.then((child) => child && ele.append(child));
       } else {
-        // 文档碎片
-        const fragment = document.createDocumentFragment();
-        for (const i in children) {
-          fragment.append(children[i]);
-        }
-        ele.append(fragment);
+        ele.append(children);
       }
+    }
+  }
+  return ele;
+}
+/**
+ * @description 创建svg元素
+ * @param tagName
+ * @param props
+ * @param attrs
+ * @param children
+ * @returns
+ */
+function createNSElementNode<T extends keyof SVGElementTagNameMap>(
+  tagName: T,
+  props?: { [key: string]: any },
+  attrs?: { [key: string]: any },
+  children?:
+    | HTMLElement
+    | SVGElement
+    | Text
+    | (HTMLElement | SVGElement | Text)[]
+): SVGElementTagNameMap[T] {
+  // svg元素命名空间
+  const ns = 'http://www.w3.org/2000/svg';
+  // 创建svg元素
+  const ele = document.createElementNS(ns, tagName);
+  // props属性设置
+  for (const key in props) {
+    if (props[key] instanceof Object) {
+      for (const subkey in props[key]) {
+        ele[key][subkey] = props[key][subkey];
+      }
+    } else {
+      ele[key] = props[key];
+    }
+  }
+  // attrs属性设置
+  for (const key in attrs) {
+    // 属性值
+    const value = attrs[key];
+    // 处理完的key
+    const formatKey = key.toLowerCase();
+    // 特殊属性
+    const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
+    // xlink命名空间
+    if (formatKey.startsWith('xlink:')) {
+      // xlink属性命名空间
+      const attrNS = 'http://www.w3.org/1999/xlink';
+      if (value) {
+        ele.setAttributeNS(attrNS, key, value);
+      } else {
+        ele.removeAttributeNS(attrNS, key);
+      }
+    } else if (formatKey.startsWith('on')) {
+      // 事件监听
+      const [, eventType] = key.toLowerCase().split('on');
+      // 事件类型
+      if (eventType) {
+        // 回调函数
+        if (value instanceof Function) {
+          ele.addEventListener(eventType, value);
+          // 回调函数数组
+        } else if (value instanceof Array) {
+          for (const i in value) {
+            // 回调函数
+            if (value[i] instanceof Function) {
+              ele.addEventListener(eventType, value[i]);
+            }
+          }
+        }
+      }
+    } else if (specificAttrs.includes(key)) {
+      if (value) {
+        ele.setAttribute(key, '');
+      } else {
+        ele.removeAttribute(key);
+      }
+    } else {
+      ele.setAttribute(key, value);
+    }
+  }
+  // 子节点
+  if (children) {
+    if (children instanceof Array) {
+      ele.append(...children);
     } else {
       ele.append(children);
     }
@@ -250,16 +311,8 @@ function createElementNode(
  * @param text
  * @returns
  */
-function createTextNode(...text) {
-  if (text && text.length === 1) {
-    return document.createTextNode(text[0]);
-  }
-  const fragment = document.createDocumentFragment();
-  for (const i in text) {
-    const textEle = document.createTextNode(text[i]);
-    fragment.append(textEle);
-  }
-  return fragment;
+function createTextNode(text: any) {
+  return document.createTextNode(text);
 }
 /**
  * @description 点
@@ -374,6 +427,7 @@ export {
   getCookie,
   sleep,
   createElementNode,
+  createNSElementNode,
   createTextNode,
   createRandomPoint,
   createRandomPath,

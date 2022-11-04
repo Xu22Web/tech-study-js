@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221103
+// @version   20221105
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
 // @match   https://pc.xuexi.cn/points/exam-practice.html
 // @match   https://pc.xuexi.cn/points/exam-weekly-detail.html?id=*
 // @match   https://pc.xuexi.cn/points/exam-paper-detail.html?id=*
+// @match   https://login.xuexi.cn/login/xuexiWeb?appid=dingoankubyrfkttorhpou&goto=https%3A%2F%2Foa.xuexi.cn&type=1&state=ffdea2ded23f45ab%2FKQreTlDFe1Id3B7BVdaaYcTMp6lsTBB%2Fs3gGevuMKfvpbABDEl9ymG3bbOgtpSN&check_login=https%3A%2F%2Fpc-api.xuexi.cn
 // @require   https://cdn.jsdelivr.net/npm/blueimp-md5@2.9.0
 // @run-at   document-start
 // @grant   GM_addStyle
@@ -204,41 +205,9 @@ function hasMobile() {
  * @param children
  * @returns
  */
-function createElementNode(eleName, props, attrs, children) {
-    // 元素
-    let ele;
-    // 格式化元素名
-    const formatEleName = eleName.toLowerCase();
-    // 需要命名空间的svg元素
-    const specficSVGElement = [
-        'svg',
-        'use',
-        'circle',
-        'rect',
-        'line',
-        'marker',
-        'linearGradient',
-        'g',
-        'path',
-    ];
-    // 需要命名空间的html元素
-    const specficHTMLElement = 'html';
-    if (formatEleName === specficHTMLElement) {
-        // html元素命名空间
-        const ns = 'http://www.w3.org/1999/xhtml';
-        // 创建普通元素
-        ele = document.createElementNS(ns, formatEleName);
-    }
-    else if (specficSVGElement.includes(formatEleName)) {
-        // svg元素命名空间
-        const ns = 'http://www.w3.org/2000/svg';
-        // 创建普通元素
-        ele = document.createElementNS(ns, formatEleName);
-    }
-    else {
-        // 创建普通元素
-        ele = document.createElement(formatEleName);
-    }
+function createElementNode(tagName, props, attrs, children) {
+    // 创建普通元素
+    const ele = document.createElement(tagName);
     // props属性设置
     for (const key in props) {
         if (props[key] instanceof Object) {
@@ -256,6 +225,8 @@ function createElementNode(eleName, props, attrs, children) {
         const value = attrs[key];
         // 处理完的key
         const formatKey = key.toLowerCase();
+        // 特殊属性
+        const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
         // xlink命名空间
         if (formatKey.startsWith('xlink:')) {
             // xlink属性命名空间
@@ -287,36 +258,115 @@ function createElementNode(eleName, props, attrs, children) {
                 }
             }
         }
-        else {
-            // 特殊属性
-            const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
-            if (specificAttrs.includes(key) && value) {
+        else if (specificAttrs.includes(key)) {
+            if (value) {
                 ele.setAttribute(key, '');
             }
             else {
-                if (value) {
-                    ele.setAttribute(key, value);
-                }
-                else {
-                    ele.removeAttribute(key);
-                }
+                ele.removeAttribute(key);
             }
+        }
+        else {
+            ele.setAttribute(key, value);
         }
     }
     // 子节点
     if (children) {
         if (children instanceof Array) {
-            if (children.length === 1) {
-                ele.append(children[0]);
+            // 过滤
+            const filterEle = (children.filter((child) => child));
+            ele.append(...filterEle);
+        }
+        else {
+            if (children instanceof Promise) {
+                children.then((child) => child && ele.append(child));
             }
             else {
-                // 文档碎片
-                const fragment = document.createDocumentFragment();
-                for (const i in children) {
-                    fragment.append(children[i]);
-                }
-                ele.append(fragment);
+                ele.append(children);
             }
+        }
+    }
+    return ele;
+}
+/**
+ * @description 创建svg元素
+ * @param tagName
+ * @param props
+ * @param attrs
+ * @param children
+ * @returns
+ */
+function createNSElementNode(tagName, props, attrs, children) {
+    // svg元素命名空间
+    const ns = 'http://www.w3.org/2000/svg';
+    // 创建svg元素
+    const ele = document.createElementNS(ns, tagName);
+    // props属性设置
+    for (const key in props) {
+        if (props[key] instanceof Object) {
+            for (const subkey in props[key]) {
+                ele[key][subkey] = props[key][subkey];
+            }
+        }
+        else {
+            ele[key] = props[key];
+        }
+    }
+    // attrs属性设置
+    for (const key in attrs) {
+        // 属性值
+        const value = attrs[key];
+        // 处理完的key
+        const formatKey = key.toLowerCase();
+        // 特殊属性
+        const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
+        // xlink命名空间
+        if (formatKey.startsWith('xlink:')) {
+            // xlink属性命名空间
+            const attrNS = 'http://www.w3.org/1999/xlink';
+            if (value) {
+                ele.setAttributeNS(attrNS, key, value);
+            }
+            else {
+                ele.removeAttributeNS(attrNS, key);
+            }
+        }
+        else if (formatKey.startsWith('on')) {
+            // 事件监听
+            const [, eventType] = key.toLowerCase().split('on');
+            // 事件类型
+            if (eventType) {
+                // 回调函数
+                if (value instanceof Function) {
+                    ele.addEventListener(eventType, value);
+                    // 回调函数数组
+                }
+                else if (value instanceof Array) {
+                    for (const i in value) {
+                        // 回调函数
+                        if (value[i] instanceof Function) {
+                            ele.addEventListener(eventType, value[i]);
+                        }
+                    }
+                }
+            }
+        }
+        else if (specificAttrs.includes(key)) {
+            if (value) {
+                ele.setAttribute(key, '');
+            }
+            else {
+                ele.removeAttribute(key);
+            }
+        }
+        else {
+            ele.setAttribute(key, value);
+        }
+    }
+    // 子节点
+    if (children) {
+        if (children instanceof Array) {
+            ele.append(...children);
         }
         else {
             ele.append(children);
@@ -329,16 +379,8 @@ function createElementNode(eleName, props, attrs, children) {
  * @param text
  * @returns
  */
-function createTextNode(...text) {
-    if (text && text.length === 1) {
-        return document.createTextNode(text[0]);
-    }
-    const fragment = document.createDocumentFragment();
-    for (const i in text) {
-        const textEle = document.createTextNode(text[i]);
-        fragment.append(textEle);
-    }
-    return fragment;
+function createTextNode(text) {
+    return document.createTextNode(text);
 }
 /**
  * @description 创建随机点
@@ -433,7 +475,7 @@ function generateMix(length = 6) {
 }
 
 
-const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}@media (max-height: 768px) {  :root {    --scale: 0.8;  }}.icon {  width: 1em;  height: 1em;  vertical-align: -0.15em;  fill: currentColor;  overflow: hidden;}.egg_btn {  transition: background 100ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_btn.manual {  background: #e3484b;}.egg_setting_box {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #fff;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}@media (max-height: 768px) {  .egg_setting_box {    top: 2rem;  }}.egg_setting_box.hide {  left: 0;  transform: translateX(-100%);}.egg_setting_box .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;}.egg_setting_box.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_setting_box .egg_setting_show_btn,.egg_setting_box .frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  cursor: pointer;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_setting_box.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_setting_box .egg_setting_show_btn {  background: #ccc;}.egg_setting_box .frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_setting_box .frame_show_btn.hide {  display: none;}.egg_setting_box hr {  height: 0.1rem;  border: none;  background: #eee;  position: relative;  margin: 0.8rem 0;}.egg_setting_box hr:after {  content: attr(data-category);  position: absolute;  transform: translate(calc(-50%), calc(-50%));  left: 50%;  top: 50%;  font-size: 1.2rem;  color: #999;  background: white;  padding: 0 0.6rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_info_item {  flex-direction: column;  align-items: stretch;}.egg_userinfo .login_btn,.egg_user_login .login_btn {  outline: none;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  cursor: pointer;  transition: 80ms ease;  color: white;}.egg_userinfo .login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_userinfo .login_btn:active,.egg_user_login .login_btn:active {  opacity: 0.8;}.egg_user_login .login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_login {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_user_login .egg_frame_item {  height: 0;  overflow: hidden;}.egg_user_login .egg_frame_item.active {  --rate: 0.75;  margin-top: 0.8rem;  height: calc(21.8rem * var(--rate));}.egg_frame {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_frame_item.active .egg_frame {  transform: scale(var(--rate));  transform-origin: top center;  overflow: hidden;  padding: 0.4rem;  width: 21.8rem;  height: 21.8rem;}.egg_frame .egg_frame_login {  position: absolute;  left: -6.9rem;  top: -2.6rem;}.egg_frame iframe {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;}.egg_userinfo {  display: flex;  justify-content: space-between;  align-items: center;}.egg_userinfo .egg_user {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_user .egg_sub_nickname,.egg_userinfo .egg_user .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_user .egg_name {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore_wrap {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore_wrap .egg_todayscore span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore_wrap .egg_todayscore span,.egg_todayscore_wrap .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_todayscore_wrap {  position: relative;}.egg_todayscore_wrap .egg_todayscore {  cursor: pointer;  display: flex;  align-items: center;}.egg_todayscore .egg_icon {  opacity: 0.3;}.egg_todayscore_wrap .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: white;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore_wrap .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;  box-shadow: -0.1rem 0.1rem 0.1rem -0.1rem #999 inset,    0.1rem 0.1rem 0.1rem -0.1rem #999 inset;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}input[type=\'checkbox\'].egg_setting_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}input[type=\'checkbox\'].egg_setting_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}input[type=\'checkbox\'].egg_setting_switch:checked {  background: var(--themeColor);}input[type=\'checkbox\'].egg_setting_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_start_btn {  justify-content: center;}.egg_study_btn {  outline: none;  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border: none;  border-radius: 1rem;  color: white;  cursor: pointer;  transition: all 0.3s;}.egg_study_btn:hover {  opacity: 0.8;}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.frame_container {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.frame_container.hide {  visibility: hidden;}.frame_container.hide .frame_mask,.frame_container.hide .frame_wrap {  opacity: 0;}.frame_container.hide .frame_wrap {  transform: scale(0);}.frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.frame_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: white;  overflow: hidden;  transform: scale(1);}.frame_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.frame_wrap .frame_controls_wrap {  width: 100%;  background: white;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.frame_controls_wrap .frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.frame_controls .frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.frame_controls .frame_btn:active {  opacity: 0.8;}.frame_wrap .frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.frame_content .frame {  width: 100%;  height: 100%;  outline: none;  border: none;  background: white;}';
+const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (max-height: 768px) {  :root {    --scale: 0.8;  }  .egg_panel {    top: 2rem;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 2rem;}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_setting_show_btn,.egg_panel .egg_frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_panel .egg_setting_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_login_wrap .egg_login_btn,.egg_user_wrap .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_login_wrap .egg_login_btn:active,.egg_user_wrap .egg_login_btn:active {  opacity: 0.8;}.egg_login_wrap .egg_login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_wrap .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_login_wrap {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_wrap .egg_login_frame_item {  height: 0;  overflow: hidden;}.egg_login_wrap .egg_login_frame_item.active {  --rate: 0.75;  margin-top: 0.8rem;  height: calc(22.8rem * var(--rate));  width: calc(22.8rem * var(--rate));}.egg_login_frame_item.active .egg_login_frame_wrap {  transform: scale(var(--rate));  transform-origin: top left;  overflow: hidden;  padding: 1rem;  width: 22.8rem;  height: 22.8rem;  background: white;  border-radius: 1rem;}.egg_login_frame_wrap {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_login_frame {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;  position: absolute;  left: -6.4rem;  top: -2.1rem;}.egg_user_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_user_wrap .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_sub_nickname,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_study_item {  display: flex;  justify-content: center;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}';
 /**
  * @description 嵌入样式
  */
@@ -772,7 +814,48 @@ async function saveAnswer(key, value) {
 /**
  * @description 任务进度
  */
-const tasks = [];
+const tasks = [
+    {
+        title: '文章选读',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
+    },
+    {
+        title: '视听学习',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
+    },
+    {
+        title: '每日答题',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每组答题每答对1道积1分。每日上限积5分。',
+    },
+    {
+        title: '每周答题',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每组答题每答对1道积1分，同组答题不重复积分。每日上限积5分。',
+    },
+    {
+        title: '专项练习',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
+    },
+];
 /**
  * @description 获取 URL
  */
@@ -825,6 +908,459 @@ let closed = true;
  * @description id
  */
 let id;
+/* 变量结束 */
+/* 组件化 */
+/**
+ * @description 分隔符
+ * @returns
+ */
+function Hr({ text }) {
+    return createElementNode('div', undefined, {
+        class: 'egg_hr_wrap',
+    }, [
+        createElementNode('div', undefined, { class: 'egg_hr' }),
+        createElementNode('div', undefined, { class: 'egg_hr_title' }, createTextNode(text)),
+        createElementNode('div', undefined, { class: 'egg_hr' }),
+    ]);
+}
+/**
+ * @description 设置任务项
+ * @returns
+ */
+function TaskItem({ title, tip, checked, onChange, }) {
+    return createElementNode('div', undefined, { class: 'egg_setting_item' }, [
+        createElementNode('div', undefined, { class: 'egg_label_wrap' }, [
+            createElementNode('label', undefined, { class: 'egg_task_title' }, createTextNode(title)),
+            createElementNode('div', undefined, { class: 'egg_progress' }, [
+                createElementNode('div', undefined, { class: 'egg_track' }, createElementNode('div', undefined, { class: 'egg_bar' })),
+                createElementNode('div', undefined, { class: 'egg_percent' }, [
+                    createElementNode('span', undefined, undefined, [createTextNode(0)]),
+                    createTextNode('%'),
+                ]),
+            ]),
+        ]),
+        createElementNode('input', undefined, {
+            title: tip,
+            class: 'egg_switch',
+            type: 'checkbox',
+            checked,
+            onChange,
+        }),
+    ]);
+}
+/**
+ * @description 设置普通项
+ * @returns
+ */
+function NomalItem({ title, tip, checked, onChange, }) {
+    return createElementNode('div', undefined, { class: 'egg_setting_item' }, [
+        createElementNode('div', undefined, { class: 'egg_label_wrap' }, [
+            createElementNode('label', undefined, { class: 'egg_task_title' }, [
+                createTextNode(title),
+                createElementNode('span', undefined, {
+                    class: 'egg_detail',
+                    title: tip,
+                }, createTextNode('i')),
+            ]),
+        ]),
+        createElementNode('input', undefined, {
+            title: tip,
+            class: 'egg_switch',
+            type: 'checkbox',
+            checked,
+            onChange,
+        }),
+    ]);
+}
+/**
+ * @description 信息
+ * @returns
+ */
+async function Info({ login }) {
+    if (login) {
+        // 用户信息
+        const userInfo = await getUserInfo();
+        if (userInfo) {
+            const { avatarMediaUrl, nick } = userInfo;
+            return createElementNode('div', undefined, {
+                class: 'egg_user_wrap',
+            }, [
+                // 用户信息
+                createElementNode('div', undefined, { class: 'egg_userinfo' }, [
+                    // 头像
+                    createElementNode('div', undefined, { class: 'egg_avatar' }, avatarMediaUrl
+                        ? createElementNode('img', undefined, {
+                            src: avatarMediaUrl,
+                            class: 'egg_avatar_img',
+                        })
+                        : createElementNode('div', undefined, {
+                            class: 'egg_sub_nickname',
+                        }, createTextNode(nick.substring(1, 3)))),
+                    // 昵称
+                    createElementNode('div', { innerText: nick }, { class: 'egg_nick' }),
+                ]),
+                // 退出按钮
+                createElementNode('button', { innerText: '退出' }, {
+                    type: 'button',
+                    class: 'egg_login_btn',
+                    onclick: debounce(() => {
+                        const logged = $$("a[class='logged-link']")[0];
+                        logged && logged.click();
+                    }, 500),
+                }),
+            ]);
+        }
+    }
+    // 刷新定时器
+    let refreshTimer;
+    // 刷新登录二维码
+    async function refreshLoginQRCode() {
+        // 配置
+        const frameItem = $$('.egg_login_frame_item')[0];
+        // 窗口
+        const iframe = $$('.egg_login_frame_wrap .egg_login_frame')[0];
+        if (frameItem) {
+            frameItem.classList.add('active');
+            // 登录页面
+            console.log('加载登录二维码!');
+            if (iframe.src !== URL_CONFIG.login) {
+                iframe.src = URL_CONFIG.login;
+                // 等待加载完毕
+                await waitFrameLoaded(iframe);
+            }
+            iframe.contentWindow?.postMessage('refresh', URL_CONFIG.login);
+        }
+    }
+    // 用户登录
+    return createElementNode('div', undefined, {
+        class: 'egg_login_wrap',
+    }, [
+        // 登录按钮
+        createElementNode('button', undefined, {
+            type: 'button',
+            class: 'egg_login_btn',
+            onclick: debounce(async () => {
+                if (refreshTimer) {
+                    clearInterval(refreshTimer);
+                }
+                // 加载登录页面
+                refreshLoginQRCode();
+                refreshTimer = setInterval(() => {
+                    refreshLoginQRCode();
+                }, 100000);
+                // 登录状态
+                const res = await loginStatus();
+                if (res) {
+                    await createTip('登录成功, 刷新页面!');
+                    window.location.reload();
+                }
+            }, 500),
+        }, createTextNode('扫码登录')),
+        // 窗口
+        createElementNode('div', undefined, {
+            class: 'egg_login_frame_item',
+        }, createElementNode('div', undefined, { class: 'egg_login_frame_wrap' }, createElementNode('iframe', undefined, {
+            class: 'egg_login_frame',
+        }))),
+    ]);
+}
+/**
+ * @description 面板
+ * @returns
+ */
+function Panel() {
+    // 任务标签
+    const taskLabels = tasks.map((task) => ({
+        title: task.title,
+        tip: task.tip,
+    }));
+    // 运行设置标签
+    const runLabels = [
+        {
+            title: '自动开始',
+            tip: '启动时, 自动开始任务, 在倒计时结束前自动开始可随时取消; 如果在自动开始前手动开始任务, 此次自动开始将取消',
+        },
+        {
+            title: '同屏任务',
+            tip: '运行任务时，所有任务均在当前页面以弹窗方式运行',
+        },
+        {
+            title: '静默运行',
+            tip: '同屏任务时, 不显示任务弹窗静默运行',
+        },
+    ];
+    // 运行设置标签
+    const examLabels = [
+        {
+            title: '随机作答',
+            tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
+        },
+        { title: '答错暂停', tip: '每周答题时, 答错暂停答题!' },
+        {
+            title: '缺分补满',
+            tip: '每周答题完成后, 若当前分数非满分, 则再次答题直到满分!',
+        },
+    ];
+    // 处理设置变化
+    const handleChangeAndNotice = (e, i, title) => {
+        // 开关
+        const { checked } = e.target;
+        if (settings[i] !== checked) {
+            settings[i] = checked;
+            // 设置
+            GM_setValue('studySetting', JSON.stringify(settings));
+            // 创建提示
+            createTip(`${title} ${checked ? '打开' : '关闭'}!`);
+        }
+    };
+    return createElementNode('div', undefined, {
+        class: `egg_panel_wrap${hasMobile() ? ' mobile' : ''}`,
+    }, createElementNode('div', undefined, { class: 'egg_panel' }, [
+        createElementNode('div', undefined, {
+            class: 'egg_user_item',
+        }, Info({ login })),
+        createElementNode('div', undefined, {
+            class: 'egg_score_item',
+        }, ScoreInfo({ login })),
+        // 任务部分
+        Hr({ text: '任务' }),
+        ...taskLabels.map((label, i) => {
+            // 处理变化
+            const handleChange = debounce(handleChangeAndNotice, 500);
+            return TaskItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[i],
+                onChange: (e) => {
+                    handleChange(e, i, label.title);
+                },
+            });
+        }),
+        // 运行部分
+        Hr({ text: '运行' }),
+        ...runLabels.map((label, i) => {
+            i += taskLabels.length;
+            // 处理变化
+            const handleChange = debounce(handleChangeAndNotice, 500);
+            return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[i],
+                onChange: (e) => {
+                    handleChange(e, i, label.title);
+                },
+            });
+        }),
+        // 答题部分
+        Hr({ text: '答题' }),
+        ...examLabels.map((label, i) => {
+            i += taskLabels.length + runLabels.length;
+            // 处理变化
+            const handleChange = debounce(handleChangeAndNotice, 500);
+            return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[i],
+                onChange: (e) => {
+                    handleChange(e, i, label.title);
+                },
+            });
+        }),
+        // 按钮集合
+        createElementNode('div', undefined, {
+            class: 'egg_btns_wrap',
+        }, [
+            createElementNode('button', undefined, {
+                class: 'egg_frame_show_btn hide',
+                type: 'button',
+                onclick: () => {
+                    // 显示窗口
+                    setFrameVisible(true);
+                },
+            }, createNSElementNode('svg', undefined, {
+                viewBox: '0 0 1024 1024',
+                class: 'egg_icon',
+            }, createNSElementNode('path', undefined, {
+                d: 'M836.224 106.666667h-490.666667a85.589333 85.589333 0 0 0-85.333333 85.333333V256h-64a85.589333 85.589333 0 0 0-85.333333 85.333333v490.666667a85.589333 85.589333 0 0 0 85.333333 85.333333h490.666667a85.589333 85.589333 0 0 0 85.333333-85.333333V768h64a85.589333 85.589333 0 0 0 85.333333-85.333333V192a85.589333 85.589333 0 0 0-85.333333-85.333333z m-132.266667 725.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-490.666667a20.138667 20.138667 0 0 1-21.333333-21.333333V341.333333a20.138667 20.138667 0 0 1 21.333333-21.333333h494.933334a20.138667 20.138667 0 0 1 21.333333 21.333333v490.666667z m153.6-149.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-64V341.333333a85.589333 85.589333 0 0 0-85.333333-85.333333h-362.666667V192a20.138667 20.138667 0 0 1 21.333333-21.333333h490.666667a20.138667 20.138667 0 0 1 21.333333 21.333333z',
+            }))),
+            createElementNode('button', undefined, {
+                class: 'egg_setting_show_btn',
+                type: 'button',
+                onclick: () => {
+                    const panel = $$('.egg_panel')[0];
+                    if (panel) {
+                        const panelHidden = panel.classList.contains('hide');
+                        panel.classList.toggle('hide', !panelHidden);
+                        if (!panelHidden) {
+                            // 积分详情
+                            const scoreDetails = $$('.egg_score_details')[0];
+                            scoreDetails && scoreDetails.classList.add('hide');
+                        }
+                    }
+                },
+            }, createNSElementNode('svg', undefined, {
+                viewBox: '0 0 1024 1024',
+                class: 'egg_icon',
+            }, createNSElementNode('path', undefined, {
+                d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
+            }))),
+        ]),
+        // 开始按钮
+        login
+            ? createElementNode('div', undefined, { class: 'egg_study_item' }, createElementNode('button', undefined, {
+                class: 'egg_study_btn loading',
+                type: 'button',
+                disabled: true,
+            }, createTextNode('等待中')))
+            : undefined,
+    ]));
+}
+/**
+ * @description 分数详情
+ */
+function ScoreInfo({ login }) {
+    if (login) {
+        // 分数信息
+        return createElementNode('div', undefined, { class: 'egg_scoreinfo' }, [
+            createElementNode('div', undefined, {
+                class: 'egg_totalscore',
+            }, [
+                createTextNode('总积分'),
+                createElementNode('span', undefined, undefined, createTextNode(0)),
+            ]),
+            createElementNode('div', undefined, {
+                class: 'egg_todayscore',
+            }, [
+                createElementNode('button', undefined, {
+                    type: 'button',
+                    class: 'egg_todayscore_btn',
+                    title: '查看分数详情',
+                    onclick: () => {
+                        const scoreDetails = $$('.egg_score_details')[0];
+                        if (scoreDetails) {
+                            const exists = scoreDetails.classList.contains('hide');
+                            scoreDetails.classList.toggle('hide', !exists);
+                        }
+                    },
+                }, [
+                    createTextNode('当天分数'),
+                    // 当天分数
+                    createElementNode('span', undefined, undefined, createTextNode(0)),
+                    // icon
+                    createNSElementNode('svg', undefined, {
+                        viewBox: '0 0 1024 1024',
+                        class: 'egg_icon',
+                    }, createNSElementNode('path', undefined, {
+                        d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
+                    })),
+                    createElementNode('div', undefined, {
+                        class: 'egg_score_details hide',
+                    }, [
+                        createElementNode('div', undefined, { class: 'egg_score_title' }, [
+                            createNSElementNode('svg', undefined, {
+                                viewBox: '0 0 1024 1024',
+                                class: 'egg_icon',
+                            }, [
+                                createNSElementNode('path', undefined, {
+                                    d: 'M314.81 304.01h415.86v58.91H314.81zM314.81 440.24h415.86v58.91H314.81z',
+                                }),
+                                createNSElementNode('path', undefined, {
+                                    d: 'M814.8 892.74h-8.64l-283.51-182-283.51 182h-8.64A69.85 69.85 0 0 1 160.72 823V188.22a69.85 69.85 0 0 1 69.77-69.77H814.8a69.85 69.85 0 0 1 69.77 69.77V823a69.85 69.85 0 0 1-69.77 69.74zM230.5 177.35a10.87 10.87 0 0 0-10.86 10.86V823a10.86 10.86 0 0 0 5 9.11l298.01-191.42 298.06 191.38a10.86 10.86 0 0 0 5-9.11V188.22a10.87 10.87 0 0 0-10.86-10.86z',
+                                }),
+                            ]),
+                            createElementNode('div', undefined, {
+                                class: 'egg_score_title_text',
+                            }, createTextNode('积分详情')),
+                        ]),
+                        ...tasks.map((task) => createElementNode('div', undefined, { class: 'egg_score_item' }, [
+                            createTextNode(task.title),
+                            createElementNode('span', { innerText: task.currentScore }, {
+                                class: 'egg_score_detail',
+                            }),
+                        ])),
+                    ]),
+                ]),
+            ]),
+        ]);
+    }
+}
+/**
+ * @description 任务窗口
+ * @returns
+ */
+function Frame() {
+    // 容器
+    return createElementNode('div', undefined, {
+        class: 'egg_frame_wrap hide',
+    }, [
+        // 遮罩
+        createElementNode('div', undefined, { class: 'egg_frame_mask' }),
+        // 窗口内容
+        createElementNode('div', undefined, { class: 'egg_frame_content_wrap' }, [
+            // 窗口控制
+            createElementNode('div', undefined, { class: 'egg_frame_controls_wrap' }, [
+                // 标题
+                createElementNode('div', undefined, { class: 'egg_frame_title' }),
+                createElementNode('div', undefined, {
+                    class: 'egg_frame_controls',
+                }, [
+                    // 隐藏
+                    createElementNode('button', undefined, {
+                        class: 'egg_frame_btn',
+                        type: 'button',
+                        onclick: () => {
+                            // 隐藏窗口
+                            setFrameVisible(false);
+                        },
+                    }, createNSElementNode('svg', undefined, {
+                        viewBox: '0 0 1024 1024',
+                        class: 'egg_icon',
+                    }, createNSElementNode('path', undefined, {
+                        d: 'M863.7 552.5H160.3c-10.6 0-19.2-8.6-19.2-19.2v-41.7c0-10.6 8.6-19.2 19.2-19.2h703.3c10.6 0 19.2 8.6 19.2 19.2v41.7c0 10.6-8.5 19.2-19.1 19.2z',
+                    }))),
+                    // 改变大小
+                    createElementNode('button', undefined, {
+                        class: 'egg_frame_btn',
+                        type: 'button',
+                        onclick: () => {
+                            const content = $$('.egg_frame_content_wrap')[0];
+                            if (content) {
+                                const exists = content.classList.contains('max');
+                                content.classList.toggle('max', !exists);
+                            }
+                        },
+                    }, createNSElementNode('svg', undefined, {
+                        viewBox: '0 0 1024 1024',
+                        class: 'egg_icon',
+                    }, createNSElementNode('path', undefined, {
+                        d: 'M609.52 584.92a35.309 35.309 0 0 1 24.98-10.36c9.37 0 18.36 3.73 24.98 10.36l189.29 189.22-0.07-114.3 0.57-6.35c3.25-17.98 19.7-30.5 37.9-28.85 18.2 1.65 32.12 16.92 32.09 35.2v200.23c-0.05 1.49-0.19 2.97-0.42 4.45l-0.21 1.13c-0.22 1.44-0.55 2.85-0.99 4.24l-0.57 1.62-0.56 1.41a34.163 34.163 0 0 1-7.62 11.36l2.12-2.4-0.14 0.14-0.92 1.06-1.06 1.2-0.57 0.57-0.56 0.57a36.378 36.378 0 0 1-16.23 8.39l-3.53 0.5-4.02 0.35h-199.6l-6.35-0.63c-16.73-3.06-28.9-17.63-28.93-34.64l0.56-6.35c3.07-16.76 17.67-28.93 34.71-28.92l114.29-0.14-189.07-189.1-4.09-4.94c-9.71-14.01-8.01-32.95 4.02-45.02z m-162.06 0c12.06 12.05 13.78 30.99 4.09 45.01l-4.09 4.94-189.15 189.08 114.3 0.14c17.04-0.01 31.65 12.17 34.71 28.92l0.57 6.35c-0.03 17.01-12.19 31.58-28.92 34.64l-6.35 0.63H173.09l-4.23-0.42-3.39-0.49a36.38 36.38 0 0 1-17.36-9.52l-1.06-1.13-0.98-1.13 0.98 1.06-1.97-2.26 0.85 1.06-0.42-0.56a35.137 35.137 0 0 1-3.74-5.64l-1.13-2.68a34.71 34.71 0 0 1-2.11-7.33l-0.28-1.13c-0.21-1.47-0.33-2.96-0.36-4.45V659.78c-0.03-18.28 13.89-33.55 32.09-35.2 18.2-1.65 34.65 10.87 37.9 28.85l0.57 6.35-0.07 114.36 189.29-189.22c13.77-13.77 36.11-13.77 49.88 0h-0.09z m-74.71-471.71l6.35 0.57c16.76 3.06 28.93 17.67 28.92 34.71l-0.63 6.35c-3.07 16.76-17.67 28.93-34.71 28.92l-114.3 0.14 189.15 189.08 4.09 4.94c10.26 15.02 7.42 35.37-6.55 47.01-13.98 11.63-34.51 10.74-47.42-2.07L208.29 233.71l0.07 114.3-0.57 6.35c-3.25 17.98-19.7 30.5-37.9 28.85-18.2-1.65-32.12-16.92-32.09-35.2V147.78c0-1.55 0.14-3.03 0.35-4.51l0.21-1.13c0.24-1.44 0.59-2.85 1.06-4.23a34.97 34.97 0 0 1 8.68-14.39l-2.12 2.4-0.42 0.57 1.55-1.84-0.99 1.06 0.92-0.98 2.26-2.33c3.04-2.73 6.52-4.92 10.3-6.49l2.82-1.06c3.45-1.07 7.04-1.62 10.65-1.62l-3.6 0.14h0.49l1.48-0.14h201.31z m512.91 0l1.41 0.14h0.42c2.43 0.29 4.84 0.79 7.19 1.48l2.82 1.06 2.61 1.2 3.04 1.76c2.09 1.33 4.03 2.89 5.78 4.66l1.13 1.2 0.78 0.98 0.21 0.14 0.49 0.64 2.33 3.17c2.35 3.83 3.98 8.07 4.8 12.49l0.21 1.13c0.21 1.48 0.35 2.96 0.35 4.44v200.37c-0.16 18.13-14.03 33.19-32.08 34.83-18.06 1.64-34.42-10.67-37.83-28.48l-0.57-6.35V233.65L659.54 422.87c-12.9 12.95-33.56 13.91-47.59 2.2-14.04-11.71-16.81-32.2-6.38-47.22l4.02-4.86 189.22-189.08-114.29-0.14c-17.06 0.04-31.71-12.14-34.78-28.92l-0.63-6.35c-0.01-17.04 12.16-31.65 28.93-34.71l6.35-0.57h201.27z m0 0',
+                    }))),
+                    // 关闭
+                    createElementNode('button', undefined, {
+                        class: 'egg_frame_btn',
+                        type: 'button',
+                        onclick: () => {
+                            // 关闭窗口
+                            closeFrame();
+                        },
+                    }, createNSElementNode('svg', undefined, {
+                        viewBox: '0 0 1024 1024',
+                        class: 'egg_icon',
+                    }, createNSElementNode('path', undefined, {
+                        d: 'M453.44 512L161.472 220.032a41.408 41.408 0 0 1 58.56-58.56L512 453.44 803.968 161.472a41.408 41.408 0 0 1 58.56 58.56L570.56 512l291.968 291.968a41.408 41.408 0 0 1-58.56 58.56L512 570.56 220.032 862.528a41.408 41.408 0 0 1-58.56-58.56L453.44 512z',
+                    }))),
+                ]),
+            ]),
+            // 窗口内容
+            createElementNode('div', undefined, {
+                class: 'egg_frame_content',
+            }, createElementNode('iframe', undefined, {
+                class: 'egg_frame',
+            })),
+        ]),
+    ]);
+}
+/* 组件化结束 */
 /**
  * @description load
  */
@@ -847,12 +1383,12 @@ window.addEventListener('load', () => {
                 initFontSize();
                 // 初始化设置
                 initSetting();
-                // 渲染菜单
-                renderMenu();
-                // 渲染窗口
-                renderFrame();
                 // 渲染提示
                 renderTip();
+                // 渲染面板
+                renderPanel();
+                // 渲染窗口
+                renderFrame();
             }
         }, 800);
     }
@@ -937,16 +1473,310 @@ window.addEventListener('load', () => {
             if ($$('.title')[0]) {
                 clearInterval(ready); // 停止定时器
                 // 创建“手动答题”按钮
-                createManualButton();
+                renderExamBtn();
                 // 开始答题
                 doingExam();
             }
         }, 500);
     }
+    else if (href === URL_CONFIG.login) {
+        window.addEventListener('message', (e) => {
+            const { data } = e;
+            if (data && data === 'refresh') {
+                const btn = $$('.login_qrcode_refresh span')[0];
+                btn && btn.click();
+            }
+        });
+    }
     else {
         console.log('此页面不支持加载学习脚本!');
     }
 });
+/**
+ * @description 获取关键字
+ */
+function getKey(content) {
+    // 外部引用md5加密
+    const key = md5(content);
+    console.log(`获取 key:${key}`);
+    return key;
+}
+/**
+ * @description 初始化配置
+ */
+function initSetting() {
+    try {
+        let settingTemp = JSON.parse(GM_getValue('studySetting'));
+        if (settingTemp && settingTemp.length === settings.length) {
+            settings = settingTemp;
+        }
+        else {
+            settings = [
+                true,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+            ];
+        }
+    }
+    catch (e) {
+        // 没有则直接初始化
+        settings = [
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+        ];
+    }
+}
+/**
+ * @description 初始化配置
+ */
+function initFontSize() {
+    // 移动端
+    const moblie = hasMobile();
+    if (moblie) {
+        // 清除缩放
+        const meta = $$('meta[name=viewport]')[0];
+        if (meta) {
+            meta.content = 'initial-scale=0, user-scalable=yes';
+        }
+        // 缩放比例
+        const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+        document.documentElement.style.setProperty('--scale', String(scale));
+        window.addEventListener('resize', () => {
+            // 缩放比例
+            const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+            document.documentElement.style.setProperty('--scale', String(scale));
+        });
+    }
+}
+/**
+ * @description 初始化 id
+ */
+function initFrameID() {
+    if (settings[6]) {
+        const win = unsafeWindow;
+        win.addEventListener('message', (msg) => {
+            const { data } = msg;
+            if (data.id) {
+                id = data.id;
+                console.log('初始化窗口 ID: ', id);
+            }
+        });
+    }
+}
+/**
+ * @description 渲染答题按钮
+ */
+function renderExamBtn() {
+    const title = $$('.title')[0];
+    // 插入节点
+    title.parentNode?.insertBefore(createElementNode('button', { innerText: '关闭自动答题' }, {
+        class: 'egg_exam_btn',
+        type: 'button',
+        onclick: () => {
+            const ExamBtn = $$('.egg_exam_btn')[0];
+            pause = !pause;
+            if (pause) {
+                ExamBtn.innerText = '开启自动答题';
+                ExamBtn.classList.add('manual');
+            }
+            else {
+                ExamBtn.innerText = '关闭自动答题';
+                ExamBtn.classList.remove('manual');
+            }
+        },
+    }), title.nextSibling);
+}
+/**
+ * @description 渲染面板
+ * @returns
+ */
+async function renderPanel() {
+    // 面板
+    const panel = Panel();
+    // 插入节点
+    document.body.append(panel);
+    // 已经登录
+    if (login) {
+        // 刷新信息
+        await refreshInfo();
+        // 完成任务
+        if (tasks.every((task, i) => !settings[i] || task.status)) {
+            finishTask();
+            return;
+        }
+        // 开始学习按钮
+        const studyBtn = $$('.egg_study_btn')[0];
+        if (studyBtn) {
+            studyBtn.removeAttribute('disabled');
+            studyBtn.classList.remove('loading');
+            studyBtn.innerText = '开始学习';
+            studyBtn.addEventListener('click', start);
+        }
+    }
+    // 自动答题
+    if (login && settings[5]) {
+        // 创建提示
+        const tip = createTip('即将自动开始任务', 5);
+        // 等待倒计时结束
+        await tip.waitCountDown();
+        // 再次查看是否开启
+        if (settings[5] && !started) {
+            // 创建提示
+            createTip('自动开始任务');
+            start();
+        }
+        else {
+            // 创建提示
+            createTip('已取消自动开始任务!');
+        }
+    }
+}
+/**
+ * @description 渲染窗口
+ */
+function renderFrame() {
+    if (settings[6]) {
+        const frame = Frame();
+        document.body.append(frame);
+    }
+}
+/**
+ * @description 渲染提示
+ */
+function renderTip() {
+    const tipWrap = createElementNode('div', undefined, {
+        class: 'egg_tip_wrap',
+    });
+    document.body.append(tipWrap);
+}
+/**
+ * @description 刷新信息
+ */
+async function refreshInfo() {
+    // 登录
+    if (login) {
+        await refreshScoreInfo();
+        await refreshTaskList();
+    }
+}
+/**
+ * @description 加载分数
+ */
+async function refreshScoreInfo() {
+    console.log('加载分数...');
+    // 获取总分
+    const totalScore = await getTotalScore();
+    // 获取当天总分
+    const todayScore = await getTodayScore();
+    // 总分
+    const totalScoreSpan = $$('.egg_totalscore span')[0];
+    //  当天分数
+    const todayScoreSpan = $$('.egg_todayscore_btn span')[0];
+    // 刷新分数
+    if (totalScoreSpan && todayScoreSpan) {
+        totalScoreSpan.innerText = totalScore;
+        todayScoreSpan.innerText = todayScore;
+    }
+}
+/**
+ * @description 加载任务列表
+ */
+async function refreshTaskList() {
+    console.log('加载任务进度...');
+    // 原始任务进度
+    const taskProgress = await getTaskList();
+    if (taskProgress) {
+        // 文章选读
+        tasks[0].currentScore = taskProgress[0].currentScore;
+        tasks[0].dayMaxScore = taskProgress[0].dayMaxScore;
+        tasks[0].need = taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
+        // 视听学习
+        tasks[1].currentScore =
+            taskProgress[1].currentScore + taskProgress[3].currentScore;
+        tasks[1].dayMaxScore =
+            taskProgress[1].dayMaxScore + taskProgress[3].dayMaxScore;
+        tasks[1].need =
+            taskProgress[1].dayMaxScore +
+                taskProgress[3].dayMaxScore -
+                (taskProgress[1].currentScore + taskProgress[3].currentScore);
+        // 每日答题
+        tasks[2].currentScore = taskProgress[6].currentScore;
+        tasks[2].dayMaxScore = taskProgress[6].dayMaxScore;
+        tasks[2].need = taskProgress[6].dayMaxScore - taskProgress[6].currentScore;
+        // 每周答题
+        tasks[3].currentScore = taskProgress[2].currentScore;
+        tasks[3].dayMaxScore = taskProgress[2].dayMaxScore;
+        tasks[3].need = taskProgress[2].dayMaxScore - taskProgress[2].currentScore;
+        // 专项练习
+        tasks[4].currentScore = taskProgress[5].currentScore;
+        tasks[4].dayMaxScore = taskProgress[5].dayMaxScore;
+        tasks[4].need = taskProgress[5].dayMaxScore - taskProgress[5].currentScore;
+        // 详情
+        const details = $$('.egg_score_details .egg_score_detail');
+        // 进度条对象
+        const taskProgressList = $$('.egg_progress');
+        // 更新数据
+        for (const i in tasks) {
+            const { currentScore, dayMaxScore } = tasks[i];
+            // 进度
+            let rate = (100 * currentScore) / dayMaxScore;
+            // 修复专项练习成组做完, 进度条显示异常
+            if (dayMaxScore <= currentScore) {
+                rate = 100;
+            }
+            // 每周答题 缺分补满
+            if (Number(i) === 3) {
+                if (!settings[10] && currentScore) {
+                    rate = 100;
+                }
+            }
+            if (rate === 100) {
+                tasks[i].status = true;
+            }
+            if (rate >= 0) {
+                // 进度条信息
+                const progressInfo = taskProgressList[i];
+                // 进度条
+                const bar = $$('.egg_bar', progressInfo)[0];
+                // 百分比
+                const percent = $$('.egg_percent span', progressInfo)[0];
+                if (bar && percent) {
+                    // 进度
+                    const progress = rate.toFixed(2);
+                    // 长度
+                    bar.style.width = `${progress}%`;
+                    // 文字
+                    percent.innerText = `${~~rate}`;
+                }
+                // 设置详情
+                if (details[i]) {
+                    details[i].innerText = String(tasks[i].currentScore);
+                }
+            }
+        }
+        return;
+    }
+    // 再次请求
+    await sleep(2000);
+    await refreshTaskList();
+}
 /**
  * @description 获取video标签
  */
@@ -991,9 +1821,7 @@ function getVideoTag() {
 }
 /**
  * @description 读新闻或者看视频
- */
-/**
- * @description type:0为新闻,1为视频
+ * @param type :0为新闻,1为视频
  */
 async function reading(type) {
     // 看文章或者视频
@@ -1028,7 +1856,7 @@ async function reading(type) {
             });
             document.dispatchEvent(scroll);
         }
-    }, !settings[5]);
+    });
     // 倒计时结束
     await tip.waitCountDown();
     // 清空链接
@@ -1039,29 +1867,22 @@ async function reading(type) {
         GM_setValue('watchingUrl', null);
     }
     // 关闭窗口
-    closeWin(settings[7], id);
+    closeWin(settings[6], id);
 }
 /**
  * @description 创建学习提示
  */
-function createTip(text, delay = 2, callback, show = true) {
+function createTip(text, delay = 2, callback) {
     const tipWrap = $$('.egg_tip_wrap')[0];
     // 提前去除
-    const studyTip = $$('#studyTip')[0];
-    if (studyTip) {
-        studyTip.destroy();
+    const tips = $$('.egg_tip');
+    if (tips.length) {
+        tips.forEach((t) => t.destroy());
     }
-    // 提示
-    const tipInfo = createElementNode('div', undefined, {
-        id: 'studyTip',
-        class: 'egg_tip',
-    });
     // 倒计时
-    const countdown = createElementNode('span', {
-        innerText: `${delay}s`,
-    }, {
+    const countdown = createElementNode('span', undefined, {
         class: 'egg_countdown',
-    });
+    }, createTextNode(`${delay}s`));
     // 文本
     const span = createElementNode('span', {
         innerText: text,
@@ -1129,12 +1950,15 @@ function createTip(text, delay = 2, callback, show = true) {
             });
         },
     };
+    // 提示
+    const tipInfo = createElementNode('div', undefined, {
+        class: 'egg_tip',
+    }, [span, countdown]);
     Object.assign(tipInfo, operate);
-    tipInfo.append(span, countdown);
     // 插入节点
     tipWrap.append(tipInfo);
     // 显示
-    show && operate.show();
+    operate.show();
     // 倒计时
     countDown();
     return operate;
@@ -1206,17 +2030,21 @@ async function readNews() {
     for (const i in news) {
         // 暂停
         await pauseStudyLock();
-        console.log(`正在看第${Number(i) + 1}个新闻...`);
+        console.log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
+        // 提示
+        createTip(`正在阅读第 ${Number(i) + 1} 个新闻...`);
         // 链接
         const { url } = news[i];
         // 链接
         GM_setValue('readingUrl', url);
         // 等待任务窗口
         await waitTaskWin(url, '文章选读');
+        // 提示
+        createTip(`完成阅读第 ${Number(i) + 1} 个新闻!`);
         // 等待一段时间
         await sleep(1500);
-        // 刷新菜单数据
-        await refreshMenu();
+        // 刷新数据
+        await refreshInfo();
         // 任务完成跳出循环
         if (settings[0] && tasks[0].status) {
             break;
@@ -1224,12 +2052,14 @@ async function readNews() {
     }
     // 任务完成状况
     if (settings[0] && !tasks[0].status) {
-        console.log('任务未完成, 继续看新闻!');
+        console.log('任务未完成, 继续阅读新闻!');
+        // 提示
+        createTip('任务未完成, 继续阅读新闻!');
         await readNews();
     }
 }
 /**
- * @description 看学习视频
+ * @description 观看视频
  */
 async function watchVideo() {
     // 获取视频
@@ -1238,18 +2068,21 @@ async function watchVideo() {
     for (const i in videos) {
         // 暂停
         await pauseStudyLock();
-        console.log(`正在观看第${Number(i) + 1}个视频...`);
+        console.log(`正在观看第 ${Number(i) + 1} 个视频...`);
+        // 提示
+        createTip(`正在观看第 ${Number(i) + 1} 个视频...`);
         // 链接
         const { url } = videos[i];
         // 链接
         GM_setValue('watchingUrl', url);
         // 等待任务窗口
         await waitTaskWin(url, '视听学习');
-        // 等待窗口关闭
+        // 提示
+        createTip(`完成观看第 ${Number(i) + 1} 个视频!`);
         // 等待一段时间
         await sleep(1500);
-        // 刷新菜单数据pauseStudyLock
-        await refreshMenu();
+        // 刷新数据
+        await refreshInfo();
         // 任务完成跳出循环
         if (settings[1] && tasks[1].status) {
             break;
@@ -1257,7 +2090,9 @@ async function watchVideo() {
     }
     // 任务完成状况
     if (settings[1] && !tasks[1].status) {
-        console.log('任务未完成, 继续看视频!');
+        console.log('任务未完成, 继续观看视频!');
+        // 提示
+        createTip('任务未完成, 继续观看看视频!');
         await watchVideo();
     }
 }
@@ -1267,18 +2102,24 @@ async function watchVideo() {
 async function doExamPractice() {
     // 暂停
     await pauseStudyLock();
-    console.log('正在完成每日答题...');
+    console.log('正在做每日答题...');
+    // 提示
+    createTip('正在做每日答题');
     // 链接
     const url = URL_CONFIG.examPractice;
     // 等待任务窗口
     await waitTaskWin(url, '每日答题');
+    // 提示
+    createTip('完成每日答题!');
     // 等待一段时间
     await sleep(1500);
-    // 刷新菜单数据
-    await refreshMenu();
+    // 刷新数据
+    await refreshInfo();
     // 任务完成状况
     if (settings[2] && !tasks[2].status) {
         console.log('任务未完成, 继续每日答题!');
+        // 提示
+        createTip('任务未完成, 继续每日答题!');
         await doExamPractice();
     }
 }
@@ -1286,51 +2127,73 @@ async function doExamPractice() {
  * @description 做每周答题
  */
 async function doExamWeekly() {
+    // 提示
+    createTip('正在寻找未做的每周答题');
     // id
     const examWeeklyId = await findExamWeekly();
     if (examWeeklyId) {
         // 暂停
         await pauseStudyLock();
         console.log('正在做每周答题...');
+        // 提示
+        createTip('正在做每周答题');
         // 链接
         const url = `${URL_CONFIG.examWeekly}?id=${examWeeklyId}`;
         console.log(`链接: ${url}`);
         // 等待任务窗口
         await waitTaskWin(url, '每周答题');
+        // 提示
+        createTip('完成每周答题!');
         // 等待一段时间
         await sleep(1500);
-        // 刷新菜单数据
-        await refreshMenu();
+        // 刷新数据
+        await refreshInfo();
         if (settings[3] && !tasks[3].status) {
             console.log('任务未完成, 继续每周答题!');
+            // 提示
+            createTip('任务未完成, 继续每周答题!');
             doExamWeekly();
         }
+        return;
     }
+    // 提示
+    createTip('每周答题均已完成!');
 }
 /**
  * @description 做专项练习
  */
 async function doExamPaper() {
+    // 提示
+    createTip('正在寻找未做的专项练习');
     // id
     const examPaperId = await findExamPaper();
     if (examPaperId) {
         // 暂停
         await pauseStudyLock();
         console.log('正在做专项练习...');
+        // 提示
+        createTip('正在做专项练习...');
         // 链接
         const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
         console.log(`链接: ${url}`);
         // 等待窗口任务
         await waitTaskWin(url, '专项练习');
+        // 提示
+        createTip('完成专项练习!');
         // 等待一段时间
         await sleep(1500);
-        // 刷新菜单数据
-        await refreshMenu();
+        // 刷新数据
+        await refreshInfo();
         if (settings[4] && !tasks[4].status) {
             console.log('任务未完成, 继续专项练习!');
+            // 提示
+            createTip('任务未完成, 继续专项练习!');
             doExamPaper();
         }
+        return;
     }
+    // 提示
+    createTip('专项练习均已完成!');
 }
 /**
  * @description 初始化每周答题总页数属性
@@ -1356,17 +2219,20 @@ async function initExam(type) {
     }
 }
 /**
- * @description 查询每周答题列表看看还有没有没做过的, 有则返回id
+ * @description 查询每周答题列表
  */
 async function findExamWeekly() {
-    console.log('初始化每周答题!');
+    console.log('正在寻找未完成的每周答题...');
     // 获取总页数
     const total = await initExam(0);
     // 当前页数
-    let current = examPaperReverse ? total : 1;
-    examPaperReverse &&
+    let current = examWeeklyReverse ? total : 1;
+    if (examWeeklyReverse) {
         console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
-    console.log('正在寻找未完成的每周答题...');
+    }
+    else {
+        console.log('每周答题, 开启顺序模式, 从最近的题目开始答题');
+    }
     while (current <= total && current) {
         // 请求数据
         const data = await getExamWeekly(current);
@@ -1402,16 +2268,20 @@ async function findExamWeekly() {
     }
 }
 /**
- * @description 查询专项练习列表看看还有没有没做过的, 有则返回id
+ * @description 查询专项练习列表
  */
 async function findExamPaper() {
-    console.log('初始化专项练习');
+    console.log('正在寻找未完成的专项练习...');
     // 获取总页数
     const total = await initExam(1);
     // 当前页数
     let current = examPaperReverse ? total : 1;
-    examPaperReverse &&
+    if (examPaperReverse) {
         console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
+    }
+    else {
+        console.log('专项练习, 开启顺序模式, 从最近的题目开始答题');
+    }
     console.log('正在寻找未完成的专项练习...');
     while (current <= total && current) {
         // 请求数据
@@ -1465,19 +2335,19 @@ function getNextButton() {
  */
 function pauseExam(flag) {
     // 按钮
-    const manualButton = $$('#manualButton')[0];
-    if (manualButton) {
+    const ExamBtn = $$('.egg_exam_btn')[0];
+    if (ExamBtn) {
         if (flag) {
             // 创建提示
             createTip('已暂停, 手动开启自动答题! ', 10);
         }
         else {
             // 创建提示
-            createTip('已开启, 自动答题! ', 2);
+            createTip('已开启, 自动答题! ');
         }
         pause = flag;
-        manualButton.innerText = '开启自动答题';
-        manualButton.classList.add('manual');
+        ExamBtn.innerText = '开启自动答题';
+        ExamBtn.classList.add('manual');
     }
 }
 /**
@@ -1489,7 +2359,7 @@ function handleSlideVerify() {
         const mask = $$('#nc_mask')[0];
         if (mask && getComputedStyle(mask).display !== 'none') {
             // 创建提示
-            createTip('等待处理滑动验证 ', 2);
+            createTip('等待滑动验证');
             // 提高层级
             mask.style.zIndex = '999';
             // 轨道
@@ -1596,7 +2466,7 @@ function handleSlideVerify() {
                 slide.dispatchEvent(mouseup);
             }
             // 创建提示
-            createTip('滑动验证成功! ', 2);
+            createTip('滑动验证成功! ');
             // 定时器
             const timer = setInterval(() => {
                 // 滑动验证
@@ -1604,7 +2474,7 @@ function handleSlideVerify() {
                 if (!mask || getComputedStyle(mask).display === 'none') {
                     console.log('滑动验证完成!');
                     // 创建提示
-                    createTip('滑动验证完成! ', 2);
+                    createTip('滑动验证完成! ');
                     clearInterval(timer);
                     resolve(true);
                 }
@@ -1822,7 +2692,7 @@ async function doingExam() {
                     }
                 }
                 // 创建提示
-                createTip('答案异常, 尝试网络题库获取!', 2);
+                createTip('答案异常, 尝试网络题库获取!');
                 // 尝试题库获取
                 const answersNetwork = await getAnswer(question);
                 // 根据题库作答
@@ -1837,7 +2707,7 @@ async function doingExam() {
                 if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
-                    createTip('答案不存在, 随机作答!', 2);
+                    createTip('答案不存在, 随机作答!');
                     await handleBlankInputRand();
                 }
                 else {
@@ -1881,7 +2751,7 @@ async function doingExam() {
                     }
                 }
                 // 创建提示
-                createTip('答案异常, 尝试网络题库获取!', 2);
+                createTip('答案异常, 尝试网络题库获取!');
                 // 尝试题库获取
                 const answersNetwork = await getAnswer(question);
                 // 答案存在
@@ -1896,7 +2766,7 @@ async function doingExam() {
                 if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
-                    createTip('答案不存在, 随机作答!', 2);
+                    createTip('答案不存在, 随机作答!');
                     await handleMutiplyChoiceRand();
                 }
                 else {
@@ -1948,7 +2818,7 @@ async function doingExam() {
                     }
                 }
                 // 创建提示
-                createTip('答案异常, 尝试网络题库获取!', 2);
+                createTip('答案异常, 尝试网络题库获取!');
                 // 尝试题库获取
                 const answersNetwork = await getAnswer(question);
                 // 存在答案
@@ -1984,7 +2854,7 @@ async function doingExam() {
                 if (settings[8]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
-                    createTip('答案不存在, 随机作答!', 2);
+                    createTip('答案不存在, 随机作答!');
                     await handleSingleChoiceRand();
                 }
                 else {
@@ -2084,792 +2954,34 @@ async function doingExam() {
             nextButton.click();
         }
     }
-    closeWin(settings[7], id);
-}
-/**
- * @description 获取关键字
- */
-function getKey(content) {
-    // 外部引用md5加密
-    const key = md5(content);
-    console.log(`获取 key:${key}`);
-    return key;
-}
-/**
- * @description 初始化配置
- */
-function initSetting() {
-    try {
-        let settingTemp = JSON.parse(GM_getValue('studySetting'));
-        if (settingTemp && settingTemp.length === settings.length) {
-            settings = settingTemp;
-        }
-        else {
-            settings = [
-                true,
-                true,
-                true,
-                true,
-                true,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-            ];
-        }
-    }
-    catch (e) {
-        // 没有则直接初始化
-        settings = [
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-        ];
-    }
-}
-/**
- * @description 初始化配置
- */
-function initFontSize() {
-    // 移动端
-    const moblie = hasMobile();
-    if (moblie) {
-        // 清除缩放
-        const meta = $$('meta[name=viewport]')[0];
-        if (meta) {
-            meta.content = 'initial-scale=0, user-scalable=yes';
-        }
-        // 缩放比例
-        const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-        document.documentElement.style.setProperty('--scale', String(scale));
-        window.addEventListener('resize', () => {
-            // 缩放比例
-            const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-            document.documentElement.style.setProperty('--scale', String(scale));
-        });
-    }
-}
-/**
- * @description 创建“手动答题”按钮
- */
-function createManualButton() {
-    const title = $$('.title')[0];
-    // 按钮
-    const manualButton = createElementNode('button', { innerText: '关闭自动答题' }, {
-        id: 'manualButton',
-        class: 'egg_btn',
-        type: 'button',
-        onclick: clickManualButton,
-    });
-    // 插入节点
-    title.parentNode?.insertBefore(manualButton, title.nextSibling);
-}
-/**
- * @description 点击手动学习按钮
- */
-function clickManualButton() {
-    const manualButton = $$('#manualButton')[0];
-    pause = !pause;
-    if (pause) {
-        manualButton.innerText = '开启自动答题';
-        manualButton.classList.add('manual');
-    }
-    else {
-        manualButton.innerText = '关闭自动答题';
-        manualButton.classList.remove('manual');
-    }
-}
-/**
- * @description 加载用户信息
- */
-async function loadUserInfo() {
-    // 分数信息
-    const infoItem = $$('.egg_info_item')[0];
-    if (login) {
-        // 退出按钮
-        const logoutBtn = createElementNode('button', { innerText: '退出' }, {
-            type: 'button',
-            class: 'login_btn',
-            onclick: debounce(() => {
-                const logged = $$("a[class='logged-link']")[0];
-                logged.click();
-            }, 500),
-        });
-        // 获取用户信息
-        const userInfo = await getUserInfo();
-        if (userInfo) {
-            const { avatarMediaUrl, nick } = userInfo;
-            const avatarItems = [];
-            if (avatarMediaUrl) {
-                // 图片
-                const img = createElementNode('img', undefined, {
-                    src: avatarMediaUrl,
-                    class: 'egg_avatar_img',
-                });
-                avatarItems.push(img);
-            }
-            else {
-                // 文字
-                const subNickName = createElementNode('div', { innerText: nick.substring(1, 3) }, { class: 'egg_sub_nickname' });
-                avatarItems.push(subNickName);
-            }
-            // 头像
-            const avatar = createElementNode('div', undefined, { class: 'egg_avatar' }, avatarItems);
-            // 昵称
-            const nickName = createElementNode('div', { innerText: nick }, { class: 'egg_name' });
-            // 关于用户
-            const user = createElementNode('div', undefined, { class: 'egg_user' }, [
-                avatar,
-                nickName,
-            ]);
-            // 用户信息
-            const userInfoWrap = createElementNode('div', undefined, {
-                class: 'egg_userinfo',
-            }, [user, logoutBtn]);
-            infoItem.append(userInfoWrap);
-        }
-    }
-    else {
-        let refreshTimer;
-        // 登录按钮
-        const loginBtn = createElementNode('button', { innerText: '扫码登录' }, {
-            type: 'button',
-            class: 'login_btn',
-            onclick: debounce(async () => {
-                if (refreshTimer) {
-                    clearInterval(refreshTimer);
-                }
-                loginWindowLoad();
-                refreshTimer = setInterval(() => {
-                    loginWindowLoad();
-                }, 100000);
-                // 登录状态
-                const res = await loginStatus();
-                if (res) {
-                    console.log('登录成功!');
-                    window.location.reload();
-                }
-            }, 500),
-        });
-        // 窗口
-        const loginFrame = createElementNode('div', undefined, {
-            class: 'egg_frame_login',
-        });
-        // 窗口项
-        const frameWrap = createElementNode('div', undefined, { class: 'egg_frame' }, loginFrame);
-        // 窗口项
-        const loginFrameItem = createElementNode('div', undefined, {
-            class: 'egg_frame_item',
-        }, frameWrap);
-        // 用户登录
-        const userLogin = createElementNode('div', undefined, {
-            class: 'egg_user_login',
-        }, [loginBtn, loginFrameItem]);
-        infoItem.append(userLogin);
-    }
-}
-/**
- * @description 加载分数
- */
-async function loadScoreInfo() {
-    if (login) {
-        // 获取总分
-        const totalScore = await getTotalScore();
-        // 获取当天总分
-        const todayScore = await getTodayScore();
-        // 分数信息
-        const infoItem = $$('.egg_info_item')[0];
-        // 总分
-        const totalScoreSpan = $$('.egg_totalscore span')[0];
-        //  当天分数
-        const todayScoreSpan = $$('.egg_todayscore span')[0];
-        if (infoItem) {
-            // 刷新分数
-            if (totalScoreSpan && todayScoreSpan) {
-                totalScoreSpan.innerText = totalScore;
-                todayScoreSpan.innerText = todayScore;
-            }
-            else {
-                // 总分
-                const totalScoreSpan = createElementNode('span', {
-                    innerText: totalScore,
-                });
-                const totalScoreDiv = createElementNode('div', { innerText: '总积分' }, {
-                    class: 'egg_totalscore',
-                }, totalScoreSpan);
-                const showPath = createElementNode('path', undefined, {
-                    d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
-                });
-                const showIcon = createElementNode('svg', undefined, {
-                    viewBox: '0 0 1024 1024',
-                    class: 'egg_icon',
-                }, showPath);
-                // 当天总分
-                const todayScoreSpan = createElementNode('span', {
-                    innerText: todayScore,
-                });
-                const todayScoreDiv = createElementNode('div', { innerText: '当天积分' }, {
-                    class: 'egg_todayscore',
-                    title: '查看分数详情',
-                    onclick: () => {
-                        const exists = scoreDetails.classList.contains('hide');
-                        scoreDetails.classList.toggle('hide', !exists);
-                    },
-                }, [todayScoreSpan, showIcon]);
-                // 分数细节
-                const scoreDetails = createElementNode('div', undefined, {
-                    class: 'egg_score_details hide',
-                }, [
-                    createElementNode('div', undefined, { class: 'egg_score_title' }, [
-                        createElementNode('svg', undefined, {
-                            viewBox: '0 0 1024 1024',
-                            class: 'egg_icon',
-                        }, [
-                            createElementNode('path', undefined, {
-                                d: 'M314.81 304.01h415.86v58.91H314.81zM314.81 440.24h415.86v58.91H314.81z',
-                            }),
-                            createElementNode('path', undefined, {
-                                d: 'M814.8 892.74h-8.64l-283.51-182-283.51 182h-8.64A69.85 69.85 0 0 1 160.72 823V188.22a69.85 69.85 0 0 1 69.77-69.77H814.8a69.85 69.85 0 0 1 69.77 69.77V823a69.85 69.85 0 0 1-69.77 69.74zM230.5 177.35a10.87 10.87 0 0 0-10.86 10.86V823a10.86 10.86 0 0 0 5 9.11l298.01-191.42 298.06 191.38a10.86 10.86 0 0 0 5-9.11V188.22a10.87 10.87 0 0 0-10.86-10.86z',
-                            }),
-                        ]),
-                        createElementNode('div', { innerText: '积分详情' }, { class: 'egg_score_title_text' }),
-                    ]),
-                    ...tasks.map((task) => createElementNode('div', undefined, { class: 'egg_score_item' }, [
-                        createTextNode(task.title),
-                        createElementNode('span', { innerText: task.currentScore }, {
-                            class: 'egg_score_detail',
-                        }),
-                    ])),
-                ]);
-                // wrap
-                const todayScoreWrap = createElementNode('div', undefined, {
-                    class: 'egg_todayscore_wrap',
-                }, [todayScoreDiv, scoreDetails]);
-                // 分数信息
-                const scoreInfo = createElementNode('div', undefined, { class: 'egg_scoreinfo' }, [totalScoreDiv, todayScoreWrap]);
-                infoItem.append(scoreInfo);
-            }
-        }
-    }
-}
-/**
- * @description 加载任务列表
- */
-async function loadTaskList() {
-    // 原始任务进度
-    const taskProgress = await getTaskList();
-    if (taskProgress) {
-        // 文章选读
-        tasks[0] = {
-            title: '文章选读',
-            currentScore: taskProgress[0].currentScore,
-            dayMaxScore: taskProgress[0].dayMaxScore,
-            need: taskProgress[0].dayMaxScore - taskProgress[0].currentScore,
-            status: false,
-        };
-        // 视听学习
-        tasks[1] = {
-            title: '视听学习',
-            currentScore: taskProgress[1].currentScore + taskProgress[3].currentScore,
-            dayMaxScore: taskProgress[1].dayMaxScore + taskProgress[3].dayMaxScore,
-            need: taskProgress[1].dayMaxScore +
-                taskProgress[3].dayMaxScore -
-                (taskProgress[1].currentScore + taskProgress[3].currentScore),
-            status: false,
-        };
-        // 每日答题
-        tasks[2] = {
-            title: '每日答题',
-            currentScore: taskProgress[6].currentScore,
-            dayMaxScore: taskProgress[6].dayMaxScore,
-            need: taskProgress[6].dayMaxScore - taskProgress[6].currentScore,
-            status: false,
-        };
-        // 每周答题
-        tasks[3] = {
-            title: '每周答题',
-            currentScore: taskProgress[2].currentScore,
-            dayMaxScore: taskProgress[2].dayMaxScore,
-            need: taskProgress[2].dayMaxScore - taskProgress[2].currentScore,
-            status: false,
-        };
-        // 专项练习
-        tasks[4] = {
-            title: '专项练习',
-            currentScore: taskProgress[5].currentScore,
-            dayMaxScore: taskProgress[5].dayMaxScore,
-            need: taskProgress[5].dayMaxScore - taskProgress[5].currentScore,
-            status: false,
-        };
-        // 详情
-        const details = $$('.egg_score_details .egg_score_detail');
-        // 更新数据
-        for (const i in tasks) {
-            const { currentScore, dayMaxScore } = tasks[i];
-            // 进度
-            let rate = (100 * currentScore) / dayMaxScore;
-            // 修复专项练习成组做完, 进度条显示异常
-            if (dayMaxScore <= currentScore) {
-                rate = 100;
-            }
-            // 每周答题 缺分补满
-            if (Number(i) === 3) {
-                if (!settings[10] && currentScore) {
-                    rate = 100;
-                }
-            }
-            if (rate === 100) {
-                tasks[i].status = true;
-            }
-            if (rate >= 0) {
-                // 设置进度条
-                setProgress(Number(i), Number(rate.toFixed(1)));
-                // 设置详情
-                if (details[i]) {
-                    details[i].innerText = String(tasks[i].currentScore);
-                }
-            }
-        }
-        return;
-    }
-    // 再次请求
-    await sleep(2000);
-    await loadTaskList();
-}
-/**
- * @description 刷新菜单数据
- */
-async function refreshMenu() {
-    console.log('正在加载任务列表...');
-    // 加载任务列表
-    await loadTaskList();
-    console.log('正在加载分数信息...');
-    // 加载分数信息
-    await loadScoreInfo();
-}
-/**
- * @description 渲染菜单
- * @returns
- */
-async function renderMenu() {
-    // 设置项
-    const settingItems = [];
-    // 信息
-    const infoItem = createElementNode('div', undefined, {
-        class: 'egg_info_item',
-    });
-    settingItems.push(infoItem);
-    // 任务标签
-    const settingTaskLabels = [
-        {
-            title: '文章选读',
-            tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
-        },
-        {
-            title: '视听学习',
-            tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
-        },
-        { title: '每日答题', tip: '每组答题每答对1道积1分。每日上限积5分。' },
-        {
-            title: '每周答题',
-            tip: '每组答题每答对1道积1分，同组答题不重复积分。每日上限积5分。',
-        },
-        {
-            title: '专项练习',
-            tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
-        },
-    ];
-    // 分割线
-    settingItems.push(createElementNode('hr', undefined, { 'data-category': '任务' }));
-    for (const i in settingTaskLabels) {
-        // 标签
-        const label = createElementNode('label', {
-            innerText: settingTaskLabels[i].title,
-        });
-        // 进度条
-        const bar = createElementNode('div', undefined, { class: 'egg_bar' });
-        // 轨道
-        const track = createElementNode('div', undefined, { class: 'egg_track' }, bar);
-        // 百分比符号
-        const percentSymbol = createElementNode('span', { innerText: '%' }, { class: 'egg_percentsymbol' });
-        // 数值
-        const percent = createElementNode('div', { innerText: '0' }, { class: 'egg_percent' }, percentSymbol);
-        // 进度
-        const progress = createElementNode('div', undefined, { class: 'egg_progress' }, [track, percent]);
-        // 标签
-        const labelWrap = createElementNode('div', undefined, { class: 'egg_label_wrap' }, [label, progress]);
-        // 处理设置选项变化
-        const handleCheckChange = debounce(async (checked) => {
-            if (settings[i] !== checked) {
-                settings[i] = checked;
-                // 设置
-                GM_setValue('studySetting', JSON.stringify(settings));
-                // 创建提示
-                createTip(`${settingTaskLabels[i].title} ${checked ? '打开' : '关闭'}!`, 2);
-            }
-        }, 500);
-        // 选项
-        const input = createElementNode('input', undefined, {
-            title: settingTaskLabels[i].tip,
-            class: 'egg_setting_switch',
-            type: 'checkbox',
-            checked: settings[i] ? 'checked' : '',
-            onchange(e) {
-                const { checked } = e.target;
-                handleCheckChange(checked);
-            },
-        });
-        // 设置项
-        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [labelWrap, input]);
-        settingItems.push(item);
-    }
-    // 分割线
-    settingItems.push(createElementNode('hr', undefined, { 'data-category': '运行' }));
-    // 运行设置标签
-    const settingRunLabels = [
-        {
-            title: '运行隐藏',
-            tip: '运行时, 隐藏任务面板以及弹窗提示',
-        },
-        {
-            title: '自动开始',
-            tip: '启动时, 自动开始任务, 在倒计时结束前自动开始可随时取消; 如果在自动开始前手动开始任务, 此次自动开始将取消',
-        },
-        {
-            title: '同屏任务',
-            tip: '所有任务不在打开的新页面进行, 而在当前页面运行',
-        },
-    ];
-    for (const i in settingRunLabels) {
-        // 标签
-        const label = createElementNode('label', {
-            innerText: settingRunLabels[i].title,
-        });
-        if (settingRunLabels[i].tip.length) {
-            const tip = createElementNode('span', { innerText: 'i' }, { class: 'egg_detail', title: settingRunLabels[i].tip });
-            label.appendChild(tip);
-        }
-        // 当前序号
-        const currentIndex = Number(i) + settingTaskLabels.length;
-        // 处理设置选项变化
-        const handleCheckChange = debounce(async (checked) => {
-            if (settings[currentIndex] !== checked) {
-                settings[currentIndex] = checked;
-                // 设置
-                GM_setValue('studySetting', JSON.stringify(settings));
-                // 创建提示
-                createTip(`${settingRunLabels[i].title} ${checked ? '打开' : '关闭'}!`, 2);
-            }
-        }, 300);
-        // 选项
-        const input = createElementNode('input', undefined, {
-            title: settingRunLabels[i].tip,
-            class: 'egg_setting_switch',
-            type: 'checkbox',
-            checked: settings[currentIndex] ? 'checked' : '',
-            onchange: (e) => {
-                const { checked } = e.target;
-                handleCheckChange(checked);
-            },
-        });
-        // 设置项
-        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
-        settingItems.push(item);
-    }
-    // 分割线
-    settingItems.push(createElementNode('hr', undefined, { 'data-category': '答题' }));
-    // 运行设置标签
-    const settingExamLabels = [
-        {
-            title: '随机作答',
-            tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
-        },
-        { title: '答错暂停', tip: '每周答题时, 答错暂停答题!' },
-        {
-            title: '缺分补满',
-            tip: '每周答题完成后, 若当前分数非满分, 则再次答题补足!',
-        },
-    ];
-    for (const i in settingExamLabels) {
-        // 标签
-        const label = createElementNode('label', {
-            innerText: settingExamLabels[i].title,
-        });
-        if (settingExamLabels[i].tip.length) {
-            const tip = createElementNode('span', { innerText: 'i' }, { class: 'egg_detail', title: settingExamLabels[i].tip });
-            label.appendChild(tip);
-        }
-        // 当前序号
-        const currentIndex = Number(i) + settingTaskLabels.length + settingRunLabels.length;
-        // 处理设置选项变化
-        const handleCheckChange = debounce(async (checked) => {
-            if (settings[currentIndex] !== checked) {
-                settings[currentIndex] = checked;
-                // 设置
-                GM_setValue('studySetting', JSON.stringify(settings));
-                // 创建提示
-                createTip(`${settingExamLabels[i].title} ${checked ? '打开' : '关闭'}!`, 2);
-            }
-        }, 300);
-        // 选项
-        const input = createElementNode('input', undefined, {
-            title: settingExamLabels[i].tip,
-            class: 'egg_setting_switch',
-            type: 'checkbox',
-            checked: settings[currentIndex] ? 'checked' : '',
-            onchange: (e) => {
-                const { checked } = e.target;
-                handleCheckChange(checked);
-            },
-        });
-        // 设置项
-        const item = createElementNode('div', undefined, { class: 'egg_setting_item' }, [label, input]);
-        settingItems.push(item);
-    }
-    const frameShowPath = createElementNode('path', undefined, {
-        d: 'M836.224 106.666667h-490.666667a85.589333 85.589333 0 0 0-85.333333 85.333333V256h-64a85.589333 85.589333 0 0 0-85.333333 85.333333v490.666667a85.589333 85.589333 0 0 0 85.333333 85.333333h490.666667a85.589333 85.589333 0 0 0 85.333333-85.333333V768h64a85.589333 85.589333 0 0 0 85.333333-85.333333V192a85.589333 85.589333 0 0 0-85.333333-85.333333z m-132.266667 725.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-490.666667a20.138667 20.138667 0 0 1-21.333333-21.333333V341.333333a20.138667 20.138667 0 0 1 21.333333-21.333333h494.933334a20.138667 20.138667 0 0 1 21.333333 21.333333v490.666667z m153.6-149.333333a20.138667 20.138667 0 0 1-21.333333 21.333333h-64V341.333333a85.589333 85.589333 0 0 0-85.333333-85.333333h-362.666667V192a20.138667 20.138667 0 0 1 21.333333-21.333333h490.666667a20.138667 20.138667 0 0 1 21.333333 21.333333z',
-    });
-    const frameShowIcon = createElementNode('svg', undefined, {
-        viewBox: '0 0 1024 1024',
-        class: 'egg_icon',
-    }, frameShowPath);
-    // 隐藏
-    const frameShowBtn = createElementNode('button', undefined, {
-        class: `frame_show_btn hide`,
-        type: 'button',
-        onclick: () => {
-            // 显示窗口
-            setFrameVisible(true);
-        },
-    }, frameShowIcon);
-    const showPath = createElementNode('path', undefined, {
-        d: 'M332.16 883.84a40.96 40.96 0 0 0 58.24 0l338.56-343.04a40.96 40.96 0 0 0 0-58.24L390.4 140.16a40.96 40.96 0 0 0-58.24 58.24L640 512l-307.84 314.24a40.96 40.96 0 0 0 0 57.6z',
-    });
-    const showIcon = createElementNode('svg', undefined, {
-        viewBox: '0 0 1024 1024',
-        class: 'egg_icon',
-    }, showPath);
-    // 隐藏
-    const showBtn = createElementNode('button', undefined, {
-        class: 'egg_setting_show_btn',
-        type: 'button',
-        onclick: () => {
-            const settingsHidden = settingBox.classList.contains('hide');
-            settingBox.classList.toggle('hide', !settingsHidden);
-            if (!settingsHidden) {
-                // 积分详情
-                const scoreDetails = $$('.egg_score_details')[0];
-                scoreDetails.classList.add('hide');
-            }
-        },
-    }, showIcon);
-    // 按钮集合
-    const btnsWrap = createElementNode('div', undefined, {
-        class: 'egg_btns_wrap',
-    }, [frameShowBtn, showBtn]);
-    settingItems.push(btnsWrap);
-    // 设置
-    const settingBox = createElementNode('div', undefined, { class: 'egg_setting_box' }, settingItems);
-    // 菜单
-    const menu = createElementNode('div', undefined, {
-        id: 'settingData',
-        class: `egg_menu${hasMobile() ? ' mobile' : ''}`,
-    }, settingBox);
-    // 根容器
-    const base = createElementNode('div', undefined, undefined, menu);
-    // 已经登录
-    if (login) {
-        // 开始学习按钮
-        const startButton = createElementNode('button', { innerText: '等待中' }, {
-            id: 'startButton',
-            class: 'egg_study_btn loading',
-            type: 'button',
-            disabled: 'disabled',
-        });
-        // 设置项
-        const item = createElementNode('div', undefined, { class: 'egg_setting_item egg_start_btn' }, startButton);
-        settingBox.append(item);
-    }
-    // 插入节点
-    document.body.append(base);
-    console.log('正在加载用户信息...');
-    // 加载用户信息
-    await loadUserInfo();
-    // 刷新菜单
-    await refreshMenu();
-    // 已经登录
-    if (login) {
-        // 完成任务
-        if (tasks.every((task, i) => !settings[i] || task.status)) {
-            finishTask();
-            return;
-        }
-        // 开始学习按钮
-        const startButton = $$('#startButton')[0];
-        if (startButton) {
-            startButton.removeAttribute('disabled');
-            startButton.classList.remove('loading');
-            startButton.innerText = '开始学习';
-            startButton.addEventListener('click', start);
-        }
-    }
-    // 自动答题
-    if (login && settings[6]) {
-        // 创建提示
-        const tip = createTip('即将自动开始任务', 5);
-        // 等待倒计时结束
-        await tip.waitCountDown();
-        // 再次查看是否开启
-        if (settings[6] && !started) {
-            // 创建提示
-            createTip('自动开始任务', 2);
-            start();
-        }
-        else {
-            // 创建提示
-            createTip('已取消自动开始任务!', 2);
-        }
-    }
-}
-/**
- * @description 渲染窗口
- */
-function renderFrame() {
-    if (settings[7]) {
-        // 标题
-        const title = createElementNode('div', undefined, { class: 'frame_title' });
-        const hidePath = createElementNode('path', undefined, {
-            d: 'M863.7 552.5H160.3c-10.6 0-19.2-8.6-19.2-19.2v-41.7c0-10.6 8.6-19.2 19.2-19.2h703.3c10.6 0 19.2 8.6 19.2 19.2v41.7c0 10.6-8.5 19.2-19.1 19.2z',
-        });
-        const hideIcon = createElementNode('svg', undefined, {
-            viewBox: '0 0 1024 1024',
-            class: 'egg_icon',
-        }, hidePath);
-        // 隐藏
-        const hideBtn = createElementNode('button', undefined, {
-            class: 'frame_btn',
-            type: 'button',
-            onclick: () => {
-                // 隐藏窗口
-                setFrameVisible(false);
-            },
-        }, hideIcon);
-        const resizePath = createElementNode('path', undefined, {
-            d: 'M609.52 584.92a35.309 35.309 0 0 1 24.98-10.36c9.37 0 18.36 3.73 24.98 10.36l189.29 189.22-0.07-114.3 0.57-6.35c3.25-17.98 19.7-30.5 37.9-28.85 18.2 1.65 32.12 16.92 32.09 35.2v200.23c-0.05 1.49-0.19 2.97-0.42 4.45l-0.21 1.13c-0.22 1.44-0.55 2.85-0.99 4.24l-0.57 1.62-0.56 1.41a34.163 34.163 0 0 1-7.62 11.36l2.12-2.4-0.14 0.14-0.92 1.06-1.06 1.2-0.57 0.57-0.56 0.57a36.378 36.378 0 0 1-16.23 8.39l-3.53 0.5-4.02 0.35h-199.6l-6.35-0.63c-16.73-3.06-28.9-17.63-28.93-34.64l0.56-6.35c3.07-16.76 17.67-28.93 34.71-28.92l114.29-0.14-189.07-189.1-4.09-4.94c-9.71-14.01-8.01-32.95 4.02-45.02z m-162.06 0c12.06 12.05 13.78 30.99 4.09 45.01l-4.09 4.94-189.15 189.08 114.3 0.14c17.04-0.01 31.65 12.17 34.71 28.92l0.57 6.35c-0.03 17.01-12.19 31.58-28.92 34.64l-6.35 0.63H173.09l-4.23-0.42-3.39-0.49a36.38 36.38 0 0 1-17.36-9.52l-1.06-1.13-0.98-1.13 0.98 1.06-1.97-2.26 0.85 1.06-0.42-0.56a35.137 35.137 0 0 1-3.74-5.64l-1.13-2.68a34.71 34.71 0 0 1-2.11-7.33l-0.28-1.13c-0.21-1.47-0.33-2.96-0.36-4.45V659.78c-0.03-18.28 13.89-33.55 32.09-35.2 18.2-1.65 34.65 10.87 37.9 28.85l0.57 6.35-0.07 114.36 189.29-189.22c13.77-13.77 36.11-13.77 49.88 0h-0.09z m-74.71-471.71l6.35 0.57c16.76 3.06 28.93 17.67 28.92 34.71l-0.63 6.35c-3.07 16.76-17.67 28.93-34.71 28.92l-114.3 0.14 189.15 189.08 4.09 4.94c10.26 15.02 7.42 35.37-6.55 47.01-13.98 11.63-34.51 10.74-47.42-2.07L208.29 233.71l0.07 114.3-0.57 6.35c-3.25 17.98-19.7 30.5-37.9 28.85-18.2-1.65-32.12-16.92-32.09-35.2V147.78c0-1.55 0.14-3.03 0.35-4.51l0.21-1.13c0.24-1.44 0.59-2.85 1.06-4.23a34.97 34.97 0 0 1 8.68-14.39l-2.12 2.4-0.42 0.57 1.55-1.84-0.99 1.06 0.92-0.98 2.26-2.33c3.04-2.73 6.52-4.92 10.3-6.49l2.82-1.06c3.45-1.07 7.04-1.62 10.65-1.62l-3.6 0.14h0.49l1.48-0.14h201.31z m512.91 0l1.41 0.14h0.42c2.43 0.29 4.84 0.79 7.19 1.48l2.82 1.06 2.61 1.2 3.04 1.76c2.09 1.33 4.03 2.89 5.78 4.66l1.13 1.2 0.78 0.98 0.21 0.14 0.49 0.64 2.33 3.17c2.35 3.83 3.98 8.07 4.8 12.49l0.21 1.13c0.21 1.48 0.35 2.96 0.35 4.44v200.37c-0.16 18.13-14.03 33.19-32.08 34.83-18.06 1.64-34.42-10.67-37.83-28.48l-0.57-6.35V233.65L659.54 422.87c-12.9 12.95-33.56 13.91-47.59 2.2-14.04-11.71-16.81-32.2-6.38-47.22l4.02-4.86 189.22-189.08-114.29-0.14c-17.06 0.04-31.71-12.14-34.78-28.92l-0.63-6.35c-0.01-17.04 12.16-31.65 28.93-34.71l6.35-0.57h201.27z m0 0',
-        });
-        const resizeIcon = createElementNode('svg', undefined, {
-            viewBox: '0 0 1024 1024',
-            class: 'egg_icon',
-        }, resizePath);
-        // 改变大小
-        const resizeBtn = createElementNode('button', undefined, {
-            class: 'frame_btn',
-            type: 'button',
-            onclick: () => {
-                const exists = wrap.classList.contains('max');
-                wrap.classList.toggle('max', !exists);
-            },
-        }, resizeIcon);
-        const closePath = createElementNode('path', undefined, {
-            d: 'M453.44 512L161.472 220.032a41.408 41.408 0 0 1 58.56-58.56L512 453.44 803.968 161.472a41.408 41.408 0 0 1 58.56 58.56L570.56 512l291.968 291.968a41.408 41.408 0 0 1-58.56 58.56L512 570.56 220.032 862.528a41.408 41.408 0 0 1-58.56-58.56L453.44 512z',
-        });
-        const closeIcon = createElementNode('svg', undefined, {
-            viewBox: '0 0 1024 1024',
-            class: 'egg_icon',
-        }, closePath);
-        // 关闭窗口
-        const closeBtn = createElementNode('button', undefined, {
-            class: 'frame_btn',
-            type: 'button',
-            onclick: () => {
-                // 关闭窗口
-                closeFrame();
-            },
-        }, closeIcon);
-        // 控制器
-        const controls = createElementNode('div', undefined, {
-            class: 'frame_controls',
-        }, [hideBtn, resizeBtn, closeBtn]);
-        const controlsWrap = createElementNode('div', undefined, { class: 'frame_controls_wrap' }, [title, controls]);
-        // 窗口
-        const frame = createElementNode('iframe', undefined, {
-            class: 'frame',
-        });
-        // 窗口内容
-        const frameContent = createElementNode('div', undefined, {
-            class: 'frame_content',
-        }, [frame]);
-        // 容器
-        const wrap = createElementNode('div', undefined, { class: 'frame_wrap' }, [
-            controlsWrap,
-            frameContent,
-        ]);
-        // 遮罩
-        const mask = createElementNode('div', undefined, { class: 'frame_mask' });
-        // 容器
-        const conn = createElementNode('div', undefined, {
-            class: 'frame_container hide',
-        }, [mask, wrap]);
-        document.body.append(conn);
-    }
-}
-/**
- * @description 渲染提示
- */
-function renderTip() {
-    const tipWrap = createElementNode('div', undefined, {
-        class: 'egg_tip_wrap',
-    });
-    document.body.append(tipWrap);
-}
-/**
- * @description 初始化 id
- */
-function initFrameID() {
-    if (settings[7]) {
-        const win = unsafeWindow;
-        win.addEventListener('message', (msg) => {
-            const { data } = msg;
-            if (data.id) {
-                id = data.id;
-                console.log('初始化窗口 id: ', id);
-            }
-        });
-    }
+    closeWin(settings[6], id);
 }
 /**
  * @description 打开窗口
  * @param url
  * @returns
  */
-function openFrame(url, title) {
-    const conn = $$('.frame_container')[0];
+async function openFrame(url, title) {
+    const conn = $$('.egg_frame_wrap')[0];
     if (conn) {
-        setFrameVisible(true);
+        // 显示窗体
+        setFrameVisible(!settings[7]);
         // 标题
-        const frameTitle = $$('.frame_title', conn)[0];
+        const frameTitle = $$('.egg_frame_title', conn)[0];
         // 窗口
-        const frame = $$('.frame', conn)[0];
+        const frame = $$('.egg_frame', conn)[0];
         // 打开
         closed = false;
         // id
         const id = generateMix(10);
-        // 设置URL
+        // 设置标题
+        frameTitle.innerText = title || '';
+        // 设置 URL
         frame.src = url;
-        frame.addEventListener('load', () => {
-            frameTitle.innerText = title || '';
-            frame.contentWindow?.postMessage({ id, closed: false }, url);
-        });
+        // 等待页面加载
+        await waitFrameLoaded(frame);
+        // 发送窗口 ID
+        frame.contentWindow?.postMessage({ id, closed: false }, url);
         return {
             id,
             frame,
@@ -2880,8 +2992,8 @@ function openFrame(url, title) {
  * @description 改变窗口可见性
  */
 function setFrameVisible(show) {
-    const conn = $$('.frame_container')[0];
-    const frameBtn = $$('.frame_show_btn')[0];
+    const conn = $$('.egg_frame_wrap')[0];
+    const frameBtn = $$('.egg_frame_show_btn')[0];
     if (conn && frameBtn) {
         conn.classList.toggle('hide', !show);
         frameBtn.classList.toggle('hide', show);
@@ -2891,17 +3003,17 @@ function setFrameVisible(show) {
  * @description 关闭窗口
  */
 function closeFrame() {
-    const conn = $$('.frame_container')[0];
-    const frameBtn = $$('.frame_show_btn')[0];
+    const conn = $$('.egg_frame_wrap')[0];
+    const frameBtn = $$('.egg_frame_show_btn')[0];
     if (conn && frameBtn) {
         // 隐藏窗口
-        conn.classList.toggle('hide', true);
+        conn.classList.add('hide');
         // 隐藏按钮
-        frameBtn.classList.toggle('hide', true);
+        frameBtn.classList.add('hide');
         // 标题
-        const frameTitle = $$('.frame_title', conn)[0];
+        const frameTitle = $$('.egg_frame_title', conn)[0];
         // 窗口
-        const frame = $$('.frame', conn)[0];
+        const frame = $$('.egg_frame', conn)[0];
         // 关闭
         closed = true;
         frame.src = '';
@@ -2928,12 +3040,20 @@ function waitFrameClose(id) {
         }, 100);
     });
 }
+// 等待窗口加载
+function waitFrameLoaded(iframe) {
+    return new Promise((resolve) => {
+        iframe.addEventListener('load', () => {
+            resolve(true);
+        });
+    });
+}
 /**
  * @description 打开并等待任务结束
  */
 async function waitTaskWin(url, title) {
-    if (settings[7]) {
-        const newFrame = openFrame(url, title);
+    if (settings[6]) {
+        const newFrame = await openFrame(url, title);
         if (newFrame) {
             // id
             const { id } = newFrame;
@@ -2945,16 +3065,6 @@ async function waitTaskWin(url, title) {
         // 页面
         const newPage = openWin(url);
         await waitingClose(newPage);
-    }
-}
-/**
- * @description 是否显示目菜单
- */
-function setVisible(isShow) {
-    // 菜单
-    const menu = $$('.egg_menu')[0];
-    if (menu) {
-        menu.style.display = isShow ? 'block' : 'none';
     }
 }
 /**
@@ -2976,49 +3086,29 @@ function loginStatus() {
     });
 }
 /**
- * @description 登录窗口
- */
-function loginWindowLoad() {
-    // egg_frame_login
-    const frameLogin = $$('.egg_frame_login')[0];
-    // 配置
-    const frameItem = $$('.egg_frame_item')[0];
-    if (frameLogin) {
-        let iframe = $$('iframe', frameLogin)[0];
-        if (!iframe) {
-            iframe = createElementNode('iframe');
-            frameLogin.append(iframe);
-            frameItem.classList.add('active');
-            console.log('加载登录二维码!');
-        }
-        else {
-            console.log('刷新登录二维码!');
-        }
-        // 登录页面
-        iframe.src = URL_CONFIG.login;
-    }
-}
-/**
  * @description 学习
  */
 async function study() {
-    console.log('开始学习');
+    // 提示
+    createTip('开始学习!');
     // 暂停
     await pauseStudyLock();
     // 任务
     if (tasks.length) {
         // 检查新闻
         if (settings[0] && !tasks[0].status) {
-            console.log('任务一：文章选读');
-            createTip('任务一：文章选读', 2);
+            console.log('任务一: 文章选读');
+            // 提示
+            createTip('任务一: 文章选读');
             // 暂停
             await pauseStudyLock();
             // 看新闻
             await readNews();
         }
         if (settings[1] && !tasks[1].status) {
-            console.log('任务二：视听学习');
-            createTip('任务二：视听学习', 2);
+            console.log('任务二: 视听学习');
+            // 提示
+            createTip('任务二: 视听学习');
             // 暂停
             await pauseStudyLock();
             // 看视频
@@ -3026,8 +3116,9 @@ async function study() {
         }
         // 检查每日答题
         if (settings[2] && !tasks[2].status) {
-            console.log('任务三：每日答题');
-            createTip('任务三：每日答题', 2);
+            console.log('任务三: 每日答题');
+            // 提示
+            createTip('任务三: 每日答题');
             // 暂停
             await pauseStudyLock();
             // 做每日答题
@@ -3035,8 +3126,9 @@ async function study() {
         }
         // 检查每周答题
         if (settings[3] && !tasks[3].status) {
-            console.log('任务四：每周答题');
-            createTip('任务四：每周答题', 2);
+            console.log('任务四: 每周答题');
+            // 提示
+            createTip('任务四: 每周答题');
             // 暂停
             await pauseStudyLock();
             // 做每周答题
@@ -3045,29 +3137,14 @@ async function study() {
     }
     // 检查专项练习
     if (settings[4] && !tasks[4].status) {
-        console.log('任务五：专项练习');
+        console.log('任务五: 专项练习');
+        // 提示
+        createTip('任务五: 专项练习');
         // 暂停
         await pauseStudyLock();
         // 做专项练习
         await doExamPaper();
     }
-}
-/**
- * @description 设置进度条
- */
-function setProgress(index, progress) {
-    // 进度条对象
-    const taskProgressList = $$('.egg_progress');
-    // 进度条信息
-    const progressInfo = taskProgressList[index];
-    // 进度条
-    const bar = $$('.egg_bar', progressInfo)[0];
-    // 百分比
-    const percent = $$('.egg_percent', progressInfo)[0];
-    // 长度
-    bar.style.width = `${progress}%`;
-    // 文字
-    percent.innerText = `${progress}%`;
 }
 /**
  * @description 暂停任务
@@ -3078,11 +3155,11 @@ function pauseTask() {
         GM_setValue('pauseStudy', true);
     }
     // 开始按钮
-    const startButton = $$('#startButton')[0];
-    startButton.innerText = '继续学习';
-    startButton.classList.remove('loading');
-    startButton.removeEventListener('click', pauseTask);
-    startButton.addEventListener('click', continueTask);
+    const studyBtn = $$('.egg_study_btn')[0];
+    studyBtn.innerText = '继续学习';
+    studyBtn.classList.remove('loading');
+    studyBtn.removeEventListener('click', pauseTask);
+    studyBtn.addEventListener('click', continueTask);
 }
 /**
  * @description 继续任务
@@ -3093,11 +3170,11 @@ function continueTask() {
         GM_setValue('pauseStudy', false);
     }
     // 开始按钮
-    const startButton = $$('#startButton')[0];
-    startButton.innerText = '正在学习, 点击暂停';
-    startButton.classList.add('loading');
-    startButton.removeEventListener('click', continueTask);
-    startButton.addEventListener('click', pauseTask);
+    const studyBtn = $$('.egg_study_btn')[0];
+    studyBtn.innerText = '正在学习, 点击暂停';
+    studyBtn.classList.add('loading');
+    studyBtn.removeEventListener('click', continueTask);
+    studyBtn.addEventListener('click', pauseTask);
 }
 /**
  * @description 完成任务
@@ -3108,16 +3185,18 @@ function finishTask() {
         GM_setValue('pauseStudy', false);
     }
     // 开始按钮
-    const startButton = $$('#startButton')[0];
-    startButton.innerText = '已完成';
-    startButton.classList.remove('loading');
-    startButton.classList.add('disabled');
-    startButton.setAttribute('disabled', '');
+    const studyBtn = $$('.egg_study_btn')[0];
+    studyBtn.innerText = '已完成';
+    studyBtn.classList.remove('loading');
+    studyBtn.classList.add('disabled');
+    studyBtn.setAttribute('disabled', '');
 }
 /**
  * @description 开始
  */
 async function start() {
+    // 提示
+    createTip('准备开始学习');
     // 保存配置
     console.log('准备开始学习...');
     if (login && !started) {
@@ -3127,39 +3206,28 @@ async function start() {
             GM_setValue('pauseStudy', false);
         }
         // 开始按钮
-        const startButton = $$('#startButton')[0];
-        startButton.innerText = '正在学习, 点击暂停';
-        startButton.classList.add('loading');
-        startButton.removeEventListener('click', start);
+        const studyBtn = $$('.egg_study_btn')[0];
+        studyBtn.innerText = '正在学习, 点击暂停';
+        studyBtn.classList.add('loading');
+        studyBtn.removeEventListener('click', start);
         // 点击暂停
-        startButton.addEventListener('click', pauseTask);
-        // 隐藏界面
-        if (settings[5]) {
-            setVisible(false);
-        }
-        // 查询今天还有什么任务没做完
-        console.log('检查今天还有什么任务没做完');
-        // 任务
-        if (tasks.length) {
-            // 学习
+        studyBtn.addEventListener('click', pauseTask);
+        // 学习
+        await study();
+        // 刷新数据
+        await refreshInfo();
+        // 未完成
+        if (!tasks.every((task, i) => !settings[i] || task.status)) {
             await study();
-            // 刷新菜单数据
-            await refreshMenu();
-            // 未完成
-            if (!tasks.every((task, i) => !settings[i] || task.status)) {
-                await study();
-            }
-            finishTask();
-            // 关闭窗口
-            if (settings[7]) {
-                closeFrame();
-            }
-            console.log('已完成');
         }
-        // 显示界面
-        if (settings[5]) {
-            setVisible(true);
+        finishTask();
+        // 关闭窗口
+        if (settings[6]) {
+            closeFrame();
         }
+        console.log('已完成');
+        // 提示
+        createTip('完成学习!');
     }
 }
 

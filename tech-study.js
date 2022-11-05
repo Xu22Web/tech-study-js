@@ -2032,7 +2032,7 @@ async function readNews() {
         await pauseStudyLock();
         console.log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
         // 提示
-        createTip(`正在阅读第 ${Number(i) + 1} 个新闻...`);
+        createTip(`正在阅读第 ${Number(i) + 1} 个新闻`);
         // 链接
         const { url } = news[i];
         // 链接
@@ -2070,7 +2070,7 @@ async function watchVideo() {
         await pauseStudyLock();
         console.log(`正在观看第 ${Number(i) + 1} 个视频...`);
         // 提示
-        createTip(`正在观看第 ${Number(i) + 1} 个视频...`);
+        createTip(`正在观看第 ${Number(i) + 1} 个视频`);
         // 链接
         const { url } = videos[i];
         // 链接
@@ -2172,7 +2172,7 @@ async function doExamPaper() {
         await pauseStudyLock();
         console.log('正在做专项练习...');
         // 提示
-        createTip('正在做专项练习...');
+        createTip('正在做专项练习');
         // 链接
         const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
         console.log(`链接: ${url}`);

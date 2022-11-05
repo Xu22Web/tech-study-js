@@ -2164,7 +2164,7 @@ function pauseExam(flag: boolean) {
       createTip('已暂停, 手动开启自动答题! ', 10);
     } else {
       // 创建提示
-      createTip('已开启, 自动答题! ');
+      createTip('已开启, 自动答题!');
     }
     pause = flag;
     ExamBtn.innerText = '开启自动答题';
@@ -2286,19 +2286,23 @@ function handleSlideVerify() {
         slide.dispatchEvent(mouseup);
       }
       // 创建提示
-      createTip('滑动验证成功! ');
+      createTip('滑动验证完成!');
       // 定时器
       const timer = setInterval(() => {
         // 滑动验证
         const mask = $$('#nc_mask')[0];
         if (!mask || getComputedStyle(mask).display === 'none') {
-          console.log('滑动验证完成!');
+          console.log('滑动验证成功!');
           // 创建提示
-          createTip('滑动验证完成! ');
+          createTip('滑动验证成功!');
           clearInterval(timer);
           resolve(true);
+          return;
         }
-        console.log('正在滑动验证...');
+        resolve(false);
+        console.log('滑动验证失败!');
+        // 创建提示
+        createTip('滑动验证失败!');
       }, 100);
       return;
     }
@@ -2709,7 +2713,7 @@ async function doingExam() {
             // 带字母的选项
             const answerTemp = choice.innerText;
             // 从字符串中拿出答案
-            const [, answer] = answerTemp.split('. ');
+            const [, answer] = answerTemp.split('.');
             if (answer && answer.length) {
               answers.push(answer);
             }

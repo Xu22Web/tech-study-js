@@ -38,21 +38,21 @@
 
 1. 用户`登录`
 
-<img src="./login.png" style="width:200px;" alt="登录">
+   <img src="./login.png" style="width:200px;" alt="登录">
 
-1. 点击 `开始学习`，等待完成任务运行
+2. 点击 `开始学习`，等待完成任务运行
 
    - `桌面端`运行
 
-     <img src="./pc.png" style="width:1000px;" alt="PC 端运行">
+     <img src="./pc.png" style="width:1000px;" alt="桌面端运行">
 
    - `移动端`运行
 
       <img src="./mobile.png" style="width:320px;" alt="移动端运行">
 
-2. `完成学习`任务
+3. `完成学习`任务
 
-<img src="./done.png" style="width:300px;" alt="完成学习">
+   <img src="./done.png" style="width:300px;" alt="完成学习">
 
 ### 更新与维护 Update and Maintenance
 
@@ -68,7 +68,7 @@
 
 - **现征集在线题库，特此公告**
 
-  > 不知道大家有没有发现，在新版的脚本中，我将原本混乱的搜题`API`，替换成了自行整合的搜题`API`
+  不知道大家有没有发现，在新版的脚本中，我将原本混乱的搜题`API`，替换成了自行整合的搜题`API`
 
   由于以下原因:
 

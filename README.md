@@ -1,8 +1,10 @@
 # tech-study-js
 
-### 原仓库：
+### 原仓库
 
 > https://github.com/TechXueXi/techxuexi-js
+
+基于原作者的原仓库，自行改进和完善
 
 ### 描述 Description
 
@@ -14,9 +16,9 @@
 
 1. 装个浏览器插件 tampermonkey （下载：https://github.com/TechXueXi/Tampermonkey ）
 
-2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 `tech-study.js` 脚本复制粘贴进编辑框保存。
+2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 [`tech-study.js`](https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js) 脚本，粘贴进编辑框保存。
 
-3. 开启这个脚本，然后进入网页强国 `www.xuexi.cn` ，登录网页。
+3. 开启这个脚本，然后进入网页强国 https://www.xuexi.cn，登录网页。
 
 ### 优化 Promote
 
@@ -24,21 +26,33 @@
 
 2. 新增用户信息显示，包括昵称、头像、总分以及当天分数
 
-3. 新增任务进度显示，优化显示逻辑
+3. 新增任务进度以及任务分数详情显示，任务情况清晰明了
 
-4. 修复部分问题，优化答题逻辑
+4. 优化答题逻辑，新增滑动验证，远离验证烦恼
+
+5. 新增同屏任务以及静默运行，仅需一个页面即可静默运行任务
+
+6. 兼容桌面端以及移动端，手机电脑均可运行（设备均需支持油猴脚本，此外，移动端需要开启同屏任务）
 
 ### 使用流程 Process
 
-1. 登录
+1. 用户`登录`
 
-![登录](./login.png)
+<img src="./login.png" style="width:200px;" alt="登录">
 
-2. 点击 `开始学习`，等待完成学习
+1. 点击 `开始学习`，等待完成任务运行
 
-3. 完成学习
+   - `桌面端`运行
 
-![完成学习](./done.png)
+     <img src="./pc.png" style="width:1000px;" alt="PC 端运行">
+
+   - `移动端`运行
+
+      <img src="./mobile.png" style="width:320px;" alt="移动端运行">
+
+2. `完成学习`任务
+
+<img src="./done.png" style="width:300px;" alt="完成学习">
 
 ### 更新与维护 Update and Maintenance
 

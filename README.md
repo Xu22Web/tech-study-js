@@ -14,11 +14,15 @@
 
 ### 用法 Usage
 
-1. 装个浏览器插件 tampermonkey （下载：https://github.com/TechXueXi/Tampermonkey ）
+1. 装个浏览器插件`Tampermonkey`
 
-2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 [`tech-study.js`](https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js) 脚本，粘贴进编辑框保存。
+   1. Microsoft Edge: [插件安装](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd?hl=zh-CN)
 
-3. 开启这个脚本，然后进入网页强国 https://www.xuexi.cn，登录网页。
+   2. Google Chrome: [插件安装](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=zh)
+
+2. 点击插件里添加按钮，去掉编辑框里原来的代码，复制 [tech-study.js](https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js) 脚本，粘贴进编辑框保存。
+
+3. 开启这个脚本，然后进入网页强国 https://www.xuexi.cn 。
 
 ### 优化 Promote
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221105
+// @version   20221209
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -16,7 +16,6 @@
 // @grant   GM_getValue
 // @grant   GM_deleteValue
 // @grant   GM_openInTab
-// @grant   GM_addElement
 // @grant   unsafeWindow
 // @updateURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
@@ -1191,11 +1190,6 @@ function Panel() {
                     if (panel) {
                         const panelHidden = panel.classList.contains('hide');
                         panel.classList.toggle('hide', !panelHidden);
-                        if (!panelHidden) {
-                            // 积分详情
-                            const scoreDetails = $$('.egg_score_details')[0];
-                            scoreDetails && scoreDetails.classList.add('hide');
-                        }
                     }
                 },
             }, createNSElementNode('svg', undefined, {
@@ -1240,6 +1234,16 @@ function ScoreInfo({ login }) {
                         if (scoreDetails) {
                             const exists = scoreDetails.classList.contains('hide');
                             scoreDetails.classList.toggle('hide', !exists);
+                        }
+                    },
+                    onblur: () => {
+                        // 积分详情
+                        const scoreDetails = $$('.egg_score_details')[0];
+                        if (scoreDetails) {
+                            const exists = scoreDetails.classList.contains('hide');
+                            if (!exists) {
+                                scoreDetails.classList.add('hide');
+                            }
                         }
                     },
                 }, [

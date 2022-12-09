@@ -867,11 +867,6 @@ function Panel() {
                 if (panel) {
                   const panelHidden = panel.classList.contains('hide');
                   panel.classList.toggle('hide', !panelHidden);
-                  if (!panelHidden) {
-                    // 积分详情
-                    const scoreDetails = $$('.egg_score_details')[0];
-                    scoreDetails && scoreDetails.classList.add('hide');
-                  }
                 }
               },
             },
@@ -947,6 +942,16 @@ function ScoreInfo({ login }: { login: boolean }) {
                 if (scoreDetails) {
                   const exists = scoreDetails.classList.contains('hide');
                   scoreDetails.classList.toggle('hide', !exists);
+                }
+              },
+              onblur: () => {
+                // 积分详情
+                const scoreDetails = $$('.egg_score_details')[0];
+                if (scoreDetails) {
+                  const exists = scoreDetails.classList.contains('hide');
+                  if (!exists) {
+                    scoreDetails.classList.add('hide');
+                  }
                 }
               },
             },

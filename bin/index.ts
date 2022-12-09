@@ -278,7 +278,7 @@ const main = async () => {
         progress.succeed(
           `完成编译: ${chalk.blueBright(
             originRelativePath
-          )} -> ${chalk.blueBright(compileName)}!`
+          )} -> ${chalk.blueBright(compileName)}`
         );
         fullData.push(importData);
         continue;
@@ -290,7 +290,7 @@ const main = async () => {
 
     progress.start(`正在导出文件... ${chalk.blueBright(compiltPath)}`);
     fs.writeFileSync(compiltPath, fullData.join('\n'));
-    progress.succeed(`导出文件: ${chalk.blueBright(compiltelativePath)}!`);
+    progress.succeed(`导出文件: ${chalk.blueBright(compiltelativePath)}`);
     return;
   }
   progress.fail(`编译失败,请检查文件路径!`);

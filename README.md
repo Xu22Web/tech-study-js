@@ -137,10 +137,10 @@
 
   ```
    ✔ 完成编译: tech-study.ts -> tech-study.js
-   ✔ 完成编译: ./config/url.ts -> tech-study.js!
-   ✔ 完成编译: ./config/api.ts -> tech-study.js!
-   ✔ 完成编译: ./utils/index.ts -> tech-study.js!
-   ✔ 导出文件: tech-study.js!
+   ✔ 完成编译: ./config/api.ts -> tech-study.js
+   ✔ 完成编译: ./config/url.ts -> tech-study.js
+   ✔ 完成编译: ./utils/index.ts -> tech-study.js
+   ✔ 导出文件: tech-study.js
   ```
 
 - 功能特性（基于`TypeScript Compiler API`）

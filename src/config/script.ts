@@ -82,6 +82,7 @@ const SCRIPT_CONFIG = {
     'https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js',
   downloadURL:
     'https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js',
+  supportURL: 'https://github.com/Xu22Web',
 };
 
 export default SCRIPT_CONFIG;

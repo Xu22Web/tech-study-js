@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20221209
+// @version   20230101
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -19,6 +19,7 @@
 // @grant   unsafeWindow
 // @updateURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
+// @supportURL   https://github.com/Xu22Web
 // ==/UserScript==
 /**
  * @description api配置
@@ -56,7 +57,7 @@ const API_CONFIG = {
     // 文本服务器保存答案
     answerSave: 'https://a6.qikekeji.com/txt/data/save',
     // 文本服务器获取答案
-    answerSearch: 'https://api.answer.uu988.xyz/answer/search',
+    answerSearch: 'https://api.answer.redfish.top/answer/search',
 };
 
 
@@ -68,8 +69,6 @@ const URL_CONFIG = {
     home: /^https\:\/\/www\.xuexi\.cn(\/(index\.html)?)?$/,
     // 每日答题页面
     examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
-    // 每周答题页面
-    examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
     // 专项练习页面
     examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
     // 登录界面
@@ -474,16 +473,12 @@ function generateMix(length = 6) {
 }
 
 
-const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (max-height: 768px) {  :root {    --scale: 0.8;  }  .egg_panel {    top: 2rem;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 2rem;}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_setting_show_btn,.egg_panel .egg_frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_panel .egg_setting_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_login_wrap .egg_login_btn,.egg_user_wrap .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_login_wrap .egg_login_btn:active,.egg_user_wrap .egg_login_btn:active {  opacity: 0.8;}.egg_login_wrap .egg_login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_wrap .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_login_wrap {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_wrap .egg_login_frame_item {  height: 0;  overflow: hidden;}.egg_login_wrap .egg_login_frame_item.active {  --rate: 0.75;  margin-top: 0.8rem;  height: calc(22.8rem * var(--rate));  width: calc(22.8rem * var(--rate));}.egg_login_frame_item.active .egg_login_frame_wrap {  transform: scale(var(--rate));  transform-origin: top left;  overflow: hidden;  padding: 1rem;  width: 22.8rem;  height: 22.8rem;  background: white;  border-radius: 1rem;}.egg_login_frame_wrap {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_login_frame {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;  position: absolute;  left: -6.4rem;  top: -2.1rem;}.egg_user_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_user_wrap .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_sub_nickname,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_study_item {  display: flex;  justify-content: center;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}';
+const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (max-height: 768px) {  :root {    --scale: 0.8;  }  .egg_panel {    top: 2rem;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 2rem;}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_setting_show_btn,.egg_panel .egg_frame_show_btn {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_panel .egg_setting_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_login_wrap .egg_login_btn,.egg_user_wrap .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_login_wrap .egg_login_btn:active,.egg_user_wrap .egg_login_btn:active {  opacity: 0.8;}.egg_login_wrap .egg_login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_wrap .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_login_wrap {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_wrap .egg_login_frame_item {  height: 0;  overflow: hidden;}.egg_login_wrap .egg_login_frame_item.active {  --rate: 0.75;  margin-top: 0.8rem;  height: calc(22.8rem * var(--rate));  width: calc(22.8rem * var(--rate));}.egg_login_frame_item.active .egg_login_frame_wrap {  transform: scale(var(--rate));  transform-origin: top left;  overflow: hidden;  padding: 1rem;  width: 22.8rem;  height: 22.8rem;  background: white;  border-radius: 1rem;}.egg_login_frame_wrap {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_login_frame {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;  position: absolute;  left: -6.4rem;  top: -2.1rem;}.egg_user_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_user_wrap .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_sub_nickname,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 1px solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}';
 /**
  * @description 嵌入样式
  */
 GM_addStyle(css);
 /* Config·配置 */
-/**
- * @description 每周答题开启逆序答题: false: 顺序答题; true: 逆序答题
- */
-const examWeeklyReverse = true;
 /**
  * @description 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
  */
@@ -706,32 +701,6 @@ async function getExamPaper(pageNo) {
     return [];
 }
 /**
- * @description 每周答题数据
- */
-async function getExamWeekly(pageNo) {
-    // 链接
-    const url = `${API_CONFIG.weeklyList}?pageSize=50&pageNo=${pageNo}`;
-    try {
-        // 获取每周答题
-        const res = await fetch(url, {
-            method: 'GET',
-            credentials: 'include',
-        });
-        // 请求成功
-        if (res.ok) {
-            const data = await res.json();
-            const paperJson = decodeURIComponent(escape(window.atob(data.data_str.replace(/-/g, '+').replace(/_/g, '/'))));
-            // JSON格式化
-            const paper = JSON.parse(paperJson);
-            return paper;
-        }
-    }
-    catch (err) {
-        return [];
-    }
-    return [];
-}
-/**
  * @description 获取答案
  */
 async function getAnswer(question) {
@@ -811,6 +780,16 @@ async function saveAnswer(key, value) {
 /* API请求函数结束 */
 /* 变量 */
 /**
+ * @description 任务类型
+ */
+var TaskType;
+(function (TaskType) {
+    TaskType[TaskType["READ"] = 0] = "READ";
+    TaskType[TaskType["WATCH"] = 1] = "WATCH";
+    TaskType[TaskType["PRACTICE"] = 2] = "PRACTICE";
+    TaskType[TaskType["PAPER"] = 3] = "PAPER";
+})(TaskType || (TaskType = {}));
+/**
  * @description 任务进度
  */
 const tasks = [
@@ -821,6 +800,7 @@ const tasks = [
         need: 0,
         status: false,
         tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
+        type: TaskType.READ,
     },
     {
         title: '视听学习',
@@ -829,6 +809,7 @@ const tasks = [
         need: 0,
         status: false,
         tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
+        type: TaskType.WATCH,
     },
     {
         title: '每日答题',
@@ -837,14 +818,7 @@ const tasks = [
         need: 0,
         status: false,
         tip: '每组答题每答对1道积1分。每日上限积5分。',
-    },
-    {
-        title: '每周答题',
-        currentScore: 0,
-        dayMaxScore: 0,
-        need: 0,
-        status: false,
-        tip: '每组答题每答对1道积1分，同组答题不重复积分。每日上限积5分。',
+        type: TaskType.PRACTICE,
     },
     {
         title: '专项练习',
@@ -853,6 +827,7 @@ const tasks = [
         need: 0,
         status: false,
         tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
+        type: TaskType.PAPER,
     },
 ];
 /**
@@ -862,19 +837,21 @@ const { href } = window.location;
 /**
  * @description 设置
  */
-let settings = [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-];
+let settings = [true, true, true, true, false, false, false, false];
+/**
+ * @description 设置类型
+ */
+var SettingType;
+(function (SettingType) {
+    SettingType[SettingType["READ"] = 0] = "READ";
+    SettingType[SettingType["WATCH"] = 1] = "WATCH";
+    SettingType[SettingType["PRACTICE"] = 2] = "PRACTICE";
+    SettingType[SettingType["PAPER"] = 3] = "PAPER";
+    SettingType[SettingType["AUTO_START"] = 4] = "AUTO_START";
+    SettingType[SettingType["SAME_TAB"] = 5] = "SAME_TAB";
+    SettingType[SettingType["SILENT_RUN"] = 6] = "SILENT_RUN";
+    SettingType[SettingType["RANDOM_EXAM"] = 7] = "RANDOM_EXAM";
+})(SettingType || (SettingType = {}));
 /**
  * @description 已经开始
  */
@@ -1072,20 +1049,24 @@ function Panel() {
     const taskLabels = tasks.map((task) => ({
         title: task.title,
         tip: task.tip,
+        type: task.type,
     }));
     // 运行设置标签
     const runLabels = [
         {
             title: '自动开始',
             tip: '启动时, 自动开始任务, 在倒计时结束前自动开始可随时取消; 如果在自动开始前手动开始任务, 此次自动开始将取消',
+            type: SettingType.AUTO_START,
         },
         {
             title: '同屏任务',
             tip: '运行任务时，所有任务均在当前页面以弹窗方式运行',
+            type: SettingType.SAME_TAB,
         },
         {
             title: '静默运行',
             tip: '同屏任务时, 不显示任务弹窗静默运行',
+            type: SettingType.SILENT_RUN,
         },
     ];
     // 运行设置标签
@@ -1093,19 +1074,16 @@ function Panel() {
         {
             title: '随机作答',
             tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
-        },
-        { title: '答错暂停', tip: '每周答题时, 答错暂停答题!' },
-        {
-            title: '缺分补满',
-            tip: '每周答题完成后, 若当前分数非满分, 则再次答题直到满分!',
+            type: SettingType.RANDOM_EXAM,
         },
     ];
     // 处理设置变化
-    const handleChangeAndNotice = (e, i, title) => {
+    const handleChangeAndNotice = (e, type, title) => {
         // 开关
         const { checked } = e.target;
-        if (settings[i] !== checked) {
-            settings[i] = checked;
+        if (settings[type] !== checked) {
+            settings[type] = checked;
+            console.log(settings, type);
             // 设置
             GM_setValue('studySetting', JSON.stringify(settings));
             // 创建提示
@@ -1123,45 +1101,43 @@ function Panel() {
         }, ScoreInfo({ login })),
         // 任务部分
         Hr({ text: '任务' }),
-        ...taskLabels.map((label, i) => {
+        ...taskLabels.map((label) => {
             // 处理变化
             const handleChange = debounce(handleChangeAndNotice, 500);
             return TaskItem({
                 title: label.title,
                 tip: label.tip,
-                checked: settings[i],
+                checked: settings[label.type],
                 onChange: (e) => {
-                    handleChange(e, i, label.title);
+                    handleChange(e, label.type, label.title);
                 },
             });
         }),
         // 运行部分
         Hr({ text: '运行' }),
-        ...runLabels.map((label, i) => {
-            i += taskLabels.length;
+        ...runLabels.map((label) => {
             // 处理变化
             const handleChange = debounce(handleChangeAndNotice, 500);
             return NomalItem({
                 title: label.title,
                 tip: label.tip,
-                checked: settings[i],
+                checked: settings[label.type],
                 onChange: (e) => {
-                    handleChange(e, i, label.title);
+                    handleChange(e, label.type, label.title);
                 },
             });
         }),
         // 答题部分
         Hr({ text: '答题' }),
         ...examLabels.map((label, i) => {
-            i += taskLabels.length + runLabels.length;
             // 处理变化
             const handleChange = debounce(handleChangeAndNotice, 500);
             return NomalItem({
                 title: label.title,
                 tip: label.tip,
-                checked: settings[i],
+                checked: settings[label.type],
                 onChange: (e) => {
-                    handleChange(e, i, label.title);
+                    handleChange(e, label.type, label.title);
                 },
             });
         }),
@@ -1459,8 +1435,7 @@ window.addEventListener('load', () => {
         }, 800);
     }
     else if (href.includes(URL_CONFIG.examPaper) ||
-        href.includes(URL_CONFIG.examPractice) ||
-        href.includes(URL_CONFIG.examWeekly)) {
+        href.includes(URL_CONFIG.examPractice)) {
         // 初始化设置
         initSetting();
         console.log('初始化设置!');
@@ -1515,36 +1490,12 @@ function initSetting() {
             settings = settingTemp;
         }
         else {
-            settings = [
-                true,
-                true,
-                true,
-                true,
-                true,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-            ];
+            settings = [true, true, true, true, false, false, false, false];
         }
     }
     catch (e) {
         // 没有则直接初始化
-        settings = [
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-        ];
+        settings = [true, true, true, true, false, false, false, false];
     }
 }
 /**
@@ -1573,7 +1524,7 @@ function initFontSize() {
  * @description 初始化 id
  */
 function initFrameID() {
-    if (settings[6]) {
+    if (settings[SettingType.SAME_TAB]) {
         const win = unsafeWindow;
         win.addEventListener('message', (msg) => {
             const { data } = msg;
@@ -1635,13 +1586,13 @@ async function renderPanel() {
         }
     }
     // 自动答题
-    if (login && settings[5]) {
+    if (login && settings[SettingType.AUTO_START]) {
         // 创建提示
         const tip = createTip('即将自动开始任务', 5);
         // 等待倒计时结束
         await tip.waitCountDown();
         // 再次查看是否开启
-        if (settings[5] && !started) {
+        if (settings[SettingType.AUTO_START] && !started) {
             // 创建提示
             createTip('自动开始任务');
             start();
@@ -1656,7 +1607,7 @@ async function renderPanel() {
  * @description 渲染窗口
  */
 function renderFrame() {
-    if (settings[6]) {
+    if (settings[SettingType.SAME_TAB]) {
         const frame = Frame();
         document.body.append(frame);
     }
@@ -1708,30 +1659,29 @@ async function refreshTaskList() {
     const taskProgress = await getTaskList();
     if (taskProgress) {
         // 文章选读
-        tasks[0].currentScore = taskProgress[0].currentScore;
-        tasks[0].dayMaxScore = taskProgress[0].dayMaxScore;
-        tasks[0].need = taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
+        tasks[TaskType.READ].currentScore = taskProgress[0].currentScore;
+        tasks[TaskType.READ].dayMaxScore = taskProgress[0].dayMaxScore;
+        tasks[TaskType.READ].need =
+            taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
         // 视听学习
-        tasks[1].currentScore =
-            taskProgress[1].currentScore + taskProgress[3].currentScore;
-        tasks[1].dayMaxScore =
-            taskProgress[1].dayMaxScore + taskProgress[3].dayMaxScore;
-        tasks[1].need =
+        tasks[TaskType.WATCH].currentScore =
+            taskProgress[1].currentScore + taskProgress[2].currentScore;
+        tasks[TaskType.WATCH].dayMaxScore =
+            taskProgress[1].dayMaxScore + taskProgress[2].dayMaxScore;
+        tasks[TaskType.WATCH].need =
             taskProgress[1].dayMaxScore +
-                taskProgress[3].dayMaxScore -
-                (taskProgress[1].currentScore + taskProgress[3].currentScore);
+                taskProgress[2].dayMaxScore -
+                (taskProgress[1].currentScore + taskProgress[2].currentScore);
         // 每日答题
-        tasks[2].currentScore = taskProgress[6].currentScore;
-        tasks[2].dayMaxScore = taskProgress[6].dayMaxScore;
-        tasks[2].need = taskProgress[6].dayMaxScore - taskProgress[6].currentScore;
-        // 每周答题
-        tasks[3].currentScore = taskProgress[2].currentScore;
-        tasks[3].dayMaxScore = taskProgress[2].dayMaxScore;
-        tasks[3].need = taskProgress[2].dayMaxScore - taskProgress[2].currentScore;
+        tasks[TaskType.PRACTICE].currentScore = taskProgress[5].currentScore;
+        tasks[TaskType.PRACTICE].dayMaxScore = taskProgress[5].dayMaxScore;
+        tasks[TaskType.PRACTICE].need =
+            taskProgress[5].dayMaxScore - taskProgress[5].currentScore;
         // 专项练习
-        tasks[4].currentScore = taskProgress[5].currentScore;
-        tasks[4].dayMaxScore = taskProgress[5].dayMaxScore;
-        tasks[4].need = taskProgress[5].dayMaxScore - taskProgress[5].currentScore;
+        tasks[TaskType.PAPER].currentScore = taskProgress[4].currentScore;
+        tasks[TaskType.PAPER].dayMaxScore = taskProgress[4].dayMaxScore;
+        tasks[TaskType.PAPER].need =
+            taskProgress[4].dayMaxScore - taskProgress[4].currentScore;
         // 详情
         const details = $$('.egg_score_details .egg_score_detail');
         // 进度条对象
@@ -1744,14 +1694,6 @@ async function refreshTaskList() {
             // 修复专项练习成组做完, 进度条显示异常
             if (dayMaxScore <= currentScore) {
                 rate = 100;
-            }
-            // 每周答题 缺分补满
-            if (Number(i) === 3) {
-                if (!settings[10] && currentScore) {
-                    rate = 100;
-                }
-            }
-            if (rate === 100) {
                 tasks[i].status = true;
             }
             if (rate >= 0) {
@@ -1871,7 +1813,7 @@ async function reading(type) {
         GM_setValue('watchingUrl', null);
     }
     // 关闭窗口
-    closeWin(settings[6], id);
+    closeWin(settings[SettingType.SAME_TAB], id);
 }
 /**
  * @description 创建学习提示
@@ -1973,7 +1915,9 @@ function createTip(text, delay = 2, callback) {
 function getNews() {
     return new Promise(async (resolve) => {
         // 需要学习的新闻数量
-        const need = tasks[0].need < maxNewsNum ? tasks[0].need : maxNewsNum;
+        const need = tasks[TaskType.READ].need < maxNewsNum
+            ? tasks[TaskType.READ].need
+            : maxNewsNum;
         console.log(`还需要看 ${need} 个新闻`);
         // 获取重要新闻
         const data = await getTodayNews();
@@ -2002,7 +1946,9 @@ function getNews() {
 function getVideos() {
     return new Promise(async (resolve) => {
         // 需要学习的视频数量
-        const need = tasks[1].need < maxVideoNum ? tasks[1].need : maxVideoNum;
+        const need = tasks[TaskType.WATCH].need < maxVideoNum
+            ? tasks[TaskType.WATCH].need
+            : maxVideoNum;
         console.log(`还需要看 ${need} 个视频`);
         // 获取重要视频
         const data = await getTodayVideos();
@@ -2050,12 +1996,12 @@ async function readNews() {
         // 刷新数据
         await refreshInfo();
         // 任务完成跳出循环
-        if (settings[0] && tasks[0].status) {
+        if (settings[SettingType.READ] && tasks[TaskType.READ].status) {
             break;
         }
     }
     // 任务完成状况
-    if (settings[0] && !tasks[0].status) {
+    if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
         console.log('任务未完成, 继续阅读新闻!');
         // 提示
         createTip('任务未完成, 继续阅读新闻!');
@@ -2088,12 +2034,12 @@ async function watchVideo() {
         // 刷新数据
         await refreshInfo();
         // 任务完成跳出循环
-        if (settings[1] && tasks[1].status) {
+        if (settings[SettingType.WATCH] && tasks[TaskType.WATCH].status) {
             break;
         }
     }
     // 任务完成状况
-    if (settings[1] && !tasks[1].status) {
+    if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
         console.log('任务未完成, 继续观看视频!');
         // 提示
         createTip('任务未完成, 继续观看看视频!');
@@ -2120,48 +2066,12 @@ async function doExamPractice() {
     // 刷新数据
     await refreshInfo();
     // 任务完成状况
-    if (settings[2] && !tasks[2].status) {
+    if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
         console.log('任务未完成, 继续每日答题!');
         // 提示
         createTip('任务未完成, 继续每日答题!');
         await doExamPractice();
     }
-}
-/**
- * @description 做每周答题
- */
-async function doExamWeekly() {
-    // 提示
-    createTip('正在寻找未做的每周答题');
-    // id
-    const examWeeklyId = await findExamWeekly();
-    if (examWeeklyId) {
-        // 暂停
-        await pauseStudyLock();
-        console.log('正在做每周答题...');
-        // 提示
-        createTip('正在做每周答题');
-        // 链接
-        const url = `${URL_CONFIG.examWeekly}?id=${examWeeklyId}`;
-        console.log(`链接: ${url}`);
-        // 等待任务窗口
-        await waitTaskWin(url, '每周答题');
-        // 提示
-        createTip('完成每周答题!');
-        // 等待一段时间
-        await sleep(1500);
-        // 刷新数据
-        await refreshInfo();
-        if (settings[3] && !tasks[3].status) {
-            console.log('任务未完成, 继续每周答题!');
-            // 提示
-            createTip('任务未完成, 继续每周答题!');
-            doExamWeekly();
-        }
-        return;
-    }
-    // 提示
-    createTip('每周答题均已完成!');
 }
 /**
  * @description 做专项练习
@@ -2188,7 +2098,7 @@ async function doExamPaper() {
         await sleep(1500);
         // 刷新数据
         await refreshInfo();
-        if (settings[4] && !tasks[4].status) {
+        if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
             console.log('任务未完成, 继续专项练习!');
             // 提示
             createTip('任务未完成, 继续专项练习!');
@@ -2200,75 +2110,15 @@ async function doExamPaper() {
     createTip('专项练习均已完成!');
 }
 /**
- * @description 初始化每周答题总页数属性
+ * @description 初始化总页数属性
  */
-async function initExam(type) {
-    if (type === 0) {
-        // 默认从第一页获取全部页属性
-        const data = await getExamWeekly(1);
-        if (data) {
-            // 等待
-            await sleep(ratelimitms);
-            return data.totalPageCount;
-        }
-    }
-    if (type === 1) {
-        // 默认从第一页获取全部页属性
-        const data = await getExamPaper(1);
-        if (data) {
-            // 等待
-            await sleep(ratelimitms);
-            return data.totalPageCount;
-        }
-    }
-}
-/**
- * @description 查询每周答题列表
- */
-async function findExamWeekly() {
-    console.log('正在寻找未完成的每周答题...');
-    // 获取总页数
-    const total = await initExam(0);
-    // 当前页数
-    let current = examWeeklyReverse ? total : 1;
-    if (examWeeklyReverse) {
-        console.log('每周答题, 开启逆序模式, 从最早的题目开始答题');
-    }
-    else {
-        console.log('每周答题, 开启顺序模式, 从最近的题目开始答题');
-    }
-    while (current <= total && current) {
-        // 请求数据
-        const data = await getExamWeekly(current);
-        if (data) {
-            const examWeeks = data.list;
-            // 逆序每周列表
-            if (examWeeklyReverse) {
-                examWeeks.reverse();
-            }
-            for (const i in data.list) {
-                // 获取每周列表
-                const examWeek = data.list[i].practices;
-                // 若开启逆序, 则反转每周的测试列表
-                if (examWeeklyReverse) {
-                    examWeek.reverse();
-                }
-                for (const j in examWeek) {
-                    // 遍历查询有没有没做过的
-                    if (examWeek[j].status === 1) {
-                        // status： 1为"开始答题" , 2为"重新答题"
-                        return examWeek[j].id;
-                    }
-                }
-            }
-            // 增加页码
-            current += examWeeklyReverse ? -1 : 1;
-            // 等待
-            await sleep(ratelimitms);
-        }
-        else {
-            break;
-        }
+async function initExam() {
+    // 默认从第一页获取全部页属性
+    const data = await getExamPaper(1);
+    if (data) {
+        // 等待
+        await sleep(ratelimitms);
+        return data.totalPageCount;
     }
 }
 /**
@@ -2277,7 +2127,7 @@ async function findExamWeekly() {
 async function findExamPaper() {
     console.log('正在寻找未完成的专项练习...');
     // 获取总页数
-    const total = await initExam(1);
+    const total = await initExam();
     // 当前页数
     let current = examPaperReverse ? total : 1;
     if (examPaperReverse) {
@@ -2712,7 +2562,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[8]) {
+                if (settings[SettingType.RANDOM_EXAM]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
@@ -2771,7 +2621,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[8]) {
+                if (settings[SettingType.RANDOM_EXAM]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
@@ -2859,7 +2709,7 @@ async function doingExam() {
                     }
                 }
                 // 随机作答
-                if (settings[8]) {
+                if (settings[SettingType.RANDOM_EXAM]) {
                     console.log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
@@ -2939,14 +2789,6 @@ async function doingExam() {
                     console.log('上传答案', { answer, key, question });
                     await saveAnswer(key, answer);
                 }
-                // 每周答题
-                if (href.includes(URL_CONFIG.examWeekly) && settings[9]) {
-                    console.log('每周答题, 答错暂停!');
-                    // 暂停答题
-                    pauseExam(true);
-                    // 暂停
-                    await pauseLock();
-                }
             }
             // 滑动验证
             await handleSlideVerify();
@@ -2962,7 +2804,7 @@ async function doingExam() {
             nextButton.click();
         }
     }
-    closeWin(settings[6], id);
+    closeWin(settings[SettingType.SAME_TAB], id);
 }
 /**
  * @description 打开窗口
@@ -2973,7 +2815,7 @@ async function openFrame(url, title) {
     const conn = $$('.egg_frame_wrap')[0];
     if (conn) {
         // 显示窗体
-        setFrameVisible(!settings[7]);
+        setFrameVisible(!settings[SettingType.SILENT_RUN]);
         // 标题
         const frameTitle = $$('.egg_frame_title', conn)[0];
         // 窗口
@@ -3060,7 +2902,7 @@ function waitFrameLoaded(iframe) {
  * @description 打开并等待任务结束
  */
 async function waitTaskWin(url, title) {
-    if (settings[6]) {
+    if (settings[SettingType.SAME_TAB]) {
         const newFrame = await openFrame(url, title);
         if (newFrame) {
             // id
@@ -3104,7 +2946,7 @@ async function study() {
     // 任务
     if (tasks.length) {
         // 检查新闻
-        if (settings[0] && !tasks[0].status) {
+        if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
             console.log('任务一: 文章选读');
             // 提示
             createTip('任务一: 文章选读');
@@ -3113,7 +2955,7 @@ async function study() {
             // 看新闻
             await readNews();
         }
-        if (settings[1] && !tasks[1].status) {
+        if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
             console.log('任务二: 视听学习');
             // 提示
             createTip('任务二: 视听学习');
@@ -3123,7 +2965,7 @@ async function study() {
             await watchVideo();
         }
         // 检查每日答题
-        if (settings[2] && !tasks[2].status) {
+        if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
             console.log('任务三: 每日答题');
             // 提示
             createTip('任务三: 每日答题');
@@ -3132,26 +2974,16 @@ async function study() {
             // 做每日答题
             await doExamPractice();
         }
-        // 检查每周答题
-        if (settings[3] && !tasks[3].status) {
-            console.log('任务四: 每周答题');
+        // 检查专项练习
+        if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
+            console.log('任务五: 专项练习');
             // 提示
-            createTip('任务四: 每周答题');
+            createTip('任务五: 专项练习');
             // 暂停
             await pauseStudyLock();
-            // 做每周答题
-            await doExamWeekly();
+            // 做专项练习
+            await doExamPaper();
         }
-    }
-    // 检查专项练习
-    if (settings[4] && !tasks[4].status) {
-        console.log('任务五: 专项练习');
-        // 提示
-        createTip('任务五: 专项练习');
-        // 暂停
-        await pauseStudyLock();
-        // 做专项练习
-        await doExamPaper();
     }
 }
 /**
@@ -3230,7 +3062,7 @@ async function start() {
         }
         finishTask();
         // 关闭窗口
-        if (settings[6]) {
+        if (settings[SettingType.SAME_TAB]) {
             closeFrame();
         }
         console.log('已完成');

@@ -6,8 +6,6 @@ const URL_CONFIG = {
   home: /^https\:\/\/www\.xuexi\.cn(\/(index\.html)?)?$/,
   // 每日答题页面
   examPractice: 'https://pc.xuexi.cn/points/exam-practice.html',
-  // 每周答题页面
-  examWeekly: 'https://pc.xuexi.cn/points/exam-weekly-detail.html',
   // 专项练习页面
   examPaper: 'https://pc.xuexi.cn/points/exam-paper-detail.html',
   // 登录界面

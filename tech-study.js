@@ -1083,7 +1083,6 @@ function Panel() {
         const { checked } = e.target;
         if (settings[type] !== checked) {
             settings[type] = checked;
-            console.log(settings, type);
             // 设置
             GM_setValue('studySetting', JSON.stringify(settings));
             // 创建提示

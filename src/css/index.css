@@ -367,7 +367,7 @@
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 0 0.2rem #999;
-  transition: 0.4s;
+  transition: left 0.4s;
   position: absolute;
   top: calc(50% - (1.4rem / 2));
   position: absolute;
@@ -382,6 +382,7 @@
 .egg_study_item {
   display: flex;
   justify-content: center;
+  padding-top: 0.5rem;
 }
 .egg_study_item .egg_study_btn {
   background: var(--themeColor);
@@ -515,6 +516,7 @@
   border-top: 1px solid #ccc;
   min-height: 40rem;
   min-width: 30rem;
+  background: white;
 }
 .egg_frame_content .egg_frame {
   width: 100%;

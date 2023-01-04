@@ -12,6 +12,16 @@
 
 - 如果感觉功能不强大，去看看 [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版') `https://github.com/Xu22Web/tech-study-node`
 
+### 交流群 Telegram Group
+
+- 链接： [tech-study 互动群](https://t.me/+IJ_YzNc-Iew0MGRl)
+
+- 二维码：
+
+  <img src="./group.png" style="width:200px;" alt="Telegram邀请二维码">
+
+注：介于脚本国内敏感，暂时不提供其他交流互动方式。
+
 ### 用法 Usage
 
 1. 装个浏览器插件`Tampermonkey`

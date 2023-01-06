@@ -18,7 +18,7 @@
 
 - 二维码：
 
-  <img src="./group.png" style="width:200px;" alt="Telegram邀请二维码">
+  <img src="./images/group.png" style="width:200px;" alt="Telegram邀请二维码">
 
 注：介于脚本国内敏感，暂时不提供其他交流互动方式。
 
@@ -48,31 +48,33 @@
 
 6. 兼容桌面端以及移动端，手机电脑均可运行（设备均需支持油猴脚本，此外，移动端需要开启同屏任务）
 
+7. 新增定时任务以及远程推送，定时刷新页面，远程微信推送登录二维码
+
 ### 使用流程 Process
 
 1. 用户`登录`
 
-   <img src="./login.png" style="width:200px;" alt="登录">
+   <img src="./images/login.png" style="width:200px;" alt="登录">
 
 2. 点击 `开始学习`，等待完成任务运行
 
    - `桌面端`运行
 
-     <img src="./pc.png" style="width:1000px;" alt="桌面端运行">
+     <img src="./images/pc.png" style="width:1000px;" alt="桌面端运行">
 
    - `移动端`运行
 
-      <img src="./mobile.png" style="width:320px;" alt="移动端运行">
+      <img src="./images/mobile.png" style="width:320px;" alt="移动端运行">
 
 3. `完成学习`任务
 
-   <img src="./done.png" style="width:300px;" alt="完成学习">
+   <img src="./images/done.png" style="width:300px;" alt="完成学习">
 
 ### 更新与维护 Update and Maintenance
 
-1. 解决由于每周答题产生的遗留问题，答题上限调整为 40 分
+1. 重磅上线定时任务以及远程推送，定时刷新页面，远程微信推送登录二维码
 
-2. 更新答题 API，更新为新域名
+2. 恢复文章选读以及视听学习页面的滚动，修复一些小问题
 
 3. 解决滑动验证问题，基本实现了全局自动化
 

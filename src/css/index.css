@@ -6,12 +6,14 @@
   --scale: 1;
   font-size: calc(10px * var(--scale));
 }
-@media (max-height: 768px) {
+@media (min-height: 678px) and (max-height: 768px) {
   :root {
     --scale: 0.8;
   }
-  .egg_panel {
-    top: 2rem;
+}
+@media (max-height: 667px) {
+  :root {
+    --scale: 0.75;
   }
 }
 @keyframes fade {
@@ -85,7 +87,17 @@
   transform: translateX(-100%);
 }
 .egg_panel_wrap.mobile .egg_panel {
-  top: 2rem;
+  top: 1rem;
+}
+@media (min-height: 678px) and (max-height: 768px) {
+  .egg_panel {
+    top: 2rem;
+  }
+}
+@media (max-height: 667px) {
+  .egg_panel {
+    top: 1rem;
+  }
 }
 .egg_panel button {
   outline: none;
@@ -100,13 +112,13 @@
   top: 50%;
   transform: translate(-50%, -50%);
   transition: 80ms ease;
+  z-index: 9;
 }
 .egg_panel.hide .egg_btns_wrap {
   left: 100%;
   transform: translate(0, -50%);
 }
-.egg_panel .egg_setting_show_btn,
-.egg_panel .egg_frame_show_btn {
+.egg_panel .egg_btns_wrap button {
   border-radius: 50%;
   width: 3rem;
   height: 3rem;
@@ -130,6 +142,16 @@
 }
 .egg_panel .egg_frame_show_btn.hide {
   display: none;
+}
+.egg_panel .egg_setting_push_btn {
+  background: #ccc;
+  margin-top: 1rem;
+}
+.egg_panel .egg_setting_push_btn.hide {
+  display: none;
+}
+.egg_panel .egg_setting_push_btn.active {
+  background: var(--themeColor);
 }
 .egg_login_wrap .egg_login_btn,
 .egg_user_wrap .egg_login_btn {
@@ -523,4 +545,211 @@
   height: 100%;
   outline: none;
   border: none;
+}
+.egg_time_input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.egg_time_input input {
+  outline: none;
+  border: 1px solid #eee;
+  width: 2rem;
+  padding: 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_time_input input::placeholder {
+  color: #ccc;
+}
+.egg_time_input span {
+  padding: 0 0.5rem;
+  font-size: 1.5rem;
+}
+.egg_list {
+  max-height: 12rem;
+  overflow: auto;
+  border-radius: 0 0 0.2rem 0.2rem;
+  box-shadow: 0.1rem 0.1rem 0.1rem 0.1rem #eee;
+  position: absolute;
+  background: white;
+  z-index: 9;
+  scroll-behavior: smooth;
+  user-select: none;
+  transition: 100ms ease;
+  opacity: 1;
+  scrollbar-width: thin;
+}
+.egg_list.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+.egg_list::-webkit-scrollbar {
+  width: 0.4rem;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2rem;
+}
+.egg_list .egg_time {
+  padding: 0.6rem 1rem;
+  border-bottom: 0.1rem solid #eee;
+  cursor: pointer;
+  color: #333;
+  transition: 100ms ease;
+}
+.egg_list .egg_time.focus {
+  font-weight: bold;
+  background: #eee;
+}
+.egg_list .egg_time:hover {
+  background: #eee;
+}
+.egg_schedule {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: 1.6rem;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.egg_schedule_add {
+  padding: 0 2rem;
+  box-shadow: 0 0 0.4rem 0.4rem #eee;
+}
+.egg_schedule_add .egg_schedule_label {
+  padding-bottom: 1rem;
+  user-select: none;
+}
+.egg_schedule_add .egg_schedule_token_wrap,
+.egg_schedule_add .egg_schedule_time_wrap {
+  padding: 1.5rem 0;
+  color: #333;
+}
+.egg_schedule_token_wrap .egg_schedule_token {
+}
+.egg_schedule_token_wrap .egg_schedule_token_input {
+  outline: none;
+  border: 1px solid #eee;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.2rem;
+  width: 100%;
+  box-sizing: border-box;
+  color: #ccc;
+}
+.egg_schedule_token_wrap .egg_schedule_token_input.active {
+  color: #333;
+}
+.egg_schedule_token_input::placeholder {
+  color: #ccc;
+}
+.egg_schedule .egg_schedule_submit_btn_wrap {
+  text-align: right;
+  padding-top: 1rem;
+  display: none;
+}
+.egg_schedule .egg_schedule_submit_btn_wrap.active {
+  display: block;
+}
+.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn {
+  outline: none;
+  border: 1px solid #eee;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+  cursor: pointer;
+}
+.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn:active {
+  background: #eee;
+}
+.egg_schedule_time_input_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_schedule_time_input_wrap .egg_schedule_add_btn {
+  outline: none;
+  border: 1px solid #eee;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+  cursor: pointer;
+}
+.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {
+  background: #eee;
+}
+.egg_schedule_list {
+  flex-grow: 1;
+  height: 100%;
+  overflow: auto;
+}
+.egg_schedule_list .egg_schedule_item {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  font-size: 1.4rem;
+  border-bottom: 0.1rem solid #eee;
+}
+.egg_schedule_list::-webkit-scrollbar {
+  width: 0.4rem;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_schedule_list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2rem;
+}
+.egg_schedule_detail_time_wrap {
+  display: flex;
+  align-items: center;
+}
+.egg_schedule_detail_time_wrap.inactive {
+  color: #ccc;
+}
+.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {
+  padding-right: 0.4rem;
+  display: flex;
+  color: #ccc;
+}
+.egg_schedule_detail_del_wrap .egg_schedule_del_btn {
+  outline: none;
+  padding: 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #ccc;
+}
+.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {
+  color: #333;
+}
+.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {
+  color: #eee;
+}
+.egg_schedule_settings_item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+.egg_schedule_settings_item .egg_schedule {
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+  transform: translateX(100%);
+  transition: 300ms ease;
+}
+.egg_schedule_settings_item .egg_schedule.active {
+  transform: translateX(0);
 }

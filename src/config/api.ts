@@ -28,14 +28,13 @@ const API_CONFIG = {
     'https://www.xuexi.cn/lgdata/1742g60067k.json',
     'https://www.xuexi.cn/lgdata/1novbsbi47k.json',
   ],
-  // 每周答题列表
-  weeklyList:
-    'https://pc-proxy-api.xuexi.cn/api/exam/service/practice/pc/weekly/more',
   // 专项练习列表
   paperList: 'https://pc-proxy-api.xuexi.cn/api/exam/service/paper/pc/list',
   // 文本服务器保存答案
   answerSave: 'https://a6.qikekeji.com/txt/data/save',
   // 文本服务器获取答案
   answerSearch: 'https://api.answer.redfish.top/answer/search',
+  // 推送
+  push: 'https://www.pushplus.plus/send',
 };
 export default API_CONFIG;

@@ -2252,8 +2252,10 @@ window.addEventListener('load', () => {
                 renderFrame();
             }
         }, 800);
+        return;
     }
-    else if (typeof GM_getValue('readingUrl') === 'string' &&
+    // 文章选读
+    if (typeof GM_getValue('readingUrl') === 'string' &&
         href === GM_getValue('readingUrl')) {
         // 页面提示
         console.log('进入文章选读页面!');
@@ -2266,8 +2268,10 @@ window.addEventListener('load', () => {
         // 渲染提示
         renderTip();
         reading(0);
+        return;
     }
-    else if (typeof GM_getValue('watchingUrl') === 'string' &&
+    // 视听学习页面
+    if (typeof GM_getValue('watchingUrl') === 'string' &&
         href === GM_getValue('watchingUrl')) {
         // 页面提示
         console.log('进入视听学习页面!');
@@ -2314,8 +2318,10 @@ window.addEventListener('load', () => {
                 console.log('等待加载...');
             }
         }, 800);
+        return;
     }
-    else if (href.includes(URL_CONFIG.examPaper) ||
+    // 答题页面
+    if (href.includes(URL_CONFIG.examPaper) ||
         href.includes(URL_CONFIG.examPractice)) {
         // 页面提示
         console.log('进入答题页面!');
@@ -2337,16 +2343,17 @@ window.addEventListener('load', () => {
                 doingExam();
             }
         }, 500);
+        return;
     }
-    else if (href === URL_CONFIG.login) {
+    // 登录页
+    if (href === URL_CONFIG.login) {
         // 初始化设置
         initSetting();
         // 初始化二维码刷新
         initQRCodeRefresh();
+        return;
     }
-    else {
-        console.log('此页面不支持加载学习脚本!');
-    }
+    console.log('此页面不支持加载学习脚本!');
 });
 /**
  * @description 获取关键字
@@ -2672,10 +2679,24 @@ async function refreshLoginQRCode() {
 function refreshScheduleTask() {
     // 剩余定时任务
     const restList = scheduleList.filter((s) => !isLate(s));
+    // 存在剩余任务
     if (restList.length) {
         const rest = restList[0];
         scheduleTimer = setInterval(() => {
             if (isNow(rest)) {
+                clearInterval(scheduleTimer);
+                // 加载二维码
+                setLoginVisible(true);
+            }
+        }, 100);
+        return;
+    }
+    // 无剩余任务
+    if (scheduleList.length) {
+        // 最新
+        const lastest = scheduleList[0];
+        scheduleTimer = setInterval(() => {
+            if (isNow(lastest)) {
                 clearInterval(scheduleTimer);
                 // 加载二维码
                 setLoginVisible(true);
@@ -2792,14 +2813,16 @@ async function refreshTaskList() {
  * @param show
  */
 async function setLoginVisible(show) {
-    // 加载二维码
+    // 加载二维码页面
     const iframe = $$('.egg_login_frame')[0];
     if (show && iframe.src !== URL_CONFIG.login) {
         const iframeItem = $$('.egg_login_frame_item')[0];
         iframeItem.classList.add('active');
         iframe.src = URL_CONFIG.login;
+        return;
     }
-    else if (!show && iframe.src !== '') {
+    // 重置为不可见
+    if (!show && iframe.src !== '') {
         const iframeItem = $$('.egg_login_frame_item')[0];
         iframeItem.classList.remove('active');
         iframe.src = '';

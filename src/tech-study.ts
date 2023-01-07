@@ -2307,19 +2307,19 @@ async function renderPanel() {
       createTip('完成学习!');
       // 学习推送
       if (settings[SettingType.REMOTE_PUSH]) {
-        // 总分
-        const totalScoreSpan = $$<HTMLSpanElement>('.egg_totalscore span')[0];
         //  当天分数
-        const todayScoreSpan = $$<HTMLSpanElement>(
-          '.egg_todayscore_btn span'
-        )[0];
+        const todayScore = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0]
+          ?.innerText;
+        // 总分
+        const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
+          ?.innerText;
         pushModal(
           {
             title: '学习推送',
             content: [
               '学习强国, 学习完成!',
-              `当天积分:  ${getHighlightHTML(totalScoreSpan.innerText)} 分`,
-              `总积分: ${getHighlightHTML(todayScoreSpan.innerText)} 分`,
+              `当天积分:  ${getHighlightHTML(todayScore)} 分`,
+              `总积分: ${getHighlightHTML(totalScore)} 分`,
               ...tasks.map((task) => getProgressHTML(task.title, task.percent)),
             ],
             type: 'success',
@@ -3957,17 +3957,19 @@ async function start() {
     createTip('完成学习!');
     // 推送
     if (settings[SettingType.REMOTE_PUSH]) {
-      // 总分
-      const totalScoreSpan = $$<HTMLSpanElement>('.egg_totalscore span')[0];
       //  当天分数
-      const todayScoreSpan = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0];
+      const todayScore = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0]
+        ?.innerText;
+      // 总分
+      const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
+        ?.innerText;
       pushModal(
         {
           title: '学习推送',
           content: [
             '学习强国, 学习完成!',
-            `当天积分:  ${getHighlightHTML(totalScoreSpan.innerText)} 分`,
-            `总积分: ${getHighlightHTML(todayScoreSpan.innerText)} 分`,
+            `当天积分:  ${getHighlightHTML(todayScore)} 分`,
+            `总积分: ${getHighlightHTML(totalScore)} 分`,
             ...tasks.map((task) => getProgressHTML(task.title, task.percent)),
           ],
           type: 'success',

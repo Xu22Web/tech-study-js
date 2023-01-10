@@ -725,6 +725,26 @@ function isNow({ hour, minute }: { hour: number; minute: number }) {
   const s = date.getSeconds();
   return h === hour && min === minute && s === 0;
 }
+/**
+ * @description 获取关键字
+ */
+function getKey(content: string) {
+  // 外部引用md5加密
+  const key = md5(content);
+  console.log(`获取 key:${key}`);
+  return key;
+}
+/**
+ * @description 打印日志
+ * @param text
+ */
+function log(...text: any[]) {
+  console.log(
+    `%c[${formatDateTime()}] %c${text.join(' ')}`,
+    '',
+    'color:dodgerblue'
+  );
+}
 export {
   $$,
   openWin,
@@ -743,9 +763,12 @@ export {
   createModal,
   getImgHTML,
   formatTime,
+  formatDateTime,
   formatDateNum,
   isNow,
   isLate,
   getProgressHTML,
   getHighlightHTML,
+  getKey,
+  log,
 };

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   20230107
+// @version   v1.4.5
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -773,6 +773,22 @@ function isNow({ hour, minute }) {
     const s = date.getSeconds();
     return h === hour && min === minute && s === 0;
 }
+/**
+ * @description 获取关键字
+ */
+function getKey(content) {
+    // 外部引用md5加密
+    const key = md5(content);
+    console.log(`获取 key:${key}`);
+    return key;
+}
+/**
+ * @description 打印日志
+ * @param text
+ */
+function log(...text) {
+    console.log(`%c[${formatDateTime()}] %c${text.join(' ')}`, '', 'color:dodgerblue');
+}
 
 
 const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel {  position: fixed;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  z-index: 99999;  color: #333;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_setting_show_btn {  background: var(--themeColor);}.egg_panel .egg_setting_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_setting_push_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_setting_push_btn.hide {  display: none;}.egg_panel .egg_setting_push_btn.active {  background: var(--themeColor);}.egg_login_wrap .egg_login_btn,.egg_user_wrap .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_login_wrap .egg_login_btn:active,.egg_user_wrap .egg_login_btn:active {  opacity: 0.8;}.egg_login_wrap .egg_login_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_user_wrap .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_login_wrap {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_wrap .egg_login_frame_item {  height: 0;  overflow: hidden;}.egg_login_wrap .egg_login_frame_item.active {  --rate: 0.75;  margin-top: 0.8rem;  height: calc(22.8rem * var(--rate));  width: calc(22.8rem * var(--rate));}.egg_login_frame_item.active .egg_login_frame_wrap {  transform: scale(var(--rate));  transform-origin: top left;  overflow: hidden;  padding: 1rem;  width: 22.8rem;  height: 22.8rem;  background: white;  border-radius: 1rem;}.egg_login_frame_wrap {  position: relative;  box-sizing: border-box;  margin: 0 auto;}.egg_login_frame {  width: 284px;  height: 241px;  border: none;  transform: scale(var(--scale));  transform-origin: top left;  position: absolute;  left: -6.4rem;  top: -2.1rem;}.egg_user_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_user_wrap .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_sub_nickname,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;  font-size: 1.6rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  font-size: 1.6rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input input {  outline: none;  border: 0.1rem solid #eee;  width: 2rem;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;}.egg_time_input input::placeholder {  color: #ccc;}.egg_time_input span {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_list {  max-height: 12rem;  overflow: auto;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0.1rem 0.1rem 0.1rem 0.1rem #eee;  position: absolute;  background: white;  z-index: 9;  scroll-behavior: smooth;  user-select: none;  transition: 100ms ease;  opacity: 1;  scrollbar-width: thin;}.egg_list.hide {  opacity: 0;  visibility: hidden;}.egg_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_list .egg_time {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 100ms ease;}.egg_list .egg_time.focus {  font-weight: bold;  background: #eee;}.egg_list .egg_time:hover {  background: #eee;}.egg_schedule {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;}.egg_schedule_add {  padding: 1.5rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_add .egg_schedule_label {  padding: 1rem 0;  user-select: none;}.egg_schedule_token_wrap .egg_schedule_token {}.egg_schedule_token_wrap .egg_schedule_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_schedule_token_wrap .egg_schedule_token_input.active {  color: #333;}.egg_schedule_token_input::placeholder {  color: #ccc;}.egg_schedule .egg_schedule_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_schedule .egg_schedule_submit_btn_wrap.active {  display: block;}.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn:active {  background: #eee;}.egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  flex-grow: 1;  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_schedule_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_schedule_settings_item .egg_schedule {  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: 300ms ease;}.egg_schedule_settings_item .egg_schedule.active {  transform: translateX(0);}';
@@ -801,6 +817,10 @@ const maxVideoNum = 6;
  * @description 二维码最大刷新次数
  */
 const maxRefreshCount = 10;
+/**
+ * @description 版本号
+ */
+const version = 'v1.4.5';
 /* Config End·配置结束 */
 /* Tools·工具函数  */
 /**
@@ -818,7 +838,7 @@ function pauseLock(callback) {
                 if (!pause) {
                     // 停止定时器
                     clearInterval(doing);
-                    console.log('答题等待结束!');
+                    log('答题等待结束!');
                     if (callback && callback instanceof Function) {
                         callback('done');
                     }
@@ -828,7 +848,7 @@ function pauseLock(callback) {
                 if (callback && callback instanceof Function) {
                     callback('pending');
                 }
-                console.log('答题等待...');
+                log('答题等待...');
             }, 500);
             return;
         }
@@ -849,7 +869,7 @@ function pauseStudyLock(callback) {
                 if (!pauseStudy) {
                     // 停止定时器
                     clearInterval(doing);
-                    console.log('学习等待结束!');
+                    log('学习等待结束!');
                     if (callback && callback instanceof Function) {
                         callback('done');
                     }
@@ -859,7 +879,7 @@ function pauseStudyLock(callback) {
                 if (callback && callback instanceof Function) {
                     callback('pending');
                 }
-                console.log('学习等待...');
+                log('学习等待...');
             }, 500);
             return;
         }
@@ -890,7 +910,11 @@ async function pushModal(options, fromToken, toToken) {
         toToken,
         template: 'html',
     });
-    return res;
+    if (res && res.code === 200) {
+        createTip('推送成功!');
+        return;
+    }
+    createTip('推送失败!');
 }
 /* Tools End·工具函数结束 */
 /* API 请求函数 */
@@ -1036,7 +1060,7 @@ async function getExamPaper(pageNo) {
  * @description 获取答案
  */
 async function getAnswer(question) {
-    console.log('正在获取网络答案...');
+    log('正在获取网络答案...');
     // 数据
     const data = {
         question,
@@ -1059,13 +1083,13 @@ async function getAnswer(question) {
             if (errno !== -1) {
                 // 答案
                 const { answers } = data.data;
-                console.log('answers', answers);
+                log('answers', answers);
                 return answers;
             }
         }
     }
     catch (error) { }
-    console.log('获取网络答案失败!');
+    log('获取网络答案失败!');
     return [];
 }
 /**
@@ -1433,7 +1457,7 @@ async function Info({ login }) {
                 // 加载登录页
                 if (e.target.src === URL_CONFIG.login) {
                     // 加载二维码
-                    console.log('加载登录二维码!');
+                    log('加载登录二维码!');
                     // 登录窗口
                     const iframe = $$('.egg_login_frame')[0];
                     // 加载二维码
@@ -2233,55 +2257,43 @@ function ScheduleList({ scheduleList }) {
  * @description load
  */
 window.addEventListener('load', () => {
-    console.log('正在加载脚本...');
     // 主页
     if (URL_CONFIG.home.test(href)) {
+        // 初始化logo
+        initLogo();
         // 页面提示
-        console.log('进入主页面!');
-        // 等待加载
-        const ready = setInterval(() => {
-            if ($$('.text-wrap')[0]) {
-                window.addEventListener('beforeunload', () => {
-                    // 全局暂停
-                    if (GM_getValue('pauseStudy') !== false) {
-                        GM_setValue('pauseStudy', false);
-                    }
-                });
-                // 停止定时器
-                clearInterval(ready);
-                // 设置字体
-                initFontSize();
-                // 初始化设置
-                initSetting();
-                // 初始化推送 token
-                initPushToken();
-                // 初始化定时任务
-                initScheduleList();
-                // 初始化二维码推送
-                initQRCodePush();
-                // 渲染提示
-                renderTip();
-                // 渲染面板
-                renderPanel();
-                // 渲染窗口
-                renderFrame();
-            }
-        }, 800);
+        log('进入主页面!');
+        // 初始化设置
+        initSetting();
+        // 设置字体
+        initFontSize();
+        // 初始化提示
+        initTip();
+        // 初始化推送 token
+        initPushToken();
+        // 初始化定时任务
+        initScheduleList();
+        // 初始化二维码推送
+        initQRCodePush();
+        // 渲染面板
+        renderPanel();
+        // 渲染窗口
+        renderFrame();
         return;
     }
     // 文章选读
     if (typeof GM_getValue('readingUrl') === 'string' &&
         href === GM_getValue('readingUrl')) {
         // 页面提示
-        console.log('进入文章选读页面!');
+        log('进入文章选读页面!');
         // 初始化设置
         initSetting();
         // 设置字体
         initFontSize();
         // 初始化 id
         initFrameID();
-        // 渲染提示
-        renderTip();
+        // 初始化提示
+        initTip();
         reading(0);
         return;
     }
@@ -2289,24 +2301,26 @@ window.addEventListener('load', () => {
     if (typeof GM_getValue('watchingUrl') === 'string' &&
         href === GM_getValue('watchingUrl')) {
         // 页面提示
-        console.log('进入视听学习页面!');
+        log('进入视听学习页面!');
         // 初始化设置
         initSetting();
         // 设置字体
         initFontSize();
         // 初始化 id
         initFrameID();
-        // 渲染提示
-        renderTip();
+        // 初始化提示
+        initTip();
         let randNum = 0;
         const checkVideoPlayingInterval = setInterval(() => {
+            // 获取视频标签
             let temp = getVideoTag();
             if (temp.video) {
+                // 静音
                 if (!temp.video.muted) {
                     temp.video.muted = true;
                 }
                 if (temp.video.paused) {
-                    console.log('正在尝试播放视频...');
+                    log('正在尝试播放视频...');
                     if (randNum === 0) {
                         // 尝试使用js的方式播放
                         try {
@@ -2324,13 +2338,13 @@ window.addEventListener('load', () => {
                     }
                 }
                 else {
-                    console.log('视频成功播放!');
+                    log('视频成功播放!');
                     clearInterval(checkVideoPlayingInterval);
                     reading(1);
                 }
             }
             else {
-                console.log('等待加载...');
+                log('等待加载...');
             }
         }, 800);
         return;
@@ -2339,15 +2353,15 @@ window.addEventListener('load', () => {
     if (href.includes(URL_CONFIG.examPaper) ||
         href.includes(URL_CONFIG.examPractice)) {
         // 页面提示
-        console.log('进入答题页面!');
+        log('进入答题页面!');
         // 初始化设置
         initSetting();
         // 设置字体
         initFontSize();
         // 初始化 id
         initFrameID();
-        // 渲染提示
-        renderTip();
+        // 初始化提示
+        initTip();
         // 答题页面
         const ready = setInterval(() => {
             if ($$('.title')[0]) {
@@ -2368,16 +2382,13 @@ window.addEventListener('load', () => {
         initQRCodeRefresh();
         return;
     }
-    console.log('此页面不支持加载学习脚本!');
+    log('此页面不支持加载学习脚本!');
 });
 /**
- * @description 获取关键字
+ * @description 初始化logo
  */
-function getKey(content) {
-    // 外部引用md5加密
-    const key = md5(content);
-    console.log(`获取 key:${key}`);
-    return key;
+function initLogo() {
+    console.log(`%c tech-study.js %c ${version} `, 'background:dodgerblue;color:white;font-size:15px;border-radius:4px 0 0 4px;padding:2px 0;', 'background:black;color:gold;font-size:15px;border-radius:0 4px 4px 0;padding:2px 0;');
 }
 /**
  * @description 初始化配置
@@ -2385,13 +2396,58 @@ function getKey(content) {
 function initSetting() {
     try {
         const settingTemp = JSON.parse(GM_getValue('studySetting'));
-        if (settingTemp && settingTemp.length === settings.length) {
+        if (settingTemp && settingTemp.length === defaultSettings.length) {
             settings = settingTemp;
+            return;
         }
     }
-    catch (e) {
-        // 没有则直接初始化
-        settings = defaultSettings;
+    catch (e) { }
+    // 初始化设置
+    settings = defaultSettings;
+}
+/**
+ * @description 初始化提示
+ */
+function initTip() {
+    const tipWrap = createElementNode('div', undefined, {
+        class: 'egg_tip_wrap',
+    });
+    document.body.append(tipWrap);
+}
+/**
+ * @description 初始化配置
+ */
+function initFontSize() {
+    // 移动端
+    const moblie = hasMobile();
+    if (moblie) {
+        // 清除缩放
+        const meta = $$('meta[name=viewport]')[0];
+        if (meta) {
+            meta.content = 'initial-scale=0, user-scalable=yes';
+        }
+        // 缩放比例
+        const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+        document.documentElement.style.setProperty('--scale', String(scale));
+        window.addEventListener('resize', () => {
+            // 缩放比例
+            const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+            document.documentElement.style.setProperty('--scale', String(scale));
+        });
+    }
+}
+/**
+ * @description 初始化 id
+ */
+function initFrameID() {
+    if (settings[SettingType.SAME_TAB]) {
+        window.addEventListener('message', (msg) => {
+            const { data } = msg;
+            if (data.id) {
+                id = data.id;
+                log(`初始化窗口 ID: ${id}`);
+            }
+        });
     }
 }
 /**
@@ -2429,43 +2485,6 @@ function initScheduleList() {
     }
 }
 /**
- * @description 初始化配置
- */
-function initFontSize() {
-    // 移动端
-    const moblie = hasMobile();
-    if (moblie) {
-        // 清除缩放
-        const meta = $$('meta[name=viewport]')[0];
-        if (meta) {
-            meta.content = 'initial-scale=0, user-scalable=yes';
-        }
-        // 缩放比例
-        const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-        document.documentElement.style.setProperty('--scale', String(scale));
-        window.addEventListener('resize', () => {
-            // 缩放比例
-            const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-            document.documentElement.style.setProperty('--scale', String(scale));
-        });
-    }
-}
-/**
- * @description 初始化 id
- */
-function initFrameID() {
-    if (settings[SettingType.SAME_TAB]) {
-        const win = unsafeWindow;
-        win.addEventListener('message', (msg) => {
-            const { data } = msg;
-            if (data.id) {
-                id = data.id;
-                console.log('初始化窗口 ID: ', id);
-            }
-        });
-    }
-}
-/**
  * @description 初始化二维码推送
  */
 function initQRCodePush() {
@@ -2476,16 +2495,12 @@ function initQRCodePush() {
                 // src
                 const { src } = data;
                 const imgWrap = getImgHTML(src);
-                const res = await pushModal({
+                // 推送
+                await pushModal({
                     title: '登录推送',
                     content: ['扫一扫, 登录学习强国!', imgWrap],
                     type: 'info',
                 }, pushToken);
-                if (res && res.code === 200) {
-                    createTip('登录推送成功!');
-                    return;
-                }
-                createTip('登录推送失败!');
                 return;
             }
             createTip('请检查用户 token 是否存在!');
@@ -2577,7 +2592,7 @@ async function renderPanel() {
         // 完成任务
         if (tasks.every((task, i) => !settings[i] || task.status)) {
             finishTask();
-            console.log('已完成');
+            log('已完成');
             // 提示
             createTip('完成学习!');
             // 学习推送
@@ -2588,7 +2603,8 @@ async function renderPanel() {
                 // 总分
                 const totalScore = $$('.egg_totalscore span')[0]
                     ?.innerText;
-                pushModal({
+                // 推送
+                await pushModal({
                     title: '学习推送',
                     content: [
                         '学习强国, 学习完成!',
@@ -2648,15 +2664,6 @@ function renderFrame() {
     }
 }
 /**
- * @description 渲染提示
- */
-function renderTip() {
-    const tipWrap = createElementNode('div', undefined, {
-        class: 'egg_tip_wrap',
-    });
-    document.body.append(tipWrap);
-}
-/**
  * @description 刷新登录二维码
  */
 async function refreshLoginQRCode() {
@@ -2671,7 +2678,8 @@ async function refreshLoginQRCode() {
         clearInterval(refreshTimer);
         // 推送
         if (settings[SettingType.REMOTE_PUSH]) {
-            pushModal({
+            // 推送
+            await pushModal({
                 title: '登录推送',
                 content: '超过最大重试次数, 登录失败!',
                 type: 'fail',
@@ -2685,7 +2693,7 @@ async function refreshLoginQRCode() {
     const iframe = $$('.egg_login_frame_wrap .egg_login_frame')[0];
     if (frameItem) {
         // 刷新二维码
-        console.log('刷新登录二维码!');
+        log('刷新登录二维码!');
         iframe.contentWindow?.postMessage({ type: 'refresh_qrcode' }, URL_CONFIG.login);
         refreshCount++;
     }
@@ -2693,32 +2701,55 @@ async function refreshLoginQRCode() {
 /**
  * @description 刷新定时任务
  */
-function refreshScheduleTask() {
-    // 剩余定时任务
-    const restList = scheduleList.filter((s) => !isLate(s));
-    // 存在剩余任务
-    if (restList.length) {
-        const rest = restList[0];
-        scheduleTimer = setInterval(() => {
-            if (isNow(rest)) {
-                clearInterval(scheduleTimer);
-                // 加载二维码
-                setLoginVisible(true);
-            }
-        }, 100);
-        return;
-    }
-    // 无剩余任务
-    if (scheduleList.length) {
-        // 最新
-        const lastest = scheduleList[0];
-        scheduleTimer = setInterval(() => {
-            if (isNow(lastest)) {
-                clearInterval(scheduleTimer);
-                // 加载二维码
-                setLoginVisible(true);
-            }
-        }, 100);
+async function refreshScheduleTask() {
+    // 清除定时刷新
+    clearInterval(scheduleTimer);
+    // 未登录
+    if (!login) {
+        // 剩余定时任务
+        const restList = scheduleList.filter((s) => !isLate(s));
+        // 刷新间隔
+        const interval = 10;
+        // 存在剩余任务
+        if (restList.length) {
+            const rest = restList[0];
+            log(`已设置 ${rest.time} 的定时任务!`);
+            createTip(`已设置 ${rest.time} 的定时任务!`);
+            let time = 0;
+            scheduleTimer = setInterval(() => {
+                if (!(time++ % interval)) {
+                    log('定时刷新正在运行...');
+                }
+                if (isNow(rest)) {
+                    clearInterval(scheduleTimer);
+                    log(`执行 ${rest.time} 的定时任务!`);
+                    createTip(`执行 ${rest.time} 的定时任务!`);
+                    // 加载二维码
+                    setLoginVisible(true);
+                }
+            }, 1000);
+            return;
+        }
+        // 无剩余任务
+        if (scheduleList.length) {
+            // 最新
+            const lastest = scheduleList[0];
+            log(`已设置 ${lastest.time} 的定时任务!`);
+            createTip(`已设置 ${lastest.time} 的定时任务!`);
+            let time = 0;
+            scheduleTimer = setInterval(() => {
+                if (!(time++ % interval)) {
+                    log('定时刷新正在运行...');
+                }
+                if (isNow(lastest)) {
+                    clearInterval(scheduleTimer);
+                    log(`执行 ${lastest.time} 的定时任务!`);
+                    createTip(`执行 ${lastest.time} 的定时任务!`);
+                    // 加载二维码
+                    setLoginVisible(true);
+                }
+            }, 1000);
+        }
     }
 }
 /**
@@ -2735,7 +2766,7 @@ async function refreshInfo() {
  * @description 加载分数
  */
 async function refreshScoreInfo() {
-    console.log('加载分数...');
+    log('加载分数...');
     // 获取总分
     const totalScore = await getTotalScore();
     // 获取当天总分
@@ -2754,7 +2785,7 @@ async function refreshScoreInfo() {
  * @description 加载任务列表
  */
 async function refreshTaskList() {
-    console.log('加载任务进度...');
+    log('加载任务进度...');
     // 原始任务进度
     const taskProgress = await getTaskList();
     if (taskProgress) {
@@ -3047,7 +3078,7 @@ function getNews() {
         const need = tasks[TaskType.READ].need < maxNewsNum
             ? tasks[TaskType.READ].need
             : maxNewsNum;
-        console.log(`还需要看 ${need} 个新闻`);
+        log(`剩余 ${need} 个新闻`);
         // 获取重要新闻
         const data = await getTodayNews();
         if (data && data.length) {
@@ -3078,7 +3109,7 @@ function getVideos() {
         const need = tasks[TaskType.WATCH].need < maxVideoNum
             ? tasks[TaskType.WATCH].need
             : maxVideoNum;
-        console.log(`还需要看 ${need} 个视频`);
+        log(`剩余 ${need} 个视频`);
         // 获取重要视频
         const data = await getTodayVideos();
         if (data && data.length) {
@@ -3109,7 +3140,7 @@ async function readNews() {
     for (const i in news) {
         // 暂停
         await pauseStudyLock();
-        console.log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
+        log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
         // 提示
         createTip(`正在阅读第 ${Number(i) + 1} 个新闻`);
         // 链接
@@ -3131,7 +3162,7 @@ async function readNews() {
     }
     // 任务完成状况
     if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
-        console.log('任务未完成, 继续阅读新闻!');
+        log('任务未完成, 继续阅读新闻!');
         // 提示
         createTip('任务未完成, 继续阅读新闻!');
         await readNews();
@@ -3147,7 +3178,7 @@ async function watchVideo() {
     for (const i in videos) {
         // 暂停
         await pauseStudyLock();
-        console.log(`正在观看第 ${Number(i) + 1} 个视频...`);
+        log(`正在观看第 ${Number(i) + 1} 个视频...`);
         // 提示
         createTip(`正在观看第 ${Number(i) + 1} 个视频`);
         // 链接
@@ -3169,7 +3200,7 @@ async function watchVideo() {
     }
     // 任务完成状况
     if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
-        console.log('任务未完成, 继续观看视频!');
+        log('任务未完成, 继续观看视频!');
         // 提示
         createTip('任务未完成, 继续观看看视频!');
         await watchVideo();
@@ -3181,7 +3212,7 @@ async function watchVideo() {
 async function doExamPractice() {
     // 暂停
     await pauseStudyLock();
-    console.log('正在做每日答题...');
+    log('正在做每日答题...');
     // 提示
     createTip('正在做每日答题');
     // 链接
@@ -3196,7 +3227,7 @@ async function doExamPractice() {
     await refreshInfo();
     // 任务完成状况
     if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
-        console.log('任务未完成, 继续每日答题!');
+        log('任务未完成, 继续每日答题!');
         // 提示
         createTip('任务未完成, 继续每日答题!');
         await doExamPractice();
@@ -3213,12 +3244,12 @@ async function doExamPaper() {
     if (examPaperId) {
         // 暂停
         await pauseStudyLock();
-        console.log('正在做专项练习...');
+        log('正在做专项练习...');
         // 提示
         createTip('正在做专项练习');
         // 链接
         const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
-        console.log(`链接: ${url}`);
+        log(`链接: ${url}`);
         // 等待窗口任务
         await waitTaskWin(url, '专项练习');
         // 提示
@@ -3228,7 +3259,7 @@ async function doExamPaper() {
         // 刷新数据
         await refreshInfo();
         if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
-            console.log('任务未完成, 继续专项练习!');
+            log('任务未完成, 继续专项练习!');
             // 提示
             createTip('任务未完成, 继续专项练习!');
             doExamPaper();
@@ -3254,18 +3285,18 @@ async function initExam() {
  * @description 查询专项练习列表
  */
 async function findExamPaper() {
-    console.log('正在寻找未完成的专项练习...');
+    log('正在寻找未完成的专项练习...');
     // 获取总页数
     const total = await initExam();
     // 当前页数
     let current = examPaperReverse ? total : 1;
     if (examPaperReverse) {
-        console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
+        log('专项练习, 开启逆序模式, 从最早的题目开始答题');
     }
     else {
-        console.log('专项练习, 开启顺序模式, 从最近的题目开始答题');
+        log('专项练习, 开启顺序模式, 从最近的题目开始答题');
     }
-    console.log('正在寻找未完成的专项练习...');
+    log('正在寻找未完成的专项练习...');
     while (current <= total && current) {
         // 请求数据
         const data = await getExamPaper(current);
@@ -3455,7 +3486,7 @@ function handleSlideVerify() {
                 // 滑动验证
                 const mask = $$('#nc_mask')[0];
                 if (!mask || getComputedStyle(mask).display === 'none') {
-                    console.log('滑动验证成功!');
+                    log('滑动验证成功!');
                     // 创建提示
                     createTip('滑动验证成功!');
                     clearInterval(timer);
@@ -3463,10 +3494,10 @@ function handleSlideVerify() {
                     return;
                 }
                 resolve(false);
-                console.log('滑动验证失败!');
+                log('滑动验证失败!');
                 // 创建提示
                 createTip('滑动验证失败!');
-            }, 100);
+            }, 1000);
             return;
         }
         resolve(true);
@@ -3624,7 +3655,7 @@ async function handleBlankInputRand() {
     }
 }
 /**
- * @description 答题过程(整合)
+ * @description 答题
  */
 async function doingExam() {
     // 下一个按钮
@@ -3692,12 +3723,18 @@ async function doingExam() {
                 }
                 // 随机作答
                 if (settings[SettingType.RANDOM_EXAM]) {
-                    console.log('答案不存在, 随机作答!');
+                    log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
                     await handleBlankInputRand();
                 }
                 else {
+                    // 推送
+                    await pushModal({
+                        title: '学习推送',
+                        content: '答题存在异常, 已暂停答题!',
+                        type: 'fail',
+                    }, pushToken);
                     // 暂停答题
                     pauseExam(true);
                     // 提交答案
@@ -3751,12 +3788,18 @@ async function doingExam() {
                 }
                 // 随机作答
                 if (settings[SettingType.RANDOM_EXAM]) {
-                    console.log('答案不存在, 随机作答!');
+                    log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
                     await handleMutiplyChoiceRand();
                 }
                 else {
+                    // 推送
+                    await pushModal({
+                        title: '学习推送',
+                        content: '答题存在异常, 已暂停答题!',
+                        type: 'fail',
+                    }, pushToken);
                     // 暂停答题
                     pauseExam(true);
                     // 提交答案
@@ -3839,12 +3882,18 @@ async function doingExam() {
                 }
                 // 随机作答
                 if (settings[SettingType.RANDOM_EXAM]) {
-                    console.log('答案不存在, 随机作答!');
+                    log('答案不存在, 随机作答!');
                     // 创建提示
                     createTip('答案不存在, 随机作答!');
                     await handleSingleChoiceRand();
                 }
                 else {
+                    // 推送
+                    await pushModal({
+                        title: '学习推送',
+                        content: '答题存在异常, 已暂停答题!',
+                        type: 'fail',
+                    }, pushToken);
                     // 暂停答题
                     pauseExam(true);
                     // 提交答案
@@ -3887,11 +3936,11 @@ async function doingExam() {
             const answer = answers.join(';');
             // 存在答案
             if (answer.length) {
-                console.log('上传答案', { answer, key, question });
+                log('上传答案', { answer, key, question });
                 // 保存答案
                 await saveAnswer(key, answer);
                 // 答案
-                console.log('上传答案成功!');
+                log('上传答案成功!');
             }
             // 重置
             shouldSaveAnswer = false;
@@ -3915,7 +3964,7 @@ async function doingExam() {
                 const [, answerText] = answerTemp.split('：');
                 if (answerText && answerText.length) {
                     const answer = answerText.replaceAll(' ', ';');
-                    console.log('上传答案', { answer, key, question });
+                    log('上传答案', { answer, key, question });
                     await saveAnswer(key, answer);
                 }
             }
@@ -4074,9 +4123,9 @@ async function study() {
     await pauseStudyLock();
     // 任务
     if (tasks.length) {
-        // 检查新闻
+        // 文章宣读
         if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
-            console.log('任务一: 文章选读');
+            log('任务一: 文章选读');
             // 提示
             createTip('任务一: 文章选读');
             // 暂停
@@ -4084,8 +4133,10 @@ async function study() {
             // 看新闻
             await readNews();
         }
+        log('任务一: 文章选读已完成!');
+        // 视听学习
         if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
-            console.log('任务二: 视听学习');
+            log('任务二: 视听学习');
             // 提示
             createTip('任务二: 视听学习');
             // 暂停
@@ -4093,9 +4144,10 @@ async function study() {
             // 看视频
             await watchVideo();
         }
-        // 检查每日答题
+        log('任务二: 视听学习已完成!');
+        // 每日答题
         if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
-            console.log('任务三: 每日答题');
+            log('任务三: 每日答题');
             // 提示
             createTip('任务三: 每日答题');
             // 暂停
@@ -4103,16 +4155,18 @@ async function study() {
             // 做每日答题
             await doExamPractice();
         }
-        // 检查专项练习
+        log('任务三: 每日答题已完成!');
+        // 专项练习
         if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
-            console.log('任务五: 专项练习');
+            log('任务四: 专项练习');
             // 提示
-            createTip('任务五: 专项练习');
+            createTip('任务四: 专项练习');
             // 暂停
             await pauseStudyLock();
             // 做专项练习
             await doExamPaper();
         }
+        log('任务四: 专项练习已完成!');
     }
 }
 /**
@@ -4167,7 +4221,7 @@ async function start() {
     // 提示
     createTip('准备开始学习');
     // 保存配置
-    console.log('准备开始学习...');
+    log('准备开始学习...');
     if (login && !started) {
         started = true;
         // 初始化暂停
@@ -4194,7 +4248,7 @@ async function start() {
         if (settings[SettingType.SAME_TAB]) {
             closeFrame();
         }
-        console.log('已完成');
+        log('已完成');
         // 提示
         createTip('完成学习!');
         // 推送
@@ -4205,7 +4259,8 @@ async function start() {
             // 总分
             const totalScore = $$('.egg_totalscore span')[0]
                 ?.innerText;
-            pushModal({
+            // 推送
+            await pushModal({
                 title: '学习推送',
                 content: [
                     '学习强国, 学习完成!',
@@ -4218,8 +4273,11 @@ async function start() {
         }
         // 定时任务
         if (settings[SettingType.SCHEDULE_RUN]) {
-            // 提示
-            createTip('退出登录!');
+            // 创建提示
+            const tip = createTip('即将退出登录', 5);
+            // 等待倒计时结束
+            await tip.waitCountDown();
+            // 退出登录
             const logged = $$("a[class='logged-link']")[0];
             logged && logged.click();
         }

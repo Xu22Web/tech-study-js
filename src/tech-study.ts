@@ -23,6 +23,8 @@ import {
   isNow,
   getProgressHTML,
   getHighlightHTML,
+  getKey,
+  log,
 } from './utils';
 /**
  * @description 嵌入样式
@@ -49,6 +51,10 @@ const maxVideoNum = 6;
  * @description 二维码最大刷新次数
  */
 const maxRefreshCount = 10;
+/**
+ * @description 版本号
+ */
+const version = 'v1.4.5';
 /* Config End·配置结束 */
 /* Tools·工具函数  */
 /**
@@ -66,7 +72,7 @@ function pauseLock(callback?: (msg: string) => void) {
         if (!pause) {
           // 停止定时器
           clearInterval(doing);
-          console.log('答题等待结束!');
+          log('答题等待结束!');
           if (callback && callback instanceof Function) {
             callback('done');
           }
@@ -76,7 +82,7 @@ function pauseLock(callback?: (msg: string) => void) {
         if (callback && callback instanceof Function) {
           callback('pending');
         }
-        console.log('答题等待...');
+        log('答题等待...');
       }, 500);
       return;
     }
@@ -97,7 +103,7 @@ function pauseStudyLock(callback?: (msg: string) => void) {
         if (!pauseStudy) {
           // 停止定时器
           clearInterval(doing);
-          console.log('学习等待结束!');
+          log('学习等待结束!');
           if (callback && callback instanceof Function) {
             callback('done');
           }
@@ -107,7 +113,7 @@ function pauseStudyLock(callback?: (msg: string) => void) {
         if (callback && callback instanceof Function) {
           callback('pending');
         }
-        console.log('学习等待...');
+        log('学习等待...');
       }, 500);
       return;
     }
@@ -142,7 +148,11 @@ async function pushModal(
     toToken,
     template: 'html',
   });
-  return res;
+  if (res && res.code === 200) {
+    createTip('推送成功!');
+    return;
+  }
+  createTip('推送失败!');
 }
 /* Tools End·工具函数结束 */
 
@@ -284,7 +294,7 @@ async function getExamPaper(pageNo: number) {
  * @description 获取答案
  */
 async function getAnswer(question: string) {
-  console.log('正在获取网络答案...');
+  log('正在获取网络答案...');
   // 数据
   const data = {
     question,
@@ -310,12 +320,12 @@ async function getAnswer(question: string) {
       if (errno !== -1) {
         // 答案
         const { answers } = data.data;
-        console.log('answers', answers);
+        log('answers', answers);
         return answers;
       }
     }
   } catch (error) {}
-  console.log('获取网络答案失败!');
+  log('获取网络答案失败!');
   return [];
 }
 /**
@@ -804,7 +814,7 @@ async function Info({ login }: { login: boolean }) {
               // 加载登录页
               if ((<HTMLIFrameElement>e.target).src === URL_CONFIG.login) {
                 // 加载二维码
-                console.log('加载登录二维码!');
+                log('加载登录二维码!');
                 // 登录窗口
                 const iframe = $$<HTMLIFrameElement>('.egg_login_frame')[0];
                 // 加载二维码
@@ -1941,41 +1951,29 @@ function ScheduleList({ scheduleList }: { scheduleList: Schedule[] }) {
  * @description load
  */
 window.addEventListener('load', () => {
-  console.log('正在加载脚本...');
   // 主页
   if (URL_CONFIG.home.test(href)) {
+    // 初始化logo
+    initLogo();
     // 页面提示
-    console.log('进入主页面!');
+    log('进入主页面!');
 
-    // 等待加载
-    const ready = setInterval(() => {
-      if ($$('.text-wrap')[0]) {
-        window.addEventListener('beforeunload', () => {
-          // 全局暂停
-          if (GM_getValue('pauseStudy') !== false) {
-            GM_setValue('pauseStudy', false);
-          }
-        });
-        // 停止定时器
-        clearInterval(ready);
-        // 设置字体
-        initFontSize();
-        // 初始化设置
-        initSetting();
-        // 初始化推送 token
-        initPushToken();
-        // 初始化定时任务
-        initScheduleList();
-        // 初始化二维码推送
-        initQRCodePush();
-        // 渲染提示
-        renderTip();
-        // 渲染面板
-        renderPanel();
-        // 渲染窗口
-        renderFrame();
-      }
-    }, 800);
+    // 初始化设置
+    initSetting();
+    // 设置字体
+    initFontSize();
+    // 初始化提示
+    initTip();
+    // 初始化推送 token
+    initPushToken();
+    // 初始化定时任务
+    initScheduleList();
+    // 初始化二维码推送
+    initQRCodePush();
+    // 渲染面板
+    renderPanel();
+    // 渲染窗口
+    renderFrame();
     return;
   }
   // 文章选读
@@ -1984,7 +1982,7 @@ window.addEventListener('load', () => {
     href === GM_getValue('readingUrl')
   ) {
     // 页面提示
-    console.log('进入文章选读页面!');
+    log('进入文章选读页面!');
 
     // 初始化设置
     initSetting();
@@ -1992,8 +1990,8 @@ window.addEventListener('load', () => {
     initFontSize();
     // 初始化 id
     initFrameID();
-    // 渲染提示
-    renderTip();
+    // 初始化提示
+    initTip();
     reading(0);
     return;
   }
@@ -2003,7 +2001,7 @@ window.addEventListener('load', () => {
     href === GM_getValue('watchingUrl')
   ) {
     // 页面提示
-    console.log('进入视听学习页面!');
+    log('进入视听学习页面!');
 
     // 初始化设置
     initSetting();
@@ -2011,17 +2009,19 @@ window.addEventListener('load', () => {
     initFontSize();
     // 初始化 id
     initFrameID();
-    // 渲染提示
-    renderTip();
+    // 初始化提示
+    initTip();
     let randNum = 0;
     const checkVideoPlayingInterval = setInterval(() => {
+      // 获取视频标签
       let temp = getVideoTag();
       if (temp.video) {
+        // 静音
         if (!temp.video.muted) {
           temp.video.muted = true;
         }
         if (temp.video.paused) {
-          console.log('正在尝试播放视频...');
+          log('正在尝试播放视频...');
           if (randNum === 0) {
             // 尝试使用js的方式播放
             try {
@@ -2035,12 +2035,12 @@ window.addEventListener('load', () => {
             randNum--;
           }
         } else {
-          console.log('视频成功播放!');
+          log('视频成功播放!');
           clearInterval(checkVideoPlayingInterval);
           reading(1);
         }
       } else {
-        console.log('等待加载...');
+        log('等待加载...');
       }
     }, 800);
     return;
@@ -2051,7 +2051,7 @@ window.addEventListener('load', () => {
     href.includes(URL_CONFIG.examPractice)
   ) {
     // 页面提示
-    console.log('进入答题页面!');
+    log('进入答题页面!');
 
     // 初始化设置
     initSetting();
@@ -2059,8 +2059,8 @@ window.addEventListener('load', () => {
     initFontSize();
     // 初始化 id
     initFrameID();
-    // 渲染提示
-    renderTip();
+    // 初始化提示
+    initTip();
     // 答题页面
     const ready = setInterval(() => {
       if ($$('.title')[0]) {
@@ -2081,16 +2081,17 @@ window.addEventListener('load', () => {
     initQRCodeRefresh();
     return;
   }
-  console.log('此页面不支持加载学习脚本!');
+  log('此页面不支持加载学习脚本!');
 });
 /**
- * @description 获取关键字
+ * @description 初始化logo
  */
-function getKey(content: string) {
-  // 外部引用md5加密
-  const key = md5(content);
-  console.log(`获取 key:${key}`);
-  return key;
+function initLogo() {
+  console.log(
+    `%c tech-study.js %c ${version} `,
+    'background:dodgerblue;color:white;font-size:15px;border-radius:4px 0 0 4px;padding:2px 0;',
+    'background:black;color:gold;font-size:15px;border-radius:0 4px 4px 0;padding:2px 0;'
+  );
 }
 /**
  * @description 初始化配置
@@ -2098,12 +2099,57 @@ function getKey(content: string) {
 function initSetting() {
   try {
     const settingTemp = JSON.parse(GM_getValue('studySetting'));
-    if (settingTemp && settingTemp.length === settings.length) {
+    if (settingTemp && settingTemp.length === defaultSettings.length) {
       settings = settingTemp;
+      return;
     }
-  } catch (e) {
-    // 没有则直接初始化
-    settings = defaultSettings;
+  } catch (e) {}
+  // 初始化设置
+  settings = defaultSettings;
+}
+/**
+ * @description 初始化提示
+ */
+function initTip() {
+  const tipWrap = createElementNode('div', undefined, {
+    class: 'egg_tip_wrap',
+  });
+  document.body.append(tipWrap);
+}
+/**
+ * @description 初始化配置
+ */
+function initFontSize() {
+  // 移动端
+  const moblie = hasMobile();
+  if (moblie) {
+    // 清除缩放
+    const meta = $$<HTMLMetaElement>('meta[name=viewport]')[0];
+    if (meta) {
+      meta.content = 'initial-scale=0, user-scalable=yes';
+    }
+    // 缩放比例
+    const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+    document.documentElement.style.setProperty('--scale', String(scale));
+    window.addEventListener('resize', () => {
+      // 缩放比例
+      const scale = ~~(window.innerWidth / window.outerWidth) || 1;
+      document.documentElement.style.setProperty('--scale', String(scale));
+    });
+  }
+}
+/**
+ * @description 初始化 id
+ */
+function initFrameID() {
+  if (settings[SettingType.SAME_TAB]) {
+    window.addEventListener('message', (msg) => {
+      const { data } = msg;
+      if (data.id) {
+        id = data.id;
+        log(`初始化窗口 ID: ${id}`);
+      }
+    });
   }
 }
 /**
@@ -2139,43 +2185,6 @@ function initScheduleList() {
   }
 }
 /**
- * @description 初始化配置
- */
-function initFontSize() {
-  // 移动端
-  const moblie = hasMobile();
-  if (moblie) {
-    // 清除缩放
-    const meta = $$<HTMLMetaElement>('meta[name=viewport]')[0];
-    if (meta) {
-      meta.content = 'initial-scale=0, user-scalable=yes';
-    }
-    // 缩放比例
-    const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-    document.documentElement.style.setProperty('--scale', String(scale));
-    window.addEventListener('resize', () => {
-      // 缩放比例
-      const scale = ~~(window.innerWidth / window.outerWidth) || 1;
-      document.documentElement.style.setProperty('--scale', String(scale));
-    });
-  }
-}
-/**
- * @description 初始化 id
- */
-function initFrameID() {
-  if (settings[SettingType.SAME_TAB]) {
-    const win = unsafeWindow;
-    win.addEventListener('message', (msg) => {
-      const { data } = msg;
-      if (data.id) {
-        id = data.id;
-        console.log('初始化窗口 ID: ', id);
-      }
-    });
-  }
-}
-/**
  * @description 初始化二维码推送
  */
 function initQRCodePush() {
@@ -2186,7 +2195,8 @@ function initQRCodePush() {
         // src
         const { src } = data;
         const imgWrap = getImgHTML(src);
-        const res = await pushModal(
+        // 推送
+        await pushModal(
           {
             title: '登录推送',
             content: ['扫一扫, 登录学习强国!', imgWrap],
@@ -2194,11 +2204,6 @@ function initQRCodePush() {
           },
           pushToken
         );
-        if (res && res.code === 200) {
-          createTip('登录推送成功!');
-          return;
-        }
-        createTip('登录推送失败!');
         return;
       }
       createTip('请检查用户 token 是否存在!');
@@ -2302,7 +2307,7 @@ async function renderPanel() {
     // 完成任务
     if (tasks.every((task, i) => !settings[i] || task.status)) {
       finishTask();
-      console.log('已完成');
+      log('已完成');
       // 提示
       createTip('完成学习!');
       // 学习推送
@@ -2313,7 +2318,8 @@ async function renderPanel() {
         // 总分
         const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
           ?.innerText;
-        pushModal(
+        // 推送
+        await pushModal(
           {
             title: '学习推送',
             content: [
@@ -2375,15 +2381,6 @@ function renderFrame() {
   }
 }
 /**
- * @description 渲染提示
- */
-function renderTip() {
-  const tipWrap = createElementNode('div', undefined, {
-    class: 'egg_tip_wrap',
-  });
-  document.body.append(tipWrap);
-}
-/**
  * @description 刷新登录二维码
  */
 async function refreshLoginQRCode() {
@@ -2398,7 +2395,8 @@ async function refreshLoginQRCode() {
     clearInterval(refreshTimer);
     // 推送
     if (settings[SettingType.REMOTE_PUSH]) {
-      pushModal(
+      // 推送
+      await pushModal(
         {
           title: '登录推送',
           content: '超过最大重试次数, 登录失败!',
@@ -2417,7 +2415,7 @@ async function refreshLoginQRCode() {
   )[0];
   if (frameItem) {
     // 刷新二维码
-    console.log('刷新登录二维码!');
+    log('刷新登录二维码!');
     iframe.contentWindow?.postMessage(
       { type: 'refresh_qrcode' },
       URL_CONFIG.login
@@ -2428,32 +2426,55 @@ async function refreshLoginQRCode() {
 /**
  * @description 刷新定时任务
  */
-function refreshScheduleTask() {
-  // 剩余定时任务
-  const restList = scheduleList.filter((s) => !isLate(s));
-  // 存在剩余任务
-  if (restList.length) {
-    const rest = restList[0];
-    scheduleTimer = setInterval(() => {
-      if (isNow(rest)) {
-        clearInterval(scheduleTimer);
-        // 加载二维码
-        setLoginVisible(true);
-      }
-    }, 100);
-    return;
-  }
-  // 无剩余任务
-  if (scheduleList.length) {
-    // 最新
-    const lastest = scheduleList[0];
-    scheduleTimer = setInterval(() => {
-      if (isNow(lastest)) {
-        clearInterval(scheduleTimer);
-        // 加载二维码
-        setLoginVisible(true);
-      }
-    }, 100);
+async function refreshScheduleTask() {
+  // 清除定时刷新
+  clearInterval(scheduleTimer);
+  // 未登录
+  if (!login) {
+    // 剩余定时任务
+    const restList = scheduleList.filter((s) => !isLate(s));
+    // 刷新间隔
+    const interval = 10;
+    // 存在剩余任务
+    if (restList.length) {
+      const rest = restList[0];
+      log(`已设置 ${rest.time} 的定时任务!`);
+      createTip(`已设置 ${rest.time} 的定时任务!`);
+      let time = 0;
+      scheduleTimer = setInterval(() => {
+        if (!(time++ % interval)) {
+          log('定时刷新正在运行...');
+        }
+        if (isNow(rest)) {
+          clearInterval(scheduleTimer);
+          log(`执行 ${rest.time} 的定时任务!`);
+          createTip(`执行 ${rest.time} 的定时任务!`);
+          // 加载二维码
+          setLoginVisible(true);
+        }
+      }, 1000);
+      return;
+    }
+    // 无剩余任务
+    if (scheduleList.length) {
+      // 最新
+      const lastest = scheduleList[0];
+      log(`已设置 ${lastest.time} 的定时任务!`);
+      createTip(`已设置 ${lastest.time} 的定时任务!`);
+      let time = 0;
+      scheduleTimer = setInterval(() => {
+        if (!(time++ % interval)) {
+          log('定时刷新正在运行...');
+        }
+        if (isNow(lastest)) {
+          clearInterval(scheduleTimer);
+          log(`执行 ${lastest.time} 的定时任务!`);
+          createTip(`执行 ${lastest.time} 的定时任务!`);
+          // 加载二维码
+          setLoginVisible(true);
+        }
+      }, 1000);
+    }
   }
 }
 /**
@@ -2470,7 +2491,7 @@ async function refreshInfo() {
  * @description 加载分数
  */
 async function refreshScoreInfo() {
-  console.log('加载分数...');
+  log('加载分数...');
   // 获取总分
   const totalScore = await getTotalScore();
   // 获取当天总分
@@ -2489,7 +2510,7 @@ async function refreshScoreInfo() {
  * @description 加载任务列表
  */
 async function refreshTaskList() {
-  console.log('加载任务进度...');
+  log('加载任务进度...');
   // 原始任务进度
   const taskProgress = await getTaskList();
   if (taskProgress) {
@@ -2807,7 +2828,7 @@ function getNews() {
       tasks[TaskType.READ].need < maxNewsNum
         ? tasks[TaskType.READ].need
         : maxNewsNum;
-    console.log(`还需要看 ${need} 个新闻`);
+    log(`剩余 ${need} 个新闻`);
     // 获取重要新闻
     const data = await getTodayNews();
     if (data && data.length) {
@@ -2838,7 +2859,7 @@ function getVideos() {
       tasks[TaskType.WATCH].need < maxVideoNum
         ? tasks[TaskType.WATCH].need
         : maxVideoNum;
-    console.log(`还需要看 ${need} 个视频`);
+    log(`剩余 ${need} 个视频`);
     // 获取重要视频
     const data = await getTodayVideos();
     if (data && data.length) {
@@ -2870,7 +2891,7 @@ async function readNews() {
   for (const i in news) {
     // 暂停
     await pauseStudyLock();
-    console.log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
+    log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
     // 提示
     createTip(`正在阅读第 ${Number(i) + 1} 个新闻`);
     // 链接
@@ -2892,7 +2913,7 @@ async function readNews() {
   }
   // 任务完成状况
   if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
-    console.log('任务未完成, 继续阅读新闻!');
+    log('任务未完成, 继续阅读新闻!');
     // 提示
     createTip('任务未完成, 继续阅读新闻!');
     await readNews();
@@ -2908,7 +2929,7 @@ async function watchVideo() {
   for (const i in videos) {
     // 暂停
     await pauseStudyLock();
-    console.log(`正在观看第 ${Number(i) + 1} 个视频...`);
+    log(`正在观看第 ${Number(i) + 1} 个视频...`);
     // 提示
     createTip(`正在观看第 ${Number(i) + 1} 个视频`);
     // 链接
@@ -2930,7 +2951,7 @@ async function watchVideo() {
   }
   // 任务完成状况
   if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
-    console.log('任务未完成, 继续观看视频!');
+    log('任务未完成, 继续观看视频!');
     // 提示
     createTip('任务未完成, 继续观看看视频!');
     await watchVideo();
@@ -2942,7 +2963,7 @@ async function watchVideo() {
 async function doExamPractice() {
   // 暂停
   await pauseStudyLock();
-  console.log('正在做每日答题...');
+  log('正在做每日答题...');
   // 提示
   createTip('正在做每日答题');
   // 链接
@@ -2957,7 +2978,7 @@ async function doExamPractice() {
   await refreshInfo();
   // 任务完成状况
   if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
-    console.log('任务未完成, 继续每日答题!');
+    log('任务未完成, 继续每日答题!');
     // 提示
     createTip('任务未完成, 继续每日答题!');
     await doExamPractice();
@@ -2974,12 +2995,12 @@ async function doExamPaper() {
   if (examPaperId) {
     // 暂停
     await pauseStudyLock();
-    console.log('正在做专项练习...');
+    log('正在做专项练习...');
     // 提示
     createTip('正在做专项练习');
     // 链接
     const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
-    console.log(`链接: ${url}`);
+    log(`链接: ${url}`);
     // 等待窗口任务
     await waitTaskWin(url, '专项练习');
     // 提示
@@ -2989,7 +3010,7 @@ async function doExamPaper() {
     // 刷新数据
     await refreshInfo();
     if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
-      console.log('任务未完成, 继续专项练习!');
+      log('任务未完成, 继续专项练习!');
       // 提示
       createTip('任务未完成, 继续专项练习!');
       doExamPaper();
@@ -3015,17 +3036,17 @@ async function initExam() {
  * @description 查询专项练习列表
  */
 async function findExamPaper() {
-  console.log('正在寻找未完成的专项练习...');
+  log('正在寻找未完成的专项练习...');
   // 获取总页数
   const total = await initExam();
   // 当前页数
   let current = examPaperReverse ? total : 1;
   if (examPaperReverse) {
-    console.log('专项练习, 开启逆序模式, 从最早的题目开始答题');
+    log('专项练习, 开启逆序模式, 从最早的题目开始答题');
   } else {
-    console.log('专项练习, 开启顺序模式, 从最近的题目开始答题');
+    log('专项练习, 开启顺序模式, 从最近的题目开始答题');
   }
-  console.log('正在寻找未完成的专项练习...');
+  log('正在寻找未完成的专项练习...');
   while (current <= total && current) {
     // 请求数据
     const data = await getExamPaper(current);
@@ -3214,7 +3235,7 @@ function handleSlideVerify() {
         // 滑动验证
         const mask = $$('#nc_mask')[0];
         if (!mask || getComputedStyle(mask).display === 'none') {
-          console.log('滑动验证成功!');
+          log('滑动验证成功!');
           // 创建提示
           createTip('滑动验证成功!');
           clearInterval(timer);
@@ -3222,10 +3243,10 @@ function handleSlideVerify() {
           return;
         }
         resolve(false);
-        console.log('滑动验证失败!');
+        log('滑动验证失败!');
         // 创建提示
         createTip('滑动验证失败!');
-      }, 100);
+      }, 1000);
       return;
     }
     resolve(true);
@@ -3384,7 +3405,7 @@ async function handleBlankInputRand() {
   }
 }
 /**
- * @description 答题过程(整合)
+ * @description 答题
  */
 async function doingExam() {
   // 下一个按钮
@@ -3454,11 +3475,20 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[SettingType.RANDOM_EXAM]) {
-          console.log('答案不存在, 随机作答!');
+          log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
           await handleBlankInputRand();
         } else {
+          // 推送
+          await pushModal(
+            {
+              title: '学习推送',
+              content: '答题存在异常, 已暂停答题!',
+              type: 'fail',
+            },
+            pushToken
+          );
           // 暂停答题
           pauseExam(true);
           // 提交答案
@@ -3514,11 +3544,20 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[SettingType.RANDOM_EXAM]) {
-          console.log('答案不存在, 随机作答!');
+          log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
           await handleMutiplyChoiceRand();
         } else {
+          // 推送
+          await pushModal(
+            {
+              title: '学习推送',
+              content: '答题存在异常, 已暂停答题!',
+              type: 'fail',
+            },
+            pushToken
+          );
           // 暂停答题
           pauseExam(true);
           // 提交答案
@@ -3599,11 +3638,20 @@ async function doingExam() {
         }
         // 随机作答
         if (settings[SettingType.RANDOM_EXAM]) {
-          console.log('答案不存在, 随机作答!');
+          log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
           await handleSingleChoiceRand();
         } else {
+          // 推送
+          await pushModal(
+            {
+              title: '学习推送',
+              content: '答题存在异常, 已暂停答题!',
+              type: 'fail',
+            },
+            pushToken
+          );
           // 暂停答题
           pauseExam(true);
           // 提交答案
@@ -3646,11 +3694,11 @@ async function doingExam() {
       const answer = answers.join(';');
       // 存在答案
       if (answer.length) {
-        console.log('上传答案', { answer, key, question });
+        log('上传答案', { answer, key, question });
         // 保存答案
         await saveAnswer(key, answer);
         // 答案
-        console.log('上传答案成功!');
+        log('上传答案成功!');
       }
       // 重置
       shouldSaveAnswer = false;
@@ -3674,7 +3722,7 @@ async function doingExam() {
         const [, answerText] = answerTemp.split('：');
         if (answerText && answerText.length) {
           const answer = answerText.replaceAll(' ', ';');
-          console.log('上传答案', { answer, key, question });
+          log('上传答案', { answer, key, question });
           await saveAnswer(key, answer);
         }
       }
@@ -3832,9 +3880,9 @@ async function study() {
   await pauseStudyLock();
   // 任务
   if (tasks.length) {
-    // 检查新闻
+    // 文章宣读
     if (settings[SettingType.READ] && !tasks[TaskType.READ].status) {
-      console.log('任务一: 文章选读');
+      log('任务一: 文章选读');
       // 提示
       createTip('任务一: 文章选读');
       // 暂停
@@ -3842,8 +3890,10 @@ async function study() {
       // 看新闻
       await readNews();
     }
+    log('任务一: 文章选读已完成!');
+    // 视听学习
     if (settings[SettingType.WATCH] && !tasks[TaskType.WATCH].status) {
-      console.log('任务二: 视听学习');
+      log('任务二: 视听学习');
       // 提示
       createTip('任务二: 视听学习');
       // 暂停
@@ -3851,9 +3901,10 @@ async function study() {
       // 看视频
       await watchVideo();
     }
-    // 检查每日答题
+    log('任务二: 视听学习已完成!');
+    // 每日答题
     if (settings[SettingType.PRACTICE] && !tasks[TaskType.PRACTICE].status) {
-      console.log('任务三: 每日答题');
+      log('任务三: 每日答题');
       // 提示
       createTip('任务三: 每日答题');
       // 暂停
@@ -3861,16 +3912,18 @@ async function study() {
       // 做每日答题
       await doExamPractice();
     }
-    // 检查专项练习
+    log('任务三: 每日答题已完成!');
+    // 专项练习
     if (settings[SettingType.PAPER] && !tasks[TaskType.PAPER].status) {
-      console.log('任务五: 专项练习');
+      log('任务四: 专项练习');
       // 提示
-      createTip('任务五: 专项练习');
+      createTip('任务四: 专项练习');
       // 暂停
       await pauseStudyLock();
       // 做专项练习
       await doExamPaper();
     }
+    log('任务四: 专项练习已完成!');
   }
 }
 /**
@@ -3925,7 +3978,7 @@ async function start() {
   // 提示
   createTip('准备开始学习');
   // 保存配置
-  console.log('准备开始学习...');
+  log('准备开始学习...');
   if (login && !started) {
     started = true;
     // 初始化暂停
@@ -3952,7 +4005,7 @@ async function start() {
     if (settings[SettingType.SAME_TAB]) {
       closeFrame();
     }
-    console.log('已完成');
+    log('已完成');
     // 提示
     createTip('完成学习!');
     // 推送
@@ -3963,7 +4016,8 @@ async function start() {
       // 总分
       const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
         ?.innerText;
-      pushModal(
+      // 推送
+      await pushModal(
         {
           title: '学习推送',
           content: [
@@ -3979,8 +4033,11 @@ async function start() {
     }
     // 定时任务
     if (settings[SettingType.SCHEDULE_RUN]) {
-      // 提示
-      createTip('退出登录!');
+      // 创建提示
+      const tip = createTip('即将退出登录', 5);
+      // 等待倒计时结束
+      await tip.waitCountDown();
+      // 退出登录
       const logged = $$("a[class='logged-link']")[0];
       logged && logged.click();
     }

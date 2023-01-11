@@ -179,40 +179,21 @@
   flex-direction: column;
   padding: 0.5rem 0;
 }
-.egg_login_wrap .egg_login_frame_item {
+.egg_login_wrap .egg_login_img_wrap {
   height: 0;
-  overflow: hidden;
-}
-.egg_login_wrap .egg_login_frame_item.active {
-  --rate: 0.75;
-  margin-top: 0.8rem;
-  height: calc(22.8rem * var(--rate));
-  width: calc(22.8rem * var(--rate));
-}
-.egg_login_frame_item.active .egg_login_frame_wrap {
-  transform: scale(var(--rate));
-  transform-origin: top left;
-  overflow: hidden;
-  padding: 1rem;
-  width: 22.8rem;
-  height: 22.8rem;
-  background: white;
   border-radius: 1rem;
+  transition: height 80ms ease;
+  overflow: hidden;
 }
-.egg_login_frame_wrap {
-  position: relative;
-  box-sizing: border-box;
-  margin: 0 auto;
+.egg_login_wrap .egg_login_img_wrap.active {
+  padding: 0.8rem;
+  margin-top: 0.8rem;
+  height: auto;
+  background: white;
 }
-.egg_login_frame {
-  width: 284px;
-  height: 241px;
-  border: none;
-  transform: scale(var(--scale));
-  transform-origin: top left;
-  position: absolute;
-  left: -6.4rem;
-  top: -2.1rem;
+.egg_login_img_wrap .egg_login_img {
+  width: 15rem;
+  height: 15rem;
 }
 .egg_user_wrap {
   display: flex;
@@ -616,15 +597,12 @@
   border-radius: 1rem;
   overflow: hidden;
 }
-.egg_schedule_add {
-  padding: 1.5rem 2rem;
-  border-bottom: 0.1rem solid #eee;
-}
-.egg_schedule_add .egg_schedule_label {
+.egg_schedule .egg_schedule_label {
   padding: 1rem 0;
   user-select: none;
 }
-.egg_schedule_token_wrap .egg_schedule_token {
+.egg_schedule .egg_schedule_token_wrap {
+  padding: 1.5rem 2rem 0 2rem;
 }
 .egg_schedule_token_wrap .egg_schedule_token_input {
   outline: none;
@@ -662,6 +640,15 @@
 .egg_schedule_submit_btn_wrap .egg_schedule_submit_btn:active {
   background: #eee;
 }
+.egg_schedule_add {
+  border-bottom: 0.1rem solid #eee;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.egg_schedule_time_wrap {
+  padding: 1.5rem 2rem;
+}
 .egg_schedule_time_input_wrap {
   display: flex;
   justify-content: space-between;
@@ -680,7 +667,6 @@
   background: #eee;
 }
 .egg_schedule_list {
-  flex-grow: 1;
   height: 100%;
   overflow: auto;
 }

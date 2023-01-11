@@ -118,6 +118,8 @@
 
   4. 编译配置 `src/config/compile.ts`
 
+  5. 任务配置 `src/config/task.ts`
+
 - CSS 文件
 
   `src/css/index.css`

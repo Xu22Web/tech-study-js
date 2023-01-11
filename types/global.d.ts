@@ -1,7 +1,7 @@
 declare global {
   module '*?raw' {
-    const cssText: string;
-    export default cssText;
+    const text: string;
+    export default text;
   }
   function md5(value: string): string;
   /**

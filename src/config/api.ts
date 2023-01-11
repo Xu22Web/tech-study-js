@@ -36,5 +36,15 @@ const API_CONFIG = {
   answerSearch: 'https://api.answer.redfish.top/answer/search',
   // 推送
   push: 'https://www.pushplus.plus/send',
+  // 生成二维码
+  generateQRCode: 'https://login.xuexi.cn/user/qrcode/generate',
+  //二维码登录
+  loginWithQRCode: 'https://login.xuexi.cn/login/login_with_qr',
+  // 签名
+  sign: 'https://pc-api.xuexi.cn/open/api/sns/sign',
+  // 安全检查
+  secureCheck: 'https://pc-api.xuexi.cn/login/secure_check',
+  // 二维码
+  qrcode: 'https://api.qrserver.com/v1/create-qr-code',
 };
 export default API_CONFIG;

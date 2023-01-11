@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   v1.4.8
+// @version   v1.5.0
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -492,7 +492,7 @@ const defaultSettings = [
     false,
 ];
 const mainStore = {
-    version: 'v1.4.8',
+    version: 'v1.5.0',
     tasks: [
         {
             title: '文章选读',
@@ -542,7 +542,6 @@ const mainStore = {
     login: !!getCookie('token'),
     news: [],
     videos: [],
-    loginTimer: null,
     refreshTimer: null,
     scheduleTimer: null,
     closed: true,
@@ -2658,30 +2657,24 @@ async function getQRCode() {
  * @param code
  * @returns
  */
-function checkQRCode(code) {
-    return new Promise((resolve) => {
-        // 清除定时器
-        clearInterval(mainStore.loginTimer);
-        // 重新设置
-        mainStore.loginTimer = setInterval(async () => {
-            log('尝试用二维码登录...');
-            const res = await loginWithQRCode(code);
-            if (res) {
-                const { data, code, success } = res;
-                // 二维码失效
-                if (code === '11019') {
-                    clearInterval(mainStore.loginTimer);
-                    resolve('');
-                    return;
-                }
-                // 临时登录验证码
-                if (success && data) {
-                    clearInterval(mainStore.loginTimer);
-                    resolve(data);
-                }
-            }
-        }, 2000);
-    });
+async function checkQRCode(code) {
+    log('尝试用二维码登录...');
+    const res = await loginWithQRCode(code);
+    if (res) {
+        const { data, code, success } = res;
+        // 二维码失效
+        if (code === '11019') {
+            return;
+        }
+        // 临时登录验证码
+        if (success && data) {
+            return data;
+        }
+    }
+    // 等待
+    sleep(1000);
+    // 再次请求
+    return checkQRCode(code);
 }
 /**
  * @description 尝试二维码登录
@@ -4009,16 +4002,13 @@ window.addEventListener('load', () => {
         initFrameID();
         // 初始化提示
         initTip();
-        // 答题页面
-        const ready = setInterval(() => {
-            if ($$('.title')[0]) {
-                clearInterval(ready); // 停止定时器
-                // 创建“手动答题”按钮
-                renderExamBtn();
-                // 开始答题
-                doingExam(ExamType.PRACTICE);
-            }
-        }, 500);
+        // title
+        $_('.title').then(() => {
+            // 创建“手动答题”按钮
+            renderExamBtn();
+            // 开始答题
+            doingExam(ExamType.PRACTICE);
+        });
         return;
     }
     // 专项练习页面
@@ -4033,16 +4023,13 @@ window.addEventListener('load', () => {
         initFrameID();
         // 初始化提示
         initTip();
-        // 答题页面
-        const ready = setInterval(() => {
-            if ($$('.title')[0]) {
-                clearInterval(ready); // 停止定时器
-                // 创建“手动答题”按钮
-                renderExamBtn();
-                // 开始答题
-                doingExam(ExamType.PAPER);
-            }
-        }, 500);
+        // title
+        $_('.title').then(() => {
+            // 创建“手动答题”按钮
+            renderExamBtn();
+            // 开始答题
+            doingExam(ExamType.PAPER);
+        });
         return;
     }
     log('此页面不支持加载学习脚本!');

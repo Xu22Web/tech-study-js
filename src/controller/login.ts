@@ -8,6 +8,7 @@ import API_CONFIG from '../config/api';
 import { maxRefreshCount } from '../config/task';
 import { mainStore } from '../store';
 import { SettingType } from '../types';
+import { sleep } from '../utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { getHighlightHTML, getImgHTML, pushModal } from '../utils/push';
@@ -35,30 +36,24 @@ async function getQRCode() {
  * @param code
  * @returns
  */
-function checkQRCode(code: string) {
-  return new Promise<string>((resolve) => {
-    // 清除定时器
-    clearInterval(mainStore.loginTimer);
-    // 重新设置
-    mainStore.loginTimer = setInterval(async () => {
-      log('尝试用二维码登录...');
-      const res = await loginWithQRCode(code);
-      if (res) {
-        const { data, code, success } = res;
-        // 二维码失效
-        if (code === '11019') {
-          clearInterval(mainStore.loginTimer);
-          resolve('');
-          return;
-        }
-        // 临时登录验证码
-        if (success && data) {
-          clearInterval(mainStore.loginTimer);
-          resolve(data);
-        }
-      }
-    }, 2000);
-  });
+async function checkQRCode(code: string): Promise<string | undefined> {
+  log('尝试用二维码登录...');
+  const res = await loginWithQRCode(code);
+  if (res) {
+    const { data, code, success } = res;
+    // 二维码失效
+    if (code === '11019') {
+      return;
+    }
+    // 临时登录验证码
+    if (success && data) {
+      return data;
+    }
+  }
+  // 等待
+  sleep(1000);
+  // 再次请求
+  return checkQRCode(code);
 }
 
 /**

@@ -156,16 +156,14 @@ window.addEventListener('load', () => {
     initFrameID();
     // 初始化提示
     initTip();
-    // 答题页面
-    const ready = setInterval(() => {
-      if ($$('.title')[0]) {
-        clearInterval(ready); // 停止定时器
-        // 创建“手动答题”按钮
-        renderExamBtn();
-        // 开始答题
-        doingExam(ExamType.PRACTICE);
-      }
-    }, 500);
+
+    // title
+    $_('.title').then(() => {
+      // 创建“手动答题”按钮
+      renderExamBtn();
+      // 开始答题
+      doingExam(ExamType.PRACTICE);
+    });
     return;
   }
   // 专项练习页面
@@ -181,16 +179,13 @@ window.addEventListener('load', () => {
     initFrameID();
     // 初始化提示
     initTip();
-    // 答题页面
-    const ready = setInterval(() => {
-      if ($$('.title')[0]) {
-        clearInterval(ready); // 停止定时器
-        // 创建“手动答题”按钮
-        renderExamBtn();
-        // 开始答题
-        doingExam(ExamType.PAPER);
-      }
-    }, 500);
+    // title
+    $_('.title').then(() => {
+      // 创建“手动答题”按钮
+      renderExamBtn();
+      // 开始答题
+      doingExam(ExamType.PAPER);
+    });
     return;
   }
   log('此页面不支持加载学习脚本!');

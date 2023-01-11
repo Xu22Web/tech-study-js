@@ -641,13 +641,13 @@
   background: #eee;
 }
 .egg_schedule_add {
-  border-bottom: 0.1rem solid #eee;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 .egg_schedule_time_wrap {
   padding: 1.5rem 2rem;
+  border-bottom: 0.1rem solid #eee;
 }
 .egg_schedule_time_input_wrap {
   display: flex;

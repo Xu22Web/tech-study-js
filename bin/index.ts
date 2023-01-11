@@ -178,12 +178,12 @@ const transformerFactory: ts.TransformerFactory<ts.SourceFile> = (context) => {
         // 获取导入模块名
         const moduleText = node.moduleSpecifier.getText();
         // 检查是否满足路径
-        const resSpecificPath = moduleText.match(
+        const rawSpecificPath = moduleText.match(
           /(?<=(["'`]))(?:\.{0,2}(?:\/|(?:\\{1,2}))[-_.a-zA-Z]*)+(?=\?raw\1)/
         );
-        if (identifierText && resSpecificPath) {
+        if (identifierText && rawSpecificPath) {
           // 提取模块相对路径
-          const [relativefilePath] = resSpecificPath;
+          const [relativefilePath] = rawSpecificPath;
           // 获取实际路径
           const filePath = path.resolve(rootDir, relativefilePath);
           // 获取文本信息
@@ -289,7 +289,7 @@ const main = async () => {
     fullData.push(data);
 
     progress.start(`正在导出文件... ${chalk.blueBright(compiltPath)}`);
-    fs.writeFileSync(compiltPath, fullData.join('\n'));
+    fs.writeFileSync(compiltPath, fullData.join('\n').replace(/\n{2,}/, '\n'));
     progress.succeed(`导出文件: ${chalk.blueBright(compiltelativePath)}`);
     return;
   }

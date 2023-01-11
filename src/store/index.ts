@@ -54,10 +54,6 @@ const mainStore: {
    */
   videos: URLData[];
   /**
-   * @description 登录定时器
-   */
-  loginTimer: any;
-  /**
    * @description 刷新定时器
    */
   refreshTimer: any;
@@ -86,7 +82,7 @@ const mainStore: {
    */
   refreshCount: number;
 } = {
-  version: 'v1.4.8',
+  version: 'v1.5.0',
   tasks: [
     {
       title: '文章选读',
@@ -136,7 +132,6 @@ const mainStore: {
   login: !!getCookie('token'),
   news: [],
   videos: [],
-  loginTimer: null,
   refreshTimer: null,
   scheduleTimer: null,
   closed: true,

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   v1.5.0
+// @version   v1.5.2
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -492,7 +492,7 @@ const defaultSettings = [
     false,
 ];
 const mainStore = {
-    version: 'v1.5.0',
+    version: 'v1.5.2',
     tasks: [
         {
             title: '文章选读',
@@ -2610,27 +2610,6 @@ async function refreshScheduleTask() {
                     refreshLoginQRCode();
                 }
             }, 1000);
-            return;
-        }
-        // 无剩余任务
-        if (mainStore.scheduleList.length) {
-            // 最新
-            const lastest = mainStore.scheduleList[0];
-            log(`已设置 ${lastest.time} 的定时任务!`);
-            createTip(`已设置 ${lastest.time} 的定时任务!`);
-            let time = 0;
-            mainStore.scheduleTimer = setInterval(() => {
-                if (!(time++ % interval)) {
-                    log('定时刷新正在运行...');
-                }
-                if (isNow(lastest)) {
-                    clearInterval(mainStore.scheduleTimer);
-                    log(`执行 ${lastest.time} 的定时任务!`);
-                    createTip(`执行 ${lastest.time} 的定时任务!`);
-                    // 加载二维码
-                    refreshLoginQRCode();
-                }
-            }, 1000);
         }
     }
 }
@@ -4248,8 +4227,7 @@ function renderFrame() {
  */
 async function renderQRCode() {
     // 加载二维码
-    if (!mainStore.settings[SettingType.REMOTE_PUSH] &&
-        !mainStore.settings[SettingType.SCHEDULE_RUN]) {
+    if (!mainStore.login && !mainStore.settings[SettingType.SCHEDULE_RUN]) {
         // 等待加载
         await $_('.egg_login_img_wrap');
         // 刷新二维码

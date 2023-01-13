@@ -34,28 +34,7 @@ async function refreshScheduleTask() {
           refreshLoginQRCode();
         }
       }, 1000);
-      return;
-    }
-    // 无剩余任务
-    if (mainStore.scheduleList.length) {
-      // 最新
-      const lastest = mainStore.scheduleList[0];
-      log(`已设置 ${lastest.time} 的定时任务!`);
-      createTip(`已设置 ${lastest.time} 的定时任务!`);
-      let time = 0;
-      mainStore.scheduleTimer = setInterval(() => {
-        if (!(time++ % interval)) {
-          log('定时刷新正在运行...');
-        }
-        if (isNow(lastest)) {
-          clearInterval(mainStore.scheduleTimer);
-          log(`执行 ${lastest.time} 的定时任务!`);
-          createTip(`执行 ${lastest.time} 的定时任务!`);
-          // 加载二维码
-          refreshLoginQRCode();
-        }
-      }, 1000);
-    }
+    } 
   }
 }
 

@@ -428,10 +428,7 @@ function renderFrame() {
  */
 async function renderQRCode() {
   // 加载二维码
-  if (
-    !mainStore.settings[SettingType.REMOTE_PUSH] &&
-    !mainStore.settings[SettingType.SCHEDULE_RUN]
-  ) {
+  if (!mainStore.login && !mainStore.settings[SettingType.SCHEDULE_RUN]) {
     // 等待加载
     await $_('.egg_login_img_wrap');
     // 刷新二维码

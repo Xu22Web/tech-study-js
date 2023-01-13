@@ -82,7 +82,7 @@ const mainStore: {
    */
   refreshCount: number;
 } = {
-  version: 'v1.5.0',
+  version: 'v1.5.2',
   tasks: [
     {
       title: '文章选读',

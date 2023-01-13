@@ -72,15 +72,11 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 登录体验再升级，远程推送支持直接打开 APP 登录
+1. 由于浏览器性能优化限制脚本，去除脚本定时刷新对于隔天的支持
 
-2. 优化每日答题逻辑，无答案时直接随机作答
+2. 优化二维码加载逻辑，在定时刷新未打开情况下，在脚本加载后自动展示二维码
 
-3. 模块解耦合，增加可维护性，优化编译逻辑
-
-4. 解决滑动验证问题，基本实现了全局自动化
-
-5. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
+3. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
 
 ### 公告 announcement
 

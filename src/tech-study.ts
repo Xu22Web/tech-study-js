@@ -1,6 +1,6 @@
 import API_CONFIG from './config/api';
 import URL_CONFIG from './config/url';
-import { autoRefreshQRCodeInterval } from './config/task';
+import { autoRefreshQRCodeInterval, muted } from './config/task';
 import {} from './api/push';
 import {} from './api/user';
 import {} from './api/data';
@@ -18,15 +18,14 @@ import {} from './component/NoramlItem';
 import {} from './component/TaskItem';
 import { Panel } from './component/Panel';
 import { Frame } from './component/Frame';
-import { hasMobile, pauseStudyLock, getVideoTag } from './utils';
+import { hasMobile, pauseStudyLock } from './utils';
 import { log } from './utils/log';
 import { $$, $_, createElementNode } from './utils/element';
 import { getHighlightHTML, getProgressHTML, pushModal } from './utils/push';
-import { createTip } from './utils/tip';
+import { createTip } from './controller/tip';
 import {} from './utils/random';
 import {} from './utils/time';
-import {} from './utils/win';
-import { closeFrame } from './utils/frame';
+import { closeFrame, closeTaskWin } from './controller/frame';
 import { refreshScheduleTask } from './controller/schedule';
 import { refreshLoginQRCode } from './controller/login';
 import { refreshInfo } from './controller/user';
@@ -46,7 +45,7 @@ GM_addStyle(css);
 /**
  * @description load
  */
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   // 链接
   const { href } = mainStore;
   // 主页
@@ -90,7 +89,18 @@ window.addEventListener('load', () => {
     initFrameID();
     // 初始化提示
     initTip();
-    reading(0);
+
+    // section
+    const sections = await $_('section', undefined, 5000);
+    const section = sections[0];
+    if (!(section && section.innerText.includes('系统正在维护中'))) {
+      // 文章选读
+      reading(0);
+      return;
+    }
+    log('未找到文章!');
+    // 关闭页面
+    closeTaskWin(mainStore.id);
     return;
   }
   // 视听学习页面
@@ -109,38 +119,45 @@ window.addEventListener('load', () => {
     initFrameID();
     // 初始化提示
     initTip();
-    let randNum = 0;
-    const checkVideoPlayingInterval = setInterval(() => {
-      // 获取视频标签
-      let temp = getVideoTag();
-      if (temp.video) {
-        // 静音
-        if (!temp.video.muted) {
-          temp.video.muted = true;
-        }
-        if (temp.video.paused) {
-          log('正在尝试播放视频...');
-          if (randNum === 0) {
-            // 尝试使用js的方式播放
-            try {
-              temp.video.play(); // 尝试使用js的方式播放
-            } catch (e) {}
-            randNum++;
-          } else {
-            try {
-              temp.pauseButton?.click(); // 尝试点击播放按钮播放
-            } catch (e) {}
-            randNum--;
+
+    // videos
+    const videos = await $_('video', undefined, 10000);
+    // 视频
+    const video = <HTMLVideoElement | undefined>videos[0];
+    const pauseBtn = $$('.prism-play-btn')[0];
+    if (video && pauseBtn) {
+      // 设置是否静音
+      video.muted = muted;
+      log('正在尝试播放视频...');
+      // 播放超时
+      const timeout = setTimeout(() => {
+        log('视频播放超时!');
+        // 关闭页面
+        closeTaskWin(mainStore.id);
+      }, 10000);
+      // 能播放
+      video.addEventListener('canplay', () => {
+        log('正在尝试播放视频...');
+        if (video.paused) {
+          // 尝试使用js的方式播放
+          video.play();
+          if (video.paused) {
+            // 尝试点击播放按钮播放
+            pauseBtn.click();
           }
-        } else {
-          log('视频成功播放!');
-          clearInterval(checkVideoPlayingInterval);
+        }
+        // 已经播放
+        if (!video.paused) {
+          clearTimeout(timeout);
+          // 视听学习
           reading(1);
         }
-      } else {
-        log('等待加载...');
-      }
-    }, 800);
+      });
+      return;
+    }
+    log('未找到视频!');
+    // 关闭页面
+    closeTaskWin(mainStore.id);
     return;
   }
   // 每日答题页面
@@ -158,12 +175,11 @@ window.addEventListener('load', () => {
     initTip();
 
     // title
-    $_('.title').then(() => {
-      // 创建“手动答题”按钮
-      renderExamBtn();
-      // 开始答题
-      doingExam(ExamType.PRACTICE);
-    });
+    await $_('.title');
+    // 创建“手动答题”按钮
+    renderExamBtn();
+    // 开始答题
+    doingExam(ExamType.PRACTICE);
     return;
   }
   // 专项练习页面
@@ -179,13 +195,13 @@ window.addEventListener('load', () => {
     initFrameID();
     // 初始化提示
     initTip();
+
     // title
-    $_('.title').then(() => {
-      // 创建“手动答题”按钮
-      renderExamBtn();
-      // 开始答题
-      doingExam(ExamType.PAPER);
-    });
+    await $_('.title');
+    // 创建“手动答题”按钮
+    renderExamBtn();
+    // 开始答题
+    doingExam(ExamType.PAPER);
     return;
   }
   log('此页面不支持加载学习脚本!');

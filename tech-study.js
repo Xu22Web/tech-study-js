@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   v1.5.2
+// @version   v1.5.4
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -106,6 +106,10 @@ const maxRefreshCount = 10;
  * @description 二维码自动刷新间隔
  */
 const autoRefreshQRCodeInterval = 100000;
+/**
+ * @description 视频静音
+ */
+const muted = true;
 
 
 /* 推送 API */
@@ -492,7 +496,7 @@ const defaultSettings = [
     false,
 ];
 const mainStore = {
-    version: 'v1.5.2',
+    version: 'v1.5.4',
     tasks: [
         {
             title: '文章选读',
@@ -1529,27 +1533,6 @@ function hasMobile() {
     return isMobile;
 }
 /**
- * @description 打开并等待任务结束
- */
-async function waitTaskWin(url, title) {
-    if (mainStore.settings[SettingType.SAME_TAB]) {
-        // 显示窗体
-        setFrameVisible(!mainStore.settings[SettingType.SILENT_RUN]);
-        const newFrame = await openFrame(url, title);
-        if (newFrame) {
-            // id
-            const { id } = newFrame;
-            // 等待窗口关闭
-            await waitFrameClose(id);
-        }
-    }
-    else {
-        // 页面
-        const newPage = openWin(url);
-        await waitWinClose(newPage);
-    }
-}
-/**
  * @description 等待时间
  * @param time
  * @returns
@@ -1645,48 +1628,6 @@ function pauseExam(flag) {
         mainStore.pause = flag;
         ExamBtn.innerText = '开启自动答题';
         ExamBtn.classList.add('manual');
-    }
-}
-/**
- * @description 获取video标签
- */
-function getVideoTag() {
-    let iframe = $$('iframe')[0];
-    let video;
-    let pauseButton;
-    const u = navigator.userAgent;
-    if (u.indexOf('Mac') > -1) {
-        // Mac
-        if (iframe && iframe.innerHTML) {
-            // 如果有iframe, 说明外面的video标签是假的
-            video = iframe.contentWindow?.document.getElementsByTagName('video')[0];
-            pauseButton = (iframe.contentWindow?.document.getElementsByClassName('prism-play-btn')[0]);
-        }
-        else {
-            // 否则这个video标签是真的
-            video = $$('video')[0];
-            pauseButton = $$('.prism-play-btn')[0];
-        }
-        return {
-            video: video,
-            pauseButton: pauseButton,
-        };
-    }
-    else {
-        if (iframe) {
-            // 如果有iframe, 说明外面的video标签是假的
-            video = (iframe.contentWindow?.document.getElementsByTagName('video')[0]);
-            pauseButton = (iframe.contentWindow?.document.getElementsByClassName('prism-play-btn')[0]);
-        }
-        else {
-            // 否则这个video标签是真的
-            video = $$('video')[0];
-            pauseButton = $$('.prism-play-btn')[0];
-        }
-        return {
-            video: video,
-            pauseButton: pauseButton,
-        };
     }
 }
 
@@ -1898,8 +1839,8 @@ function $$(selector, parent = document) {
  * @param selector
  * @returns
  */
-function $_(selector, parent = document) {
-    return new Promise((resolve, reject) => {
+function $_(selector, parent = document, timeout) {
+    return new Promise((resolve) => {
         const timer = setInterval(() => {
             const selectors = Array.from(parent.querySelectorAll(selector));
             // 存在元素
@@ -1908,6 +1849,13 @@ function $_(selector, parent = document) {
                 resolve(selectors);
             }
         }, 10);
+        // 超时
+        if (timeout) {
+            setTimeout(() => {
+                clearInterval(timer);
+                resolve([]);
+            }, timeout);
+        }
     });
 }
 /**
@@ -2445,50 +2393,6 @@ function isNow({ hour, minute }) {
 
 
 /**
- * @description 打开新窗口
- */
-function openWin(url) {
-    return GM_openInTab(url, {
-        active: true,
-        insert: true,
-        setParent: true,
-    });
-}
-/**
- * @description 关闭子窗口
- */
-function closeWin(frame, id) {
-    try {
-        if (frame) {
-            window.parent.postMessage({ id, closed: true }, URL_CONFIG.homeOrigin);
-        }
-        else {
-            window.opener = window;
-            const win = window.open('', '_self');
-            win?.close();
-            top?.close();
-        }
-    }
-    catch (e) { }
-}
-/**
- * @description 等待窗口关闭
- * @param newPage
- * @returns
- */
-function waitWinClose(newPage) {
-    return new Promise((resolve) => {
-        const doing = setInterval(() => {
-            if (newPage.closed) {
-                clearInterval(doing); // 停止定时器
-                resolve('done');
-            }
-        }, 1000);
-    });
-}
-
-
-/**
  * @description 打开窗口
  * @param url
  * @returns
@@ -2501,7 +2405,7 @@ async function openFrame(url, title) {
         // 窗口
         const frame = $$('.egg_frame', conn)[0];
         // 打开
-        closed = false;
+        mainStore.closed = false;
         // id
         const id = generateMix(10);
         // 设置标题
@@ -2545,7 +2449,7 @@ function closeFrame() {
         // 窗口
         const frame = $$('.egg_frame', conn)[0];
         // 关闭
-        closed = true;
+        mainStore.closed = true;
         frame.src = '';
         frameTitle.innerText = '';
     }
@@ -2564,7 +2468,7 @@ function waitFrameClose(id) {
             }
         });
         setInterval(() => {
-            if (closed) {
+            if (mainStore.closed) {
                 resolve(true);
             }
         }, 100);
@@ -2577,6 +2481,76 @@ function waitFrameLoaded(iframe) {
             resolve(true);
         });
     });
+}
+/**
+ * @description 打开新窗口
+ */
+function openWin(url) {
+    return GM_openInTab(url, {
+        active: true,
+        insert: true,
+        setParent: true,
+    });
+}
+/**
+ * @description 关闭子窗口
+ */
+function closeWin() {
+    try {
+        window.opener = window;
+        const win = window.open('', '_self');
+        win?.close();
+        top?.close();
+    }
+    catch (e) { }
+}
+/**
+ * @description 等待窗口关闭
+ * @param newPage
+ * @returns
+ */
+function waitWinClose(newPage) {
+    return new Promise((resolve) => {
+        const doing = setInterval(() => {
+            if (newPage.closed) {
+                clearInterval(doing); // 停止定时器
+                resolve('done');
+            }
+        }, 1000);
+    });
+}
+/**
+ * @description 关闭任务窗口
+ */
+function closeTaskWin(id) {
+    // 同屏任务
+    if (mainStore.settings[SettingType.SAME_TAB]) {
+        window.parent.postMessage({ id, closed: true }, URL_CONFIG.homeOrigin);
+        return;
+    }
+    // 子窗口
+    closeWin();
+}
+/**
+ * @description 打开并等待任务结束
+ */
+async function waitTaskWin(url, title) {
+    if (mainStore.settings[SettingType.SAME_TAB]) {
+        // 显示窗体
+        setFrameVisible(!mainStore.settings[SettingType.SILENT_RUN]);
+        const newFrame = await openFrame(url, title);
+        if (newFrame) {
+            // id
+            const { id } = newFrame;
+            // 等待窗口关闭
+            await waitFrameClose(id);
+        }
+    }
+    else {
+        // 页面
+        const newPage = openWin(url);
+        await waitWinClose(newPage);
+    }
 }
 
 
@@ -2897,32 +2871,50 @@ async function refreshTaskList() {
  */
 async function reading(type) {
     // 看文章或者视频
-    let time = 1;
+    let time;
     if (type === 0) {
         // 80-100秒后关闭页面, 看文章
         time = ~~(Math.random() * 20 + 80) + 1;
     }
     if (type === 1) {
-        // 100-150秒后关闭页面, 看视频
-        time = ~~(Math.random() * 50 + 100) + 1;
+        // 视频
+        const video = $$('video')[0];
+        // 总时长
+        const duration = ~~video.duration;
+        // 看视频
+        time = (duration > 120 ? 120 : duration) + (~~(Math.random() * 10) + 10);
     }
     // 第一次滚动时间
-    let firstTime = time - 2;
+    const firstTime = time - (~~(Math.random() * 4) + 4);
     // 第二次滚动时间
-    let secendTime = 12;
+    const secendTime = ~~(Math.random() * 4) + 8;
     // 创建提示
     const tip = createTip('距离关闭页面还剩', time, async (time) => {
         // 暂停锁
         await pauseStudyLock();
+        // 窗口
+        const window = unsafeWindow;
+        // 第一次滚动
         if (time === firstTime) {
             // 滚动
-            window.scrollTo(0, 394);
+            window.scrollTo(0, 400);
             // 模拟滚动
             const scroll = new Event('scroll', {
                 bubbles: true,
             });
             document.dispatchEvent(scroll);
+            // 模拟滑动
+            const mousemove = new MouseEvent('mousemove', {
+                bubbles: true,
+            });
+            document.dispatchEvent(mousemove);
+            // 模拟点击
+            const click = new Event('click', {
+                bubbles: true,
+            });
+            document.dispatchEvent(click);
         }
+        // 第二次滚动
         if (time === secendTime) {
             // 滚动长度
             const scrollLength = document.body.scrollHeight / 2;
@@ -2933,19 +2925,22 @@ async function reading(type) {
                 bubbles: true,
             });
             document.dispatchEvent(scroll);
+            // 模拟滑动
+            const mousemove = new MouseEvent('mousemove', {
+                bubbles: true,
+            });
+            document.dispatchEvent(mousemove);
+            // 模拟点击
+            const click = new Event('click', {
+                bubbles: true,
+            });
+            document.dispatchEvent(click);
         }
     });
     // 倒计时结束
     await tip.waitCountDown();
-    // 清空链接
-    if (type === 0) {
-        GM_setValue('readingUrl', null);
-    }
-    else {
-        GM_setValue('watchingUrl', null);
-    }
-    // 关闭窗口
-    closeWin(mainStore.settings[SettingType.SAME_TAB], mainStore.id);
+    // 关闭任务窗口
+    closeTaskWin(mainStore.id);
 }
 /**
  * @description 获取新闻列表
@@ -3027,6 +3022,8 @@ async function readNews() {
         GM_setValue('readingUrl', url);
         // 等待任务窗口
         await waitTaskWin(url, '文章选读');
+        // 清空链接
+        GM_setValue('readingUrl', null);
         // 创建提示
         createTip(`完成阅读第 ${Number(i) + 1} 个新闻!`);
         // 等待一段时间
@@ -3067,6 +3064,8 @@ async function watchVideo() {
         GM_setValue('watchingUrl', url);
         // 等待任务窗口
         await waitTaskWin(url, '视听学习');
+        // 清空链接
+        GM_setValue('watchingUrl', null);
         // 创建提示
         createTip(`完成观看第 ${Number(i) + 1} 个视频!`);
         // 等待一段时间
@@ -3742,7 +3741,8 @@ async function doingExam(type) {
             nextButton.click();
         }
     }
-    closeWin(mainStore.settings[SettingType.SAME_TAB], mainStore.id);
+    // 关闭任务窗口
+    closeTaskWin(mainStore.id);
 }
 /**
  * @description 做每日答题
@@ -3874,7 +3874,7 @@ GM_addStyle(css);
 /**
  * @description load
  */
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     // 链接
     const { href } = mainStore;
     // 主页
@@ -3914,7 +3914,17 @@ window.addEventListener('load', () => {
         initFrameID();
         // 初始化提示
         initTip();
-        reading(0);
+        // section
+        const sections = await $_('section', undefined, 5000);
+        const section = sections[0];
+        if (!(section && section.innerText.includes('系统正在维护中'))) {
+            // 文章选读
+            reading(0);
+            return;
+        }
+        log('未找到文章!');
+        // 关闭页面
+        closeTaskWin(mainStore.id);
         return;
     }
     // 视听学习页面
@@ -3930,43 +3940,44 @@ window.addEventListener('load', () => {
         initFrameID();
         // 初始化提示
         initTip();
-        let randNum = 0;
-        const checkVideoPlayingInterval = setInterval(() => {
-            // 获取视频标签
-            let temp = getVideoTag();
-            if (temp.video) {
-                // 静音
-                if (!temp.video.muted) {
-                    temp.video.muted = true;
-                }
-                if (temp.video.paused) {
-                    log('正在尝试播放视频...');
-                    if (randNum === 0) {
-                        // 尝试使用js的方式播放
-                        try {
-                            temp.video.play(); // 尝试使用js的方式播放
-                        }
-                        catch (e) { }
-                        randNum++;
+        // videos
+        const videos = await $_('video', undefined, 10000);
+        // 视频
+        const video = videos[0];
+        const pauseBtn = $$('.prism-play-btn')[0];
+        if (video && pauseBtn) {
+            // 设置是否静音
+            video.muted = muted;
+            log('正在尝试播放视频...');
+            // 播放超时
+            const timeout = setTimeout(() => {
+                log('视频播放超时!');
+                // 关闭页面
+                closeTaskWin(mainStore.id);
+            }, 10000);
+            // 能播放
+            video.addEventListener('canplay', () => {
+                log('正在尝试播放视频...');
+                if (video.paused) {
+                    // 尝试使用js的方式播放
+                    video.play();
+                    if (video.paused) {
+                        // 尝试点击播放按钮播放
+                        pauseBtn.click();
                     }
-                    else {
-                        try {
-                            temp.pauseButton?.click(); // 尝试点击播放按钮播放
-                        }
-                        catch (e) { }
-                        randNum--;
-                    }
                 }
-                else {
-                    log('视频成功播放!');
-                    clearInterval(checkVideoPlayingInterval);
+                // 已经播放
+                if (!video.paused) {
+                    clearTimeout(timeout);
+                    // 视听学习
                     reading(1);
                 }
-            }
-            else {
-                log('等待加载...');
-            }
-        }, 800);
+            });
+            return;
+        }
+        log('未找到视频!');
+        // 关闭页面
+        closeTaskWin(mainStore.id);
         return;
     }
     // 每日答题页面
@@ -3982,12 +3993,11 @@ window.addEventListener('load', () => {
         // 初始化提示
         initTip();
         // title
-        $_('.title').then(() => {
-            // 创建“手动答题”按钮
-            renderExamBtn();
-            // 开始答题
-            doingExam(ExamType.PRACTICE);
-        });
+        await $_('.title');
+        // 创建“手动答题”按钮
+        renderExamBtn();
+        // 开始答题
+        doingExam(ExamType.PRACTICE);
         return;
     }
     // 专项练习页面
@@ -4003,12 +4013,11 @@ window.addEventListener('load', () => {
         // 初始化提示
         initTip();
         // title
-        $_('.title').then(() => {
-            // 创建“手动答题”按钮
-            renderExamBtn();
-            // 开始答题
-            doingExam(ExamType.PAPER);
-        });
+        await $_('.title');
+        // 创建“手动答题”按钮
+        renderExamBtn();
+        // 开始答题
+        doingExam(ExamType.PAPER);
         return;
     }
     log('此页面不支持加载学习脚本!');

@@ -2,10 +2,11 @@ import { getNewsList, getVideoList } from '../api/data';
 import { maxNewsNum, maxVideoNum } from '../config/task';
 import { mainStore } from '../store';
 import { SettingType, TaskType } from '../types';
-import { pauseStudyLock, sleep, waitTaskWin } from '../utils';
+import { pauseStudyLock, sleep } from '../utils';
+import { $$ } from '../utils/element';
 import { log } from '../utils/log';
-import { createTip } from '../utils/tip';
-import { closeWin } from '../utils/win';
+import { closeTaskWin, waitTaskWin } from './frame';
+import { createTip } from './tip';
 import { refreshInfo } from './user';
 
 /**
@@ -14,32 +15,50 @@ import { refreshInfo } from './user';
  */
 async function reading(type: number) {
   // 看文章或者视频
-  let time = 1;
+  let time;
   if (type === 0) {
     // 80-100秒后关闭页面, 看文章
     time = ~~(Math.random() * 20 + 80) + 1;
   }
   if (type === 1) {
-    // 100-150秒后关闭页面, 看视频
-    time = ~~(Math.random() * 50 + 100) + 1;
+    // 视频
+    const video = $$<HTMLVideoElement>('video')[0];
+    // 总时长
+    const duration = ~~video.duration;
+    // 看视频
+    time = (duration > 120 ? 120 : duration) + (~~(Math.random() * 10) + 10);
   }
   // 第一次滚动时间
-  let firstTime = time - 2;
+  const firstTime = time - (~~(Math.random() * 4) + 4);
   // 第二次滚动时间
-  let secendTime = 12;
+  const secendTime = ~~(Math.random() * 4) + 8;
   // 创建提示
   const tip = createTip('距离关闭页面还剩', time, async (time) => {
     // 暂停锁
     await pauseStudyLock();
+    // 窗口
+    const window = unsafeWindow;
+    // 第一次滚动
     if (time === firstTime) {
       // 滚动
-      window.scrollTo(0, 394);
+      window.scrollTo(0, 400);
       // 模拟滚动
       const scroll = new Event('scroll', {
         bubbles: true,
       });
       document.dispatchEvent(scroll);
+      // 模拟滑动
+      const mousemove = new MouseEvent('mousemove', {
+        bubbles: true,
+      });
+      document.dispatchEvent(mousemove);
+      // 模拟点击
+      const click = new Event('click', {
+        bubbles: true,
+      });
+      document.dispatchEvent(click);
     }
+    // 第二次滚动
     if (time === secendTime) {
       // 滚动长度
       const scrollLength = document.body.scrollHeight / 2;
@@ -50,18 +69,22 @@ async function reading(type: number) {
         bubbles: true,
       });
       document.dispatchEvent(scroll);
+      // 模拟滑动
+      const mousemove = new MouseEvent('mousemove', {
+        bubbles: true,
+      });
+      document.dispatchEvent(mousemove);
+      // 模拟点击
+      const click = new Event('click', {
+        bubbles: true,
+      });
+      document.dispatchEvent(click);
     }
   });
   // 倒计时结束
   await tip.waitCountDown();
-  // 清空链接
-  if (type === 0) {
-    GM_setValue('readingUrl', null);
-  } else {
-    GM_setValue('watchingUrl', null);
-  }
-  // 关闭窗口
-  closeWin(mainStore.settings[SettingType.SAME_TAB], mainStore.id);
+  // 关闭任务窗口
+  closeTaskWin(mainStore.id);
 }
 
 /**
@@ -148,6 +171,8 @@ async function readNews() {
     GM_setValue('readingUrl', url);
     // 等待任务窗口
     await waitTaskWin(url, '文章选读');
+    // 清空链接
+    GM_setValue('readingUrl', null);
     // 创建提示
     createTip(`完成阅读第 ${Number(i) + 1} 个新闻!`);
     // 等待一段时间
@@ -193,6 +218,8 @@ async function watchVideo() {
     GM_setValue('watchingUrl', url);
     // 等待任务窗口
     await waitTaskWin(url, '视听学习');
+    // 清空链接
+    GM_setValue('watchingUrl', null);
     // 创建提示
     createTip(`完成观看第 ${Number(i) + 1} 个视频!`);
     // 等待一段时间

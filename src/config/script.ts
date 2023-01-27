@@ -39,7 +39,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: 'v1.5.2',
+  version: 'v1.5.4',
   /**
    * @description 脚本描述
    */

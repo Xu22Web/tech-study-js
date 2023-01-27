@@ -212,9 +212,10 @@ function $$<T extends Element = HTMLElement>(
  */
 function $_<T extends Element = HTMLElement>(
   selector: string,
-  parent: Document | Element = document
+  parent: Document | Element = document,
+  timeout?: number
 ) {
-  return new Promise<T[]>((resolve, reject) => {
+  return new Promise<T[]>((resolve) => {
     const timer = setInterval(() => {
       const selectors = Array.from(parent.querySelectorAll<T>(selector));
       // 存在元素
@@ -223,6 +224,13 @@ function $_<T extends Element = HTMLElement>(
         resolve(selectors);
       }
     }, 10);
+    // 超时
+    if (timeout) {
+      setTimeout(() => {
+        clearInterval(timer);
+        resolve([]);
+      }, timeout);
+    }
   });
 }
 

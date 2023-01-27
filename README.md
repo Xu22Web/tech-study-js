@@ -72,11 +72,13 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 由于浏览器性能优化限制脚本，去除脚本定时刷新对于隔天的支持
+1. 修复同屏任务点击关闭后，任务无法继续进行的问题
 
-2. 优化二维码加载逻辑，在定时刷新未打开情况下，在脚本加载后自动展示二维码
+2. 优化视听学习的结束时间。若视频时长大于 120s ，则在 120s 左右关闭；否则在视频总时长左右关闭页面
 
-3. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
+3. 新增文章选读、视听学习在页面无效时，自动跳过问题页面
+
+4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
 
 ### 公告 announcement
 

@@ -1,4 +1,5 @@
 import { refreshScheduleTask } from '../controller/schedule';
+import { createTip } from '../controller/tip';
 import { mainStore } from '../store';
 import { Schedule, SettingType } from '../types';
 import {
@@ -7,7 +8,6 @@ import {
   createNSElementNode,
   createTextNode,
 } from '../utils/element';
-import { createTip } from '../utils/tip';
 import { ScheduleList } from './ScheduleList';
 import { TimeInput } from './TimeInput';
 

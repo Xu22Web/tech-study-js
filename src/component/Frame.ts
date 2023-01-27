@@ -1,5 +1,5 @@
+import { closeFrame, setFrameVisible } from '../controller/frame';
 import { $$, createElementNode, createNSElementNode } from '../utils/element';
-import { closeFrame, setFrameVisible } from '../utils/frame';
 
 /**
  * @description 任务窗口

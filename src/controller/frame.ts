@@ -1,5 +1,8 @@
-import { $$ } from './element';
-import { generateMix } from './random';
+import URL_CONFIG from '../config/url';
+import { mainStore } from '../store';
+import { SettingType } from '../types';
+import { $$ } from '../utils/element';
+import { generateMix } from '../utils/random';
 
 /**
  * @description 打开窗口
@@ -14,7 +17,7 @@ async function openFrame(url: string, title?: string) {
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
     // 打开
-    closed = false;
+    mainStore.closed = false;
     // id
     const id = generateMix(10);
     // 设置标题
@@ -60,7 +63,7 @@ function closeFrame() {
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
     // 关闭
-    closed = true;
+    mainStore.closed = true;
     frame.src = '';
     frameTitle.innerText = '';
   }
@@ -80,7 +83,7 @@ function waitFrameClose(id: string) {
       }
     });
     setInterval(() => {
-      if (closed) {
+      if (mainStore.closed) {
         resolve(true);
       }
     }, 100);
@@ -96,10 +99,85 @@ function waitFrameLoaded(iframe: HTMLElement) {
   });
 }
 
+/**
+ * @description 打开新窗口
+ */
+function openWin(url: string) {
+  return GM_openInTab(url, {
+    active: true,
+    insert: true,
+    setParent: true,
+  });
+}
+
+/**
+ * @description 关闭子窗口
+ */
+function closeWin() {
+  try {
+    window.opener = window;
+    const win = window.open('', '_self');
+    win?.close();
+    top?.close();
+  } catch (e) {}
+}
+
+/**
+ * @description 等待窗口关闭
+ * @param newPage
+ * @returns
+ */
+function waitWinClose(newPage) {
+  return new Promise((resolve) => {
+    const doing = setInterval(() => {
+      if (newPage.closed) {
+        clearInterval(doing); // 停止定时器
+        resolve('done');
+      }
+    }, 1000);
+  });
+}
+
+/**
+ * @description 关闭任务窗口
+ */
+function closeTaskWin(id?: string) {
+  // 同屏任务
+  if (mainStore.settings[SettingType.SAME_TAB]) {
+    window.parent.postMessage({ id, closed: true }, URL_CONFIG.homeOrigin);
+    return;
+  }
+  // 子窗口
+  closeWin();
+}
+
+/**
+ * @description 打开并等待任务结束
+ */
+async function waitTaskWin(url: string, title?: string) {
+  if (mainStore.settings[SettingType.SAME_TAB]) {
+    // 显示窗体
+    setFrameVisible(!mainStore.settings[SettingType.SILENT_RUN]);
+    const newFrame = await openFrame(url, title);
+    if (newFrame) {
+      // id
+      const { id } = newFrame;
+      // 等待窗口关闭
+      await waitFrameClose(id);
+    }
+  } else {
+    // 页面
+    const newPage = openWin(url);
+    await waitWinClose(newPage);
+  }
+}
+
 export {
   openFrame,
   closeFrame,
   waitFrameClose,
   waitFrameLoaded,
   setFrameVisible,
+  closeTaskWin,
+  waitTaskWin,
 };

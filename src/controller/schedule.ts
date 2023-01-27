@@ -1,8 +1,8 @@
 import { mainStore } from '../store';
 import { log } from '../utils/log';
 import { isLate, isNow } from '../utils/time';
-import { createTip } from '../utils/tip';
 import { refreshLoginQRCode } from './login';
+import { createTip } from './tip';
 
 /**
  * @description 刷新定时任务
@@ -34,7 +34,7 @@ async function refreshScheduleTask() {
           refreshLoginQRCode();
         }
       }, 1000);
-    } 
+    }
   }
 }
 

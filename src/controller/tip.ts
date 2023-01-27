@@ -1,4 +1,4 @@
-import { $$, createElementNode, createTextNode } from './element';
+import { $$, createElementNode, createTextNode } from '../utils/element';
 
 /**
  * @description 创建学习提示

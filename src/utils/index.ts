@@ -1,13 +1,7 @@
-import { getTaskList, getTodayScore, getTotalScore } from '../api/user';
-import { refreshLoginQRCode } from '../controller/login';
+import { createTip } from '../controller/tip';
 import { mainStore } from '../store';
-import { SettingType, TaskType } from '../types';
 import { $$ } from './element';
-import { openFrame, setFrameVisible, waitFrameClose } from './frame';
 import { log } from './log';
-import { isLate, isNow } from './time';
-import { createTip } from './tip';
-import { openWin, waitWinClose } from './win';
 
 /* 工具函数 */
 /**
@@ -69,27 +63,6 @@ function hasMobile() {
     isMobile = true;
   }
   return isMobile;
-}
-
-/**
- * @description 打开并等待任务结束
- */
-async function waitTaskWin(url: string, title?: string) {
-  if (mainStore.settings[SettingType.SAME_TAB]) {
-    // 显示窗体
-    setFrameVisible(!mainStore.settings[SettingType.SILENT_RUN]);
-    const newFrame = await openFrame(url, title);
-    if (newFrame) {
-      // id
-      const { id } = newFrame;
-      // 等待窗口关闭
-      await waitFrameClose(id);
-    }
-  } else {
-    // 页面
-    const newPage = openWin(url);
-    await waitWinClose(newPage);
-  }
 }
 
 /**
@@ -193,56 +166,6 @@ function pauseExam(flag: boolean) {
   }
 }
 
-/**
- * @description 获取video标签
- */
-function getVideoTag() {
-  let iframe = $$<HTMLIFrameElement>('iframe')[0];
-  let video: HTMLVideoElement | undefined;
-  let pauseButton: HTMLButtonElement | undefined;
-  const u = navigator.userAgent;
-  if (u.indexOf('Mac') > -1) {
-    // Mac
-    if (iframe && iframe.innerHTML) {
-      // 如果有iframe, 说明外面的video标签是假的
-      video = iframe.contentWindow?.document.getElementsByTagName('video')[0];
-      pauseButton = <HTMLButtonElement>(
-        iframe.contentWindow?.document.getElementsByClassName(
-          'prism-play-btn'
-        )[0]
-      );
-    } else {
-      // 否则这个video标签是真的
-      video = $$<HTMLVideoElement>('video')[0];
-      pauseButton = $$<HTMLButtonElement>('.prism-play-btn')[0];
-    }
-    return {
-      video: video,
-      pauseButton: pauseButton,
-    };
-  } else {
-    if (iframe) {
-      // 如果有iframe, 说明外面的video标签是假的
-      video = <HTMLVideoElement>(
-        iframe.contentWindow?.document.getElementsByTagName('video')[0]
-      );
-      pauseButton = <HTMLButtonElement>(
-        iframe.contentWindow?.document.getElementsByClassName(
-          'prism-play-btn'
-        )[0]
-      );
-    } else {
-      // 否则这个video标签是真的
-      video = $$<HTMLVideoElement>('video')[0];
-      pauseButton = $$<HTMLButtonElement>('.prism-play-btn')[0];
-    }
-    return {
-      video: video,
-      pauseButton: pauseButton,
-    };
-  }
-}
-
 export {
   debounce,
   sleep,
@@ -251,6 +174,4 @@ export {
   pauseLock,
   pauseStudyLock,
   pauseExam,
-  waitTaskWin,
-  getVideoTag,
 };

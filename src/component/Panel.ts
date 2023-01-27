@@ -1,3 +1,5 @@
+import { setFrameVisible } from '../controller/frame';
+import { createTip } from '../controller/tip';
 import { mainStore } from '../store';
 import { SettingType } from '../types';
 import { debounce, hasMobile } from '../utils';
@@ -7,8 +9,6 @@ import {
   createNSElementNode,
   createTextNode,
 } from '../utils/element';
-import { setFrameVisible } from '../utils/frame';
-import { createTip } from '../utils/tip';
 import { Hr } from './Hr';
 import { Info } from './Infor';
 import { NomalItem } from './NoramlItem';

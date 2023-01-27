@@ -12,7 +12,7 @@ import { sleep } from '../utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { getHighlightHTML, getImgHTML, pushModal } from '../utils/push';
-import { createTip } from '../utils/tip';
+import { createTip } from './tip';
 
 /**
  * @description 生成二维码

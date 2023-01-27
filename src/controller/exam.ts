@@ -9,15 +9,14 @@ import {
   pauseExam,
   pauseLock,
   pauseStudyLock,
-  sleep,
-  waitTaskWin,
+  sleep
 } from '../utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { pushModal } from '../utils/push';
 import { createRandomPath, createRandomPoint } from '../utils/random';
-import { createTip } from '../utils/tip';
-import { closeWin } from '../utils/win';
+import { closeTaskWin, waitTaskWin } from './frame';
+import { createTip } from './tip';
 import { refreshInfo } from './user';
 
 /**
@@ -694,7 +693,8 @@ async function doingExam(type: ExamType) {
       nextButton.click();
     }
   }
-  closeWin(mainStore.settings[SettingType.SAME_TAB], mainStore.id);
+  // 关闭任务窗口
+  closeTaskWin(mainStore.id);
 }
 
 /**
@@ -824,3 +824,4 @@ async function findExamPaper() {
 }
 
 export { doingExam, doExamPaper, doExamPractice, ExamType };
+

@@ -8,9 +8,13 @@
 
 ### 描述 Description
 
-- 灵活且貌似轻量的 `学习强国` 油猴插件。
+- 灵活且貌似轻量的 `学习强国` 油猴脚本。
 
-- 如果感觉功能不强大，去看看 [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版') `https://github.com/Xu22Web/tech-study-node`
+- 与此同时，提供更加便捷的版本选择
+
+  - [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版')
+
+  - [Docker 版](https://github.com/Xu22Web/tech-study-docker 'Docker 版')
 
 ### 交流群 Telegram Group
 
@@ -72,13 +76,15 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 修复同屏任务点击关闭后，任务无法继续进行的问题
+1. 修复获取分数失败，界面显示异常的问题
 
-2. 优化视听学习的结束时间。若视频时长大于 120s ，则在 120s 左右关闭；否则在视频总时长左右关闭页面
+2. 新增类 Composition API，优化代码逻辑，同时压缩脚本文件，减小文件体积
 
-3. 新增文章选读、视听学习在页面无效时，自动跳过问题页面
+3. 与此同时，提供更加便捷的版本选择
 
-4. 发布基于 Node.js 以及 puppeteer 的全套解决方案，[Node.js 版](https://github.com/Xu22Web/tech-study-node) 解决了滑动验证问题等问题，实现全自动化
+   - [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版')
+
+   - [Docker 版](https://github.com/Xu22Web/tech-study-docker 'Docker 版')
 
 ### 公告 announcement
 
@@ -108,15 +114,17 @@
 
 - 脚本配置
 
-  1. 脚本配置 `src/config/script.ts`
+  1. 版本配置 `src/config/version.ts`
 
-  2. API 配置 `src/config/api.ts`
+  2. 脚本配置 `src/config/script.ts`
 
-  3. URL 配置 `src/config/url.ts`
+  3. 编译配置 `src/config/compile.ts`
 
-  4. 编译配置 `src/config/compile.ts`
+  4. 接口配置 `src/config/api.ts`
 
-  5. 任务配置 `src/config/task.ts`
+  5. 链接配置 `src/config/url.ts`
+
+  6. 任务配置 `src/config/task.ts`
 
 - CSS 文件
 
@@ -150,11 +158,15 @@
   即
 
   ```
-   ✔ 完成编译: tech-study.ts -> tech-study.js
-   ✔ 完成编译: ./config/api.ts -> tech-study.js
-   ✔ 完成编译: ./config/url.ts -> tech-study.js
-   ✔ 完成编译: ./utils/index.ts -> tech-study.js
-   ✔ 导出文件: tech-study.js
+   ✔ 完成编译: index.ts -> index.js
+   ✔ 已生成 用户脚本配置 注释!
+   ✔ 完成编译: ./config/api.ts -> api.js
+   ✔ 完成编译: ./config/url.ts -> url.js
+   ✔ 完成编译: ./config/task.ts -> task.js
+
+   ... ...
+
+   ✔ 导出整合的脚本文件: tech-study.js
   ```
 
 - 功能特性（基于`TypeScript Compiler API`）
@@ -178,3 +190,7 @@
      1. 文件`file`文本插入到主文件一起导出，相当于合并多个`*.ts`文件导出为一个`*.js`文件
 
      2. 此类型`import`语句不会被编译到结果
+
+- 类似组合式接口（类似 `Composition API`）
+
+  模拟 `ref`，`watch`，`watchEffect` 等 API。

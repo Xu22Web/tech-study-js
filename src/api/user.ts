@@ -2,7 +2,7 @@ import API_CONFIG from '../config/api';
 
 /**
  * @description 用户信息
-*/
+ */
 type UserInfo = {
   avatarMediaUrl?: string;
   nick: string;

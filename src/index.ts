@@ -1,12 +1,20 @@
+import { version } from './config/version';
 import API_CONFIG from './config/api';
 import URL_CONFIG from './config/url';
-import { autoRefreshQRCodeInterval, muted } from './config/task';
+import { muted } from './config/task';
 import {} from './api/push';
 import {} from './api/user';
 import {} from './api/data';
 import {} from './api/answer';
 import {} from './api/login';
-import { SettingType, TaskType } from './types';
+import { ProgressType, SettingType, TaskType } from './types';
+import { hasMobile, studyPauseLock } from './utils/utils';
+import { getHighlightHTML, getProgressHTML, pushModal } from './utils/push';
+import { log } from './utils/log';
+import { $$, $_, createElementNode, createTextNode } from './utils/element';
+import { watchEffectRef } from './utils/composition';
+import {} from './utils/random';
+import {} from './utils/time';
 import { defaultSettings, mainStore } from './store';
 import {} from './component/Hr';
 import {} from './component/Infor';
@@ -18,17 +26,11 @@ import {} from './component/NoramlItem';
 import {} from './component/TaskItem';
 import { Panel } from './component/Panel';
 import { Frame } from './component/Frame';
-import { hasMobile, pauseStudyLock } from './utils';
-import { log } from './utils/log';
-import { $$, $_, createElementNode } from './utils/element';
-import { getHighlightHTML, getProgressHTML, pushModal } from './utils/push';
 import { createTip } from './controller/tip';
-import {} from './utils/random';
-import {} from './utils/time';
 import { closeFrame, closeTaskWin } from './controller/frame';
 import { refreshScheduleTask } from './controller/schedule';
-import { refreshLoginQRCode } from './controller/login';
-import { refreshInfo } from './controller/user';
+import { startLogin } from './controller/login';
+import { refreshScoreInfo, refreshTaskList } from './controller/user';
 import { reading, readNews, watchVideo } from './controller/readAndWatch';
 import {
   doExamPaper,
@@ -37,6 +39,8 @@ import {
   ExamType,
 } from './controller/exam';
 import css from './css/index.css?raw';
+import { ExamBtn } from './component/ExamBtn';
+
 /**
  * @description 嵌入样式
  */
@@ -134,7 +138,7 @@ window.addEventListener('load', async () => {
         log('视频播放超时!');
         // 关闭页面
         closeTaskWin(mainStore.id);
-      }, 10000);
+      }, 20000);
       // 能播放
       video.addEventListener('canplay', () => {
         log('正在尝试播放视频...');
@@ -212,7 +216,7 @@ window.addEventListener('load', async () => {
  */
 function initLogo() {
   console.log(
-    `%c tech-study.js %c ${mainStore.version} `,
+    `%c tech-study.js %c ${version} `,
     'background:dodgerblue;color:white;font-size:15px;border-radius:4px 0 0 4px;padding:2px 0;',
     'background:black;color:gold;font-size:15px;border-radius:0 4px 4px 0;padding:2px 0;'
   );
@@ -318,29 +322,10 @@ function initScheduleList() {
  */
 function renderExamBtn() {
   const title = $$('.title')[0];
-  // 插入节点
-  title.parentNode?.insertBefore(
-    createElementNode(
-      'button',
-      { innerText: '关闭自动答题' },
-      {
-        class: 'egg_exam_btn',
-        type: 'button',
-        onclick: () => {
-          const ExamBtn = $$('.egg_exam_btn')[0];
-          mainStore.pause = !mainStore.pause;
-          if (mainStore.pause) {
-            ExamBtn.innerText = '开启自动答题';
-            ExamBtn.classList.add('manual');
-          } else {
-            ExamBtn.innerText = '关闭自动答题';
-            ExamBtn.classList.remove('manual');
-          }
-        },
-      }
-    ),
-    title.nextSibling
-  );
+  if (title) {
+    // 插入节点
+    title.parentNode?.insertBefore(ExamBtn(), title.nextSibling);
+  }
 }
 
 /**
@@ -349,39 +334,40 @@ function renderExamBtn() {
  */
 async function renderPanel() {
   // 面板
-  const panel = Panel({ login: mainStore.login });
+  const panel = Panel({
+    login: mainStore.login,
+  });
   // 插入节点
   document.body.append(panel);
   // 已经登录
   if (mainStore.login) {
-    // 刷新信息
-    await refreshInfo();
+    // 分数信息
+    await refreshScoreInfo();
+    // 任务信息
+    await refreshTaskList();
     // 完成任务
     if (
       mainStore.tasks.every((task, i) => !mainStore.settings[i] || task.status)
     ) {
+      // 完成任务
       finishTask();
       log('已完成');
       // 创建提示
       createTip('完成学习!');
       // 远程推送
       if (mainStore.settings[SettingType.REMOTE_PUSH]) {
-        //  当天分数
-        const todayScore = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0]
-          ?.innerText;
-        // 总分
-        const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
-          ?.innerText;
+        // 分数信息
+        const { todayScore, totalScore } = mainStore;
         // 推送
         const res = await pushModal(
           {
             title: '学习推送',
             content: [
               '学习强国, 学习完成!',
-              `当天积分:  ${getHighlightHTML(todayScore)} 分`,
-              `总积分: ${getHighlightHTML(totalScore)} 分`,
+              `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
+              `总积分: ${getHighlightHTML(totalScore.value)} 分`,
               ...mainStore.tasks.map((task) =>
-                getProgressHTML(task.title, task.percent)
+                getProgressHTML(task.title, task.percent.value)
               ),
             ],
             type: 'success',
@@ -402,14 +388,8 @@ async function renderPanel() {
       }
       return;
     }
-    // 开始学习按钮
-    const studyBtn = $$<HTMLButtonElement>('.egg_study_btn')[0];
-    if (studyBtn) {
-      studyBtn.removeAttribute('disabled');
-      studyBtn.classList.remove('loading');
-      studyBtn.innerText = '开始学习';
-      studyBtn.addEventListener('click', start);
-    }
+    // 加载任务
+    loadedTask();
     // 自动答题
     if (mainStore.settings[SettingType.AUTO_START]) {
       // 创建提示
@@ -417,7 +397,10 @@ async function renderPanel() {
       // 等待倒计时结束
       await tip.waitCountDown();
       // 再次查看是否开启
-      if (mainStore.settings[SettingType.AUTO_START] && !mainStore.started) {
+      if (
+        mainStore.settings[SettingType.AUTO_START] &&
+        mainStore.progress.value !== ProgressType.START
+      ) {
         // 创建提示
         createTip('自动开始任务');
         start();
@@ -434,7 +417,7 @@ async function renderPanel() {
  */
 function renderFrame() {
   if (mainStore.settings[SettingType.SAME_TAB]) {
-    const frame = Frame();
+    const frame = Frame({ show: mainStore.frameShow });
     document.body.append(frame);
   }
 }
@@ -447,13 +430,8 @@ async function renderQRCode() {
   if (!mainStore.login && !mainStore.settings[SettingType.SCHEDULE_RUN]) {
     // 等待加载
     await $_('.egg_login_img_wrap');
-    // 刷新二维码
-    refreshLoginQRCode();
-    // 每隔 100s 刷新
-    mainStore.refreshTimer = setInterval(() => {
-      // 刷新二维码
-      refreshLoginQRCode();
-    }, autoRefreshQRCodeInterval);
+    // 开始登录
+    startLogin();
   }
 }
 
@@ -464,7 +442,7 @@ async function study() {
   // 创建提示
   createTip('开始学习!');
   // 暂停
-  await pauseStudyLock();
+  await studyPauseLock();
   // 任务
   if (mainStore.tasks.length) {
     // 文章宣读
@@ -476,7 +454,7 @@ async function study() {
       // 创建提示
       createTip('任务一: 文章选读');
       // 暂停
-      await pauseStudyLock();
+      await studyPauseLock();
       // 看新闻
       await readNews();
     }
@@ -490,7 +468,7 @@ async function study() {
       // 创建提示
       createTip('任务二: 视听学习');
       // 暂停
-      await pauseStudyLock();
+      await studyPauseLock();
       // 看视频
       await watchVideo();
     }
@@ -504,7 +482,7 @@ async function study() {
       // 创建提示
       createTip('任务三: 每日答题');
       // 暂停
-      await pauseStudyLock();
+      await studyPauseLock();
       // 做每日答题
       await doExamPractice();
     }
@@ -518,12 +496,26 @@ async function study() {
       // 创建提示
       createTip('任务四: 专项练习');
       // 暂停
-      await pauseStudyLock();
+      await studyPauseLock();
       // 做专项练习
       await doExamPaper();
     }
     log('任务四: 专项练习已完成!');
   }
+}
+
+/**
+ * @description 加载任务
+ */
+function loadedTask() {
+  // 全局暂停
+  if (GM_getValue('pauseStudy') !== false) {
+    GM_setValue('pauseStudy', false);
+  }
+  // 开始按钮
+  const studyBtn = $$('.egg_study_btn')[0];
+  studyBtn.addEventListener('click', start);
+  mainStore.progress.value = ProgressType.LOADED;
 }
 /**
  * @description 暂停任务
@@ -535,10 +527,9 @@ function pauseTask() {
   }
   // 开始按钮
   const studyBtn = $$('.egg_study_btn')[0];
-  studyBtn.innerText = '继续学习';
-  studyBtn.classList.remove('loading');
   studyBtn.removeEventListener('click', pauseTask);
   studyBtn.addEventListener('click', continueTask);
+  mainStore.progress.value = ProgressType.PAUSE;
 }
 /**
  * @description 继续任务
@@ -548,28 +539,20 @@ function continueTask() {
   if (GM_getValue('pauseStudy') !== false) {
     GM_setValue('pauseStudy', false);
   }
-  // 开始按钮
+  // 学习按钮
   const studyBtn = $$('.egg_study_btn')[0];
-  studyBtn.innerText = '正在学习, 点击暂停';
-  studyBtn.classList.add('loading');
   studyBtn.removeEventListener('click', continueTask);
+  studyBtn.removeEventListener('click', start);
   studyBtn.addEventListener('click', pauseTask);
+  mainStore.progress.value = ProgressType.START;
 }
 /**
  * @description 完成任务
  */
 function finishTask() {
-  // 全局暂停
-  if (GM_getValue('pauseStudy') !== false) {
-    GM_setValue('pauseStudy', false);
-  }
-  // 开始按钮
-  const studyBtn = $$('.egg_study_btn')[0];
-  studyBtn.innerText = '已完成';
-  studyBtn.classList.remove('loading');
-  studyBtn.classList.add('disabled');
-  studyBtn.setAttribute('disabled', '');
+  mainStore.progress.value = ProgressType.FINISH;
 }
+
 /**
  * @description 开始
  */
@@ -578,56 +561,41 @@ async function start() {
   createTip('准备开始学习');
   // 保存配置
   log('准备开始学习...');
-  if (mainStore.login && !mainStore.started) {
-    mainStore.started = true;
-    // 初始化暂停
-    if (GM_getValue('pauseStudy') !== false) {
-      GM_setValue('pauseStudy', false);
-    }
-    // 开始按钮
-    const studyBtn = $$('.egg_study_btn')[0];
-    studyBtn.innerText = '正在学习, 点击暂停';
-    studyBtn.classList.add('loading');
-    studyBtn.removeEventListener('click', start);
-    // 点击暂停
-    studyBtn.addEventListener('click', pauseTask);
+  // 未登录且未开始
+  if (mainStore.login && mainStore.progress.value !== ProgressType.START) {
+    // 继续任务
+    continueTask();
     // 学习
     await study();
-    // 刷新数据
-    await refreshInfo();
-    // 未完成
-    if (
-      !mainStore.tasks.every((task, i) => !mainStore.settings[i] || task.status)
-    ) {
-      // 再次学习
-      await study();
-    }
+    // 刷新分数数据
+    await refreshScoreInfo();
+    // 刷新任务数据
+    await refreshTaskList();
+    // 刷新任务
     finishTask();
     // 关闭窗口
     if (mainStore.settings[SettingType.SAME_TAB]) {
       closeFrame();
+      // 窗口不存在
+      mainStore.frameExist.value = false;
     }
     log('已完成');
     // 创建提示
     createTip('完成学习!');
     // 远程推送
     if (mainStore.settings[SettingType.REMOTE_PUSH]) {
-      //  当天分数
-      const todayScore = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0]
-        ?.innerText;
-      // 总分
-      const totalScore = $$<HTMLSpanElement>('.egg_totalscore span')[0]
-        ?.innerText;
+      // 分数信息
+      const { todayScore, totalScore } = mainStore;
       // 推送
       const res = await pushModal(
         {
           title: '学习推送',
           content: [
             '学习强国, 学习完成!',
-            `当天积分:  ${getHighlightHTML(todayScore)} 分`,
-            `总积分: ${getHighlightHTML(totalScore)} 分`,
+            `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
+            `总积分: ${getHighlightHTML(totalScore.value)} 分`,
             ...mainStore.tasks.map((task) =>
-              getProgressHTML(task.title, task.percent)
+              getProgressHTML(task.title, task.percent.value)
             ),
           ],
           type: 'success',

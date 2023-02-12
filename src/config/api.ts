@@ -5,9 +5,9 @@ const API_CONFIG = {
   // 用户信息
   userInfo: 'https://pc-api.xuexi.cn/open/api/user/info',
   // 总分
-  totalScore: 'https://pc-api.xuexi.cn/open/api/score/get',
+  totalScore: 'https://pc-proxy-api.xuexi.cn/delegate/score/get',
   // 当天分数
-  todayScore: 'https://pc-api.xuexi.cn/open/api/score/today/query',
+  todayScore: 'https://pc-proxy-api.xuexi.cn/delegate/score/today/query',
   // 任务列表
   taskList:
     'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',

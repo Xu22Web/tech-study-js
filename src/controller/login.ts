@@ -2,13 +2,13 @@ import {
   generateQRCode,
   getSign,
   loginWithQRCode,
-  secureCheck,
+  secureCheck
 } from '../api/login';
 import API_CONFIG from '../config/api';
-import { maxRefreshCount } from '../config/task';
+import { autoRefreshQRCodeInterval, maxRefreshCount } from '../config/task';
 import { mainStore } from '../store';
 import { SettingType } from '../types';
-import { sleep } from '../utils';
+import { sleep } from '../utils/utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { getHighlightHTML, getImgHTML, pushModal } from '../utils/push';
@@ -86,7 +86,8 @@ async function refreshLoginQRCode() {
     // 重置刷新数
     mainStore.refreshCount = 0;
     // 隐藏二维码
-    setLoginVisible(false);
+    mainStore.startLogin.value = false;
+
     // 远程推送
     if (mainStore.settings[SettingType.REMOTE_PUSH]) {
       // 推送
@@ -118,8 +119,8 @@ async function refreshLoginQRCode() {
       const { src, code, url } = qrCode;
       // src
       img.src = src;
-      // 显示二维码
-      setLoginVisible(true);
+      // 开始登录
+      mainStore.startLogin.value = true;
       // 远程推送
       if (mainStore.settings[SettingType.REMOTE_PUSH]) {
         // img html
@@ -186,20 +187,17 @@ async function refreshLoginQRCode() {
 }
 
 /**
- * @description 设置登录二维码可见
- * @param show
+ * @description 开始登录
  */
-async function setLoginVisible(show: boolean) {
-  const imgWrap = $$('.egg_login_img_wrap')[0];
-  if (imgWrap) {
-    imgWrap.classList.toggle('active', show);
-  }
+function startLogin() {
+  // 刷新二维码
+  refreshLoginQRCode();
+  // 每隔一段时间刷新
+  mainStore.refreshTimer = setInterval(() => {
+    // 刷新二维码
+    refreshLoginQRCode();
+  }, autoRefreshQRCodeInterval);
 }
 
-export {
-  getQRCode,
-  checkQRCode,
-  tryLogin,
-  refreshLoginQRCode,
-  setLoginVisible,
-};
+export { getQRCode, checkQRCode, tryLogin, refreshLoginQRCode, startLogin };
+

@@ -1,6 +1,6 @@
 import { mainStore } from '../store';
+import { ref, watchEffectRef } from '../utils/composition';
 import {
-  $$,
   createElementNode,
   createNSElementNode,
   createTextNode,
@@ -11,6 +11,8 @@ import {
  */
 function ScoreInfo({ login }: { login: boolean }) {
   if (login) {
+    // 分数显示
+    const scoreShow = ref(false);
     // 分数信息
     return createElementNode('div', undefined, { class: 'egg_scoreinfo' }, [
       createElementNode(
@@ -21,7 +23,12 @@ function ScoreInfo({ login }: { login: boolean }) {
         },
         [
           createTextNode('总积分'),
-          createElementNode('span', undefined, undefined, createTextNode(0)),
+          createElementNode(
+            'span',
+            undefined,
+            undefined,
+            createTextNode(mainStore.totalScore)
+          ),
         ]
       ),
       createElementNode(
@@ -39,21 +46,10 @@ function ScoreInfo({ login }: { login: boolean }) {
               class: 'egg_todayscore_btn',
               title: '查看分数详情',
               onclick: () => {
-                const scoreDetails = $$('.egg_score_details')[0];
-                if (scoreDetails) {
-                  const exists = scoreDetails.classList.contains('hide');
-                  scoreDetails.classList.toggle('hide', !exists);
-                }
+                scoreShow.value = !scoreShow.value;
               },
               onblur: () => {
-                // 积分详情
-                const scoreDetails = $$('.egg_score_details')[0];
-                if (scoreDetails) {
-                  const exists = scoreDetails.classList.contains('hide');
-                  if (!exists) {
-                    scoreDetails.classList.add('hide');
-                  }
-                }
+                scoreShow.value = false;
               },
             },
             [
@@ -63,7 +59,7 @@ function ScoreInfo({ login }: { login: boolean }) {
                 'span',
                 undefined,
                 undefined,
-                createTextNode(0)
+                createTextNode(mainStore.todayScore)
               ),
               // icon
               createNSElementNode(
@@ -81,7 +77,10 @@ function ScoreInfo({ login }: { login: boolean }) {
                 'div',
                 undefined,
                 {
-                  class: 'egg_score_details hide',
+                  class: watchEffectRef(
+                    scoreShow,
+                    () => `egg_score_details${scoreShow.value ? '' : ' hide'}`
+                  ),
                 },
                 [
                   createElementNode(
@@ -124,10 +123,11 @@ function ScoreInfo({ login }: { login: boolean }) {
                         createTextNode(task.title),
                         createElementNode(
                           'span',
-                          { innerText: task.currentScore },
+                          undefined,
                           {
                             class: 'egg_score_detail',
-                          }
+                          },
+                          createTextNode(task.score)
                         ),
                       ]
                     )

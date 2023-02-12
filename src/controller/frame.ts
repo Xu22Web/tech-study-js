@@ -16,12 +16,12 @@ async function openFrame(url: string, title?: string) {
     const frameTitle = $$('.egg_frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
-    // 打开
-    mainStore.closed = false;
     // id
     const id = generateMix(10);
+    // 打开
+    mainStore.closed = false;
     // 设置标题
-    frameTitle.innerText = title || '';
+    mainStore.frameTile.value = title || '';
     // 设置 URL
     frame.src = url;
     // 等待页面加载
@@ -36,36 +36,22 @@ async function openFrame(url: string, title?: string) {
 }
 
 /**
- * @description 改变窗口可见性
- */
-function setFrameVisible(show: boolean) {
-  const conn = $$('.egg_frame_wrap')[0];
-  const frameBtn = $$('.egg_frame_show_btn')[0];
-  if (conn && frameBtn) {
-    conn.classList.toggle('hide', !show);
-    frameBtn.classList.toggle('hide', show);
-  }
-}
-
-/**
  * @description 关闭窗口
  */
 function closeFrame() {
   const conn = $$('.egg_frame_wrap')[0];
   const frameBtn = $$('.egg_frame_show_btn')[0];
+  mainStore.frameShow.value = false;
   if (conn && frameBtn) {
-    // 隐藏窗口
-    conn.classList.add('hide');
-    // 隐藏按钮
-    frameBtn.classList.add('hide');
     // 标题
     const frameTitle = $$('.egg_frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
     // 关闭
     mainStore.closed = true;
+    // 标题
+    mainStore.frameTile.value = '';
     frame.src = '';
-    frameTitle.innerText = '';
   }
 }
 
@@ -156,8 +142,10 @@ function closeTaskWin(id?: string) {
  */
 async function waitTaskWin(url: string, title?: string) {
   if (mainStore.settings[SettingType.SAME_TAB]) {
+    // 窗口存在
+    mainStore.frameExist.value = true;
     // 显示窗体
-    setFrameVisible(!mainStore.settings[SettingType.SILENT_RUN]);
+    mainStore.frameShow.value = !mainStore.settings[SettingType.SILENT_RUN];
     const newFrame = await openFrame(url, title);
     if (newFrame) {
       // id
@@ -177,7 +165,6 @@ export {
   closeFrame,
   waitFrameClose,
   waitFrameLoaded,
-  setFrameVisible,
   closeTaskWin,
   waitTaskWin,
 };

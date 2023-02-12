@@ -4,20 +4,19 @@ import { examPaperReverse } from '../config/task';
 import URL_CONFIG from '../config/url';
 import { mainStore } from '../store';
 import { SettingType, TaskType } from '../types';
-import {
-  hasMobile,
-  pauseExam,
-  pauseLock,
-  pauseStudyLock,
-  sleep
-} from '../utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { pushModal } from '../utils/push';
 import { createRandomPath, createRandomPoint } from '../utils/random';
+import {
+  examPauseLock,
+  hasMobile,
+  sleep,
+  studyPauseLock,
+} from '../utils/utils';
 import { closeTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
-import { refreshInfo } from './user';
+import { refreshScoreInfo, refreshTaskList } from './user';
 
 /**
  * @description  考试类型
@@ -359,7 +358,7 @@ async function doingExam(type: ExamType) {
     // 先等等再开始做题
     await sleep(2500);
     // 暂停
-    await pauseLock();
+    await examPauseLock();
     // 获取下一个按钮
     nextButton = await getNextButton();
     // 下一个文本
@@ -380,7 +379,7 @@ async function doingExam(type: ExamType) {
     // 等待一段时间
     await sleep(1500);
     // 暂停
-    await pauseLock();
+    await examPauseLock();
     // 选项按钮
     const allBtns = $$<HTMLButtonElement>('.q-answer');
     // 所有填空
@@ -390,7 +389,7 @@ async function doingExam(type: ExamType) {
       $$('.q-header')[0].innerText.substring(0, 3)
     );
     // 暂停
-    await pauseLock();
+    await examPauseLock();
     // 题型分类作答
     switch (questionType) {
       case '填空题': {
@@ -434,8 +433,8 @@ async function doingExam(type: ExamType) {
             mainStore.pushToken
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
-          // 暂停答题
-          pauseExam(true);
+          // 暂停
+          mainStore.examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -507,8 +506,8 @@ async function doingExam(type: ExamType) {
             mainStore.pushToken
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
-          // 暂停答题
-          pauseExam(true);
+          // 暂停
+          mainStore.examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -605,8 +604,8 @@ async function doingExam(type: ExamType) {
             mainStore.pushToken
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
-          // 暂停答题
-          pauseExam(true);
+          // 暂停
+          mainStore.examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -614,7 +613,7 @@ async function doingExam(type: ExamType) {
       }
     }
     // 暂停
-    await pauseLock();
+    await examPauseLock();
     // 获取下一个按钮
     nextButton = await getNextButton();
     // 下一个文本
@@ -663,7 +662,7 @@ async function doingExam(type: ExamType) {
       // 等待一段时间
       await sleep(2000);
       // 暂停
-      await pauseLock();
+      await examPauseLock();
       // 答案解析
       const answerBox = $$('.answer')[0];
       // 答题错误
@@ -702,7 +701,7 @@ async function doingExam(type: ExamType) {
  */
 async function doExamPractice() {
   // 暂停
-  await pauseStudyLock();
+  await studyPauseLock();
   log('正在做每日答题...');
   // 创建提示
   createTip('正在做每日答题');
@@ -714,8 +713,10 @@ async function doExamPractice() {
   createTip('完成每日答题!');
   // 等待一段时间
   await sleep(1500);
-  // 刷新数据
-  await refreshInfo();
+  // 刷新分数数据
+  await refreshScoreInfo();
+  // 刷新任务数据
+  await refreshTaskList();
   // 任务完成状况
   if (
     mainStore.settings[SettingType.PRACTICE] &&
@@ -738,7 +739,7 @@ async function doExamPaper() {
   const examPaperId = await findExamPaper();
   if (examPaperId) {
     // 暂停
-    await pauseStudyLock();
+    await studyPauseLock();
     log('正在做专项练习...');
     // 创建提示
     createTip('正在做专项练习');
@@ -751,8 +752,10 @@ async function doExamPaper() {
     createTip('完成专项练习!');
     // 等待一段时间
     await sleep(1500);
-    // 刷新数据
-    await refreshInfo();
+    // 刷新分数数据
+    await refreshScoreInfo();
+    // 刷新任务数据
+    await refreshTaskList();
     if (
       mainStore.settings[SettingType.PAPER] &&
       !mainStore.tasks[TaskType.PAPER].status
@@ -824,4 +827,3 @@ async function findExamPaper() {
 }
 
 export { doingExam, doExamPaper, doExamPractice, ExamType };
-

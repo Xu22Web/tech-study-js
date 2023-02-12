@@ -1,6 +1,5 @@
 import { createTip } from '../controller/tip';
 import { mainStore } from '../store';
-import { $$ } from './element';
 import { log } from './log';
 
 /* 工具函数 */
@@ -84,40 +83,46 @@ function sleep(time) {
 /**
  * @description 暂停锁
  */
-function pauseLock(callback?: (msg: string) => void) {
-  return new Promise((resolve) => {
+function examPauseLock(callback?: (status: boolean) => void) {
+  return new Promise<boolean>((resolve) => {
     // 学习暂停
     const pauseStudy = <boolean>(GM_getValue('pauseStudy') || false);
+    // 全局暂停
     if (pauseStudy) {
-      pauseExam(pauseStudy);
+      mainStore.examPause.value = true;
     }
-    if (mainStore.pause) {
+    // 暂停
+    if (mainStore.examPause.value) {
+      // 创建提示
+      createTip('已暂停, 手动开启自动答题! ', 10);
       const doing = setInterval(() => {
-        if (!mainStore.pause) {
+        if (!mainStore.examPause.value) {
           // 停止定时器
           clearInterval(doing);
           log('答题等待结束!');
           if (callback && callback instanceof Function) {
-            callback('done');
+            // 创建提示
+            createTip('已开启, 自动答题!');
+            callback(true);
           }
-          resolve('done');
+          resolve(true);
           return;
         }
         if (callback && callback instanceof Function) {
-          callback('pending');
+          callback(false);
         }
         log('答题等待...');
       }, 500);
       return;
     }
-    resolve('done');
+    resolve(true);
   });
 }
 
 /**
  * @description 暂停学习锁
  */
-function pauseStudyLock(callback?: (msg: string) => void) {
+function studyPauseLock(callback?: (msg: string) => void) {
   return new Promise((resolve) => {
     // 暂停
     const pauseStudy = GM_getValue('pauseStudy') || false;
@@ -146,32 +151,4 @@ function pauseStudyLock(callback?: (msg: string) => void) {
   });
 }
 
-/**
- * @description 暂停答题
- */
-function pauseExam(flag: boolean) {
-  // 按钮
-  const ExamBtn = $$<HTMLButtonElement>('.egg_exam_btn')[0];
-  if (ExamBtn) {
-    if (flag) {
-      // 创建提示
-      createTip('已暂停, 手动开启自动答题! ', 10);
-    } else {
-      // 创建提示
-      createTip('已开启, 自动答题!');
-    }
-    mainStore.pause = flag;
-    ExamBtn.innerText = '开启自动答题';
-    ExamBtn.classList.add('manual');
-  }
-}
-
-export {
-  debounce,
-  sleep,
-  hasMobile,
-  getCookie,
-  pauseLock,
-  pauseStudyLock,
-  pauseExam,
-};
+export { debounce, sleep, hasMobile, getCookie, examPauseLock, studyPauseLock };

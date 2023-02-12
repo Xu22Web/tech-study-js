@@ -1,9 +1,8 @@
 import { getUserInfo } from '../api/user';
-import { autoRefreshQRCodeInterval } from '../config/task';
-import { refreshLoginQRCode } from '../controller/login';
+import { startLogin } from '../controller/login';
 import { mainStore } from '../store';
-import { SettingType } from '../types';
-import { debounce } from '../utils';
+import { debounce } from '../utils/utils';
+import { watchEffectRef } from '../utils/composition';
 import { $$, createElementNode, createTextNode } from '../utils/element';
 
 /**
@@ -47,14 +46,15 @@ async function Info({ login }: { login: boolean }) {
             // 昵称
             createElementNode(
               'div',
-              { innerText: nick },
-              { class: 'egg_nick' }
+              undefined,
+              { class: 'egg_nick' },
+              createTextNode(nick)
             ),
           ]),
           // 退出按钮
           createElementNode(
             'button',
-            { innerText: '退出' },
+            undefined,
             {
               type: 'button',
               class: 'egg_login_btn',
@@ -62,7 +62,8 @@ async function Info({ login }: { login: boolean }) {
                 const logged = $$("a[class='logged-link']")[0];
                 logged && logged.click();
               }, 500),
-            }
+            },
+            createTextNode('退出')
           ),
         ]
       );
@@ -84,13 +85,8 @@ async function Info({ login }: { login: boolean }) {
           type: 'button',
           class: 'egg_login_btn',
           onclick: debounce(async () => {
-            // 刷新二维码
-            refreshLoginQRCode();
-            // 每隔 100s 刷新
-            mainStore.refreshTimer = setInterval(() => {
-              // 刷新二维码
-              refreshLoginQRCode();
-            }, autoRefreshQRCodeInterval);
+            // 开始登录
+            startLogin();
           }, 500),
         },
         createTextNode('扫码登录')
@@ -100,7 +96,11 @@ async function Info({ login }: { login: boolean }) {
         'div',
         undefined,
         {
-          class: 'egg_login_img_wrap',
+          class: watchEffectRef(
+            mainStore.startLogin,
+            () =>
+              `egg_login_img_wrap${mainStore.startLogin.value ? ' active' : ''}`
+          ),
         },
         createElementNode('img', undefined, {
           class: 'egg_login_img',

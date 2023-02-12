@@ -1,20 +1,8 @@
 import { getTaskList, getTodayScore, getTotalScore } from '../api/user';
 import { mainStore } from '../store';
 import { TaskType } from '../types';
-import { sleep } from '../utils';
-import { $$ } from '../utils/element';
+import { sleep } from '../utils/utils';
 import { log } from '../utils/log';
-
-/**
- * @description 刷新信息
- */
-async function refreshInfo() {
-  // 登录
-  if (mainStore.login) {
-    await refreshScoreInfo();
-    await refreshTaskList();
-  }
-}
 
 /**
  * @description 加载分数
@@ -25,14 +13,10 @@ async function refreshScoreInfo() {
   const totalScore = await getTotalScore();
   // 获取当天总分
   const todayScore = await getTodayScore();
-  // 总分
-  const totalScoreSpan = $$<HTMLSpanElement>('.egg_totalscore span')[0];
-  //  当天分数
-  const todayScoreSpan = $$<HTMLSpanElement>('.egg_todayscore_btn span')[0];
-  // 刷新分数
-  if (totalScoreSpan && todayScoreSpan) {
-    totalScoreSpan.innerText = totalScore;
-    todayScoreSpan.innerText = todayScore;
+  if (Number.isInteger(totalScore) && Number.isInteger(todayScore)) {
+    // 设置分数
+    mainStore.totalScore.value = totalScore;
+    mainStore.todayScore.value = todayScore;
   }
 }
 
@@ -70,42 +54,20 @@ async function refreshTaskList() {
     mainStore.tasks[TaskType.PAPER].dayMaxScore = taskProgress[4].dayMaxScore;
     mainStore.tasks[TaskType.PAPER].need =
       taskProgress[4].dayMaxScore - taskProgress[4].currentScore;
-    // 详情
-    const details = $$('.egg_score_details .egg_score_detail');
-    // 进度条对象
-    const taskProgressList = $$('.egg_progress');
     // 更新数据
     for (const i in mainStore.tasks) {
       const { currentScore, dayMaxScore } = mainStore.tasks[i];
       // 进度
-      let rate = (100 * currentScore) / dayMaxScore;
+      let rate = Number(((100 * currentScore) / dayMaxScore).toFixed(2));
       // 修复专项练习成组做完, 进度条显示异常
       if (dayMaxScore <= currentScore) {
         rate = 100;
         mainStore.tasks[i].status = true;
       }
-      if (rate >= 0) {
-        // 进度条信息
-        const progressInfo = taskProgressList[i];
-        // 进度条
-        const bar = $$('.egg_bar', progressInfo)[0];
-        // 百分比
-        const percent = $$('.egg_percent span', progressInfo)[0];
-        if (bar && percent) {
-          // 进度
-          const progress = rate.toFixed(2);
-          // 长度
-          bar.style.width = `${progress}%`;
-          // 文字
-          percent.innerText = `${~~rate}`;
-          // 进度
-          mainStore.tasks[i].percent = Number(progress);
-        }
-        // 设置详情
-        if (details[i]) {
-          details[i].innerText = String(mainStore.tasks[i].currentScore);
-        }
-      }
+      // 百分比
+      mainStore.tasks[i].percent.value = rate;
+      // 分数
+      mainStore.tasks[i].score.value = currentScore;
     }
     return;
   }
@@ -114,4 +76,5 @@ async function refreshTaskList() {
   await refreshTaskList();
 }
 
-export { refreshInfo };
+export { refreshScoreInfo, refreshTaskList };
+

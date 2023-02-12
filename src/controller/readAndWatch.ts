@@ -2,12 +2,12 @@ import { getNewsList, getVideoList } from '../api/data';
 import { maxNewsNum, maxVideoNum } from '../config/task';
 import { mainStore } from '../store';
 import { SettingType, TaskType } from '../types';
-import { pauseStudyLock, sleep } from '../utils';
+import { sleep, studyPauseLock } from '../utils/utils';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { closeTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
-import { refreshInfo } from './user';
+import { refreshScoreInfo, refreshTaskList } from './user';
 
 /**
  * @description 读新闻或者看视频
@@ -32,12 +32,12 @@ async function reading(type: number) {
   const firstTime = time - (~~(Math.random() * 4) + 4);
   // 第二次滚动时间
   const secendTime = ~~(Math.random() * 4) + 8;
+  // 窗口
+  const window = unsafeWindow;
   // 创建提示
   const tip = createTip('距离关闭页面还剩', time, async (time) => {
     // 暂停锁
-    await pauseStudyLock();
-    // 窗口
-    const window = unsafeWindow;
+    await studyPauseLock();
     // 第一次滚动
     if (time === firstTime) {
       // 滚动
@@ -158,10 +158,12 @@ function getVideos() {
  * @description 阅读文章
  */
 async function readNews() {
+  // 获取文章
   await getNews();
+  // 观看文章
   for (const i in mainStore.news) {
     // 暂停
-    await pauseStudyLock();
+    await studyPauseLock();
     log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
     // 创建提示
     createTip(`正在阅读第 ${Number(i) + 1} 个新闻`);
@@ -177,8 +179,10 @@ async function readNews() {
     createTip(`完成阅读第 ${Number(i) + 1} 个新闻!`);
     // 等待一段时间
     await sleep(1500);
-    // 刷新数据
-    await refreshInfo();
+    // 刷新分数数据
+    await refreshScoreInfo();
+    // 刷新任务数据
+    await refreshTaskList();
     // 任务完成跳出循环
     if (
       mainStore.settings[SettingType.READ] &&
@@ -208,7 +212,7 @@ async function watchVideo() {
   // 观看视频
   for (const i in mainStore.videos) {
     // 暂停
-    await pauseStudyLock();
+    await studyPauseLock();
     log(`正在观看第 ${Number(i) + 1} 个视频...`);
     // 创建提示
     createTip(`正在观看第 ${Number(i) + 1} 个视频`);
@@ -224,8 +228,10 @@ async function watchVideo() {
     createTip(`完成观看第 ${Number(i) + 1} 个视频!`);
     // 等待一段时间
     await sleep(1500);
-    // 刷新数据
-    await refreshInfo();
+    // 刷新分数数据
+    await refreshScoreInfo();
+    // 刷新任务数据
+    await refreshTaskList();
     // 任务完成跳出循环
     if (
       mainStore.settings[SettingType.WATCH] &&

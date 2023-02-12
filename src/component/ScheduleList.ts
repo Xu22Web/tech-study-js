@@ -1,5 +1,7 @@
 import { refreshScheduleTask } from '../controller/schedule';
-import { Schedule } from '../types';
+import { createTip } from '../controller/tip';
+import { mainStore } from '../store';
+import { Schedule, SettingType } from '../types';
 import {
   $$,
   createElementNode,
@@ -71,6 +73,11 @@ function ScheduleList({ scheduleList }: { scheduleList: Schedule[] }) {
                   {
                     class: 'egg_schedule_del_btn',
                     onclick: () => {
+                      // 定时刷新
+                      if (!mainStore.settings[SettingType.SCHEDULE_RUN]) {
+                        createTip('未开启定时刷新!');
+                        return;
+                      }
                       // 索引
                       const index = scheduleList.findIndex(
                         (s) => s === schedule

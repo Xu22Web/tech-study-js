@@ -1,29 +1,5 @@
-/**
- * @description 格式化日期时间数字
- * @param num
- * @returns
- */
-function formatDateNum(num: number) {
-  return num < 10 ? `0${num}` : `${num}`;
-}
-/**
- * @description 格式化日期时间
- * @param time
- * @returns
- * @example
- * formatDate() -> "20220901"
- * formatDate(new Date()) -> "20220901"
- * formatDate(Date.now()) -> "20220901"
- */
-function formatDate(time: Date | string | number = Date.now()) {
-  const date = new Date(time);
-  const d = date.getDate();
-  const m = date.getMonth() + 1;
-  const y = date.getFullYear();
-  // 日期
-  const dateText = [y, m, d].map(formatDateNum).join('');
-  return dateText;
-}
+import { version } from './version';
+
 /**
  * @description 脚本配置
  */
@@ -39,7 +15,7 @@ const SCRIPT_CONFIG = {
   /**
    * @description 版本
    */
-  version: 'v1.5.4',
+  version,
   /**
    * @description 脚本描述
    */

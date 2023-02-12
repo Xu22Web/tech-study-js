@@ -1,3 +1,4 @@
+import { Ref, watchEffectRef } from '../utils/composition';
 import { createElementNode, createTextNode } from '../utils/element';
 
 /**
@@ -9,11 +10,13 @@ function TaskItem({
   tip,
   checked,
   onChange,
+  percent,
 }: {
   title: string;
   tip: string;
   checked: boolean;
   onChange: (e: Event) => void;
+  percent: Ref<number>;
 }) {
   return createElementNode('div', undefined, { class: 'egg_setting_item' }, [
     createElementNode('div', undefined, { class: 'egg_label_wrap' }, [
@@ -28,10 +31,15 @@ function TaskItem({
           'div',
           undefined,
           { class: 'egg_track' },
-          createElementNode('div', undefined, { class: 'egg_bar' })
+          createElementNode('div', undefined, {
+            class: 'egg_bar',
+            style: watchEffectRef(percent, () => `width: ${percent.value}%;`),
+          })
         ),
         createElementNode('div', undefined, { class: 'egg_percent' }, [
-          createElementNode('span', undefined, undefined, [createTextNode(0)]),
+          createElementNode('span', undefined, undefined, [
+            createTextNode(percent),
+          ]),
           createTextNode('%'),
         ]),
       ]),

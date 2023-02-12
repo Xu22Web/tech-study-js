@@ -1,3 +1,5 @@
+import { isRef, Ref, watchEffect } from './composition';
+
 /**
  * @description 创建元素节点
  * @param eleName
@@ -23,10 +25,10 @@ function createElementNode<T extends keyof HTMLElementTagNameMap>(
   const ele = document.createElement(tagName);
   // props属性设置
   for (const key in props) {
-    if (props[key] instanceof Object) {
-      for (const subkey in props[key]) {
-        ele[key][subkey] = props[key][subkey];
-      }
+    if (isRef(props[key])) {
+      const refVal = <Ref>props[key];
+      ele[key] = refVal.value;
+      watchEffect(() => (ele[key] = refVal.value));
     } else {
       ele[key] = props[key];
     }
@@ -39,42 +41,72 @@ function createElementNode<T extends keyof HTMLElementTagNameMap>(
     const formatKey = key.toLowerCase();
     // 特殊属性
     const specificAttrs = ['checked', 'selected', 'disabled', 'enabled'];
-    // xlink命名空间
-    if (formatKey.startsWith('xlink:')) {
-      // xlink属性命名空间
-      const attrNS = 'http://www.w3.org/1999/xlink';
-      if (value) {
-        ele.setAttributeNS(attrNS, key, value);
-      } else {
-        ele.removeAttributeNS(attrNS, key);
-      }
-    } else if (formatKey.startsWith('on')) {
+    // 事件绑定
+    if (formatKey.startsWith('on')) {
       // 事件监听
       const [, eventType] = key.toLowerCase().split('on');
       // 事件类型
       if (eventType) {
-        // 回调函数
-        if (value instanceof Function) {
-          ele.addEventListener(eventType, value);
-
-          // 回调函数数组
-        } else if (value instanceof Array) {
-          for (const i in value) {
-            // 回调函数
-            if (value[i] instanceof Function) {
-              ele.addEventListener(eventType, value[i]);
-            }
+        if (isRef(value)) {
+          const refVal = <Ref<EventListener>>value;
+          if (value.value instanceof Function) {
+            // 设置事件监听
+            ele.addEventListener(eventType, refVal.value);
+            // 初始监听
+            const fn = refVal.value;
+            // 订阅
+            watchEffect(() => {
+              ele.removeEventListener(eventType, fn);
+              if (refVal.value instanceof Function) {
+                ele.addEventListener(eventType, refVal.value);
+              }
+            });
           }
+        } else if (value instanceof Function) {
+          ele.addEventListener(eventType, value);
         }
       }
     } else if (specificAttrs.includes(key)) {
-      if (value) {
-        ele.setAttribute(key, '');
+      if (isRef(value)) {
+        const refVal = <Ref>value;
+        if (refVal.value) {
+          ele.setAttribute(key, '');
+        } else {
+          ele.removeAttribute(key);
+        }
+        watchEffect(() => {
+          if (refVal.value) {
+            ele.setAttribute(key, '');
+          } else {
+            ele.removeAttribute(key);
+          }
+        });
       } else {
-        ele.removeAttribute(key);
+        if (value) {
+          ele.setAttribute(key, '');
+        } else {
+          ele.removeAttribute(key);
+        }
+      }
+    } else if (key === 'ref') {
+      if (isRef(value)) {
+        const refVal = <Ref>value;
+        refVal.value = ele;
+      }
+      if (value instanceof Function) {
+        const refFn = <Function>value;
+        refFn(ele);
       }
     } else {
-      ele.setAttribute(key, value);
+      if (isRef(value)) {
+        const refVal = <Ref>value;
+        ele.setAttribute(key, refVal.value);
+        watchEffect(() => {
+          ele.setAttribute(key, refVal.value);
+        });
+      } else {
+        ele.setAttribute(key, value);
+      }
     }
   }
   // 子节点
@@ -125,7 +157,15 @@ function createNSElementNode<T extends keyof SVGElementTagNameMap>(
         ele[key][subkey] = props[key][subkey];
       }
     } else {
-      ele[key] = props[key];
+      if (isRef(props[key])) {
+        const refVal = <Ref>props[key];
+        ele[key] = refVal.value;
+        watchEffect(() => {
+          ele[key] = refVal.value;
+        });
+      } else {
+        ele[key] = props[key];
+      }
     }
   }
   // attrs属性设置
@@ -150,35 +190,74 @@ function createNSElementNode<T extends keyof SVGElementTagNameMap>(
       const [, eventType] = key.toLowerCase().split('on');
       // 事件类型
       if (eventType) {
-        // 回调函数
-        if (value instanceof Function) {
-          ele.addEventListener(eventType, value);
-          // 回调函数数组
-        } else if (value instanceof Array) {
-          for (const i in value) {
-            // 回调函数
-            if (value[i] instanceof Function) {
-              ele.addEventListener(eventType, value[i]);
-            }
+        if (isRef(value)) {
+          const refVal = <Ref<EventListener>>value;
+          if (refVal.value instanceof Function) {
+            // 设置事件监听
+            ele.addEventListener(eventType, refVal.value);
+            // 初始监听
+            const fn = refVal.value;
+            // 订阅
+            watchEffect(() => {
+              ele.removeEventListener(eventType, fn);
+              if (refVal.value instanceof Function) {
+                ele.addEventListener(eventType, refVal.value);
+              }
+            });
           }
+        } else if (value instanceof Function) {
+          ele.addEventListener(eventType, value);
         }
       }
     } else if (specificAttrs.includes(key)) {
-      if (value) {
-        ele.setAttribute(key, '');
+      if (isRef(value)) {
+        const refVal = <Ref>value;
+        if (refVal.value) {
+          ele.setAttribute(key, '');
+        } else {
+          ele.removeAttribute(key);
+        }
+        watchEffect(() => {
+          if (refVal.value) {
+            ele.setAttribute(key, '');
+          } else {
+            ele.removeAttribute(key);
+          }
+        });
+      } else if (key === 'ref') {
+        if (isRef(value)) {
+          const refVal = <Ref>value;
+          refVal.value = ele;
+        }
+        if (value instanceof Function) {
+          const refFn = <Function>value;
+          refFn(ele);
+        }
       } else {
-        ele.removeAttribute(key);
+        if (value) {
+          ele.setAttribute(key, '');
+        } else {
+          ele.removeAttribute(key);
+        }
       }
     } else {
-      ele.setAttribute(key, value);
+      if (isRef(value)) {
+        const refVal = <Ref>value;
+        ele.setAttribute(key, refVal.value);
+        watchEffect(() => {
+          ele.setAttribute(key, refVal.value);
+        });
+      } else {
+        ele.setAttribute(key, value);
+      }
     }
-  }
-  // 子节点
-  if (children) {
-    if (children instanceof Array) {
-      ele.append(...children);
-    } else {
-      ele.append(children);
+    // 子节点
+    if (children) {
+      if (children instanceof Array) {
+        ele.append(...children);
+      } else {
+        ele.append(children);
+      }
     }
   }
   return ele;
@@ -190,6 +269,18 @@ function createNSElementNode<T extends keyof SVGElementTagNameMap>(
  * @returns
  */
 function createTextNode(text: any) {
+  // ref
+  if (isRef(text)) {
+    // ref
+    const refVal = <Ref>text;
+    // 元素
+    const ele = document.createTextNode(refVal.value);
+    // 订阅变化
+    watchEffect(() => {
+      ele.data = refVal.value;
+    });
+    return ele;
+  }
   return document.createTextNode(text);
 }
 
@@ -231,17 +322,6 @@ function $_<T extends Element = HTMLElement>(
         resolve([]);
       }, timeout);
     }
-  });
-}
-
-/**
- * @description 打开新窗口
- */
-function openWin(url: string) {
-  return GM_openInTab(url, {
-    active: true,
-    insert: true,
-    setParent: true,
   });
 }
 

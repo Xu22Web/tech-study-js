@@ -1,7 +1,15 @@
 /* 变量 */
 
-import { Schedule, Settings, Task, TaskType, URLData } from '../types';
-import { getCookie } from '../utils';
+import {
+  ProgressType,
+  Schedule,
+  Settings,
+  Task,
+  TaskType,
+  URLData,
+} from '../types';
+import { getCookie } from '../utils/utils';
+import { Ref, ref } from '../utils/composition';
 
 const defaultSettings: Settings = [
   true,
@@ -18,13 +26,17 @@ const defaultSettings: Settings = [
 
 const mainStore: {
   /**
-   * @description 版本号
-   */
-  version: string;
-  /**
    * @description 任务进度
    */
   tasks: Task[];
+  /**
+   * @description 总分
+   */
+  totalScore: Ref<number>;
+  /**
+   * @description 当天分数
+   */
+  todayScore: Ref<number>;
   /**
    * @description 获取 URL
    */
@@ -36,11 +48,11 @@ const mainStore: {
   /**
    * @description 已经开始
    */
-  started: boolean;
+  progress: Ref<number>;
   /**
    * @description 是否暂停答题
    */
-  pause: boolean;
+  examPause: Ref<boolean>;
   /**
    * @description 初始化登录状态
    */
@@ -81,8 +93,23 @@ const mainStore: {
    * @description 刷新次数
    */
   refreshCount: number;
+  /**
+   * @description 窗口显示
+   */
+  frameShow: Ref<boolean>;
+  /**
+   * @description 窗口存在
+   */
+  frameExist: Ref<boolean>;
+  /**
+   * @description 窗口标题
+   */
+  frameTile: Ref<string>;
+  /**
+   * @description 开始登录
+   */
+  startLogin: Ref<boolean>;
 } = {
-  version: 'v1.5.4',
   tasks: [
     {
       title: '文章选读',
@@ -92,7 +119,8 @@ const mainStore: {
       status: false,
       tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
       type: TaskType.READ,
-      percent: 0,
+      percent: ref(0),
+      score: ref(0),
     },
     {
       title: '视听学习',
@@ -102,7 +130,8 @@ const mainStore: {
       status: false,
       tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
       type: TaskType.WATCH,
-      percent: 0,
+      percent: ref(0),
+      score: ref(0),
     },
     {
       title: '每日答题',
@@ -112,7 +141,8 @@ const mainStore: {
       status: false,
       tip: '每组答题每答对1道积1分。每日上限积5分。',
       type: TaskType.PRACTICE,
-      percent: 0,
+      percent: ref(0),
+      score: ref(0),
     },
     {
       title: '专项练习',
@@ -122,13 +152,16 @@ const mainStore: {
       status: false,
       tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
       type: TaskType.PAPER,
-      percent: 0,
+      percent: ref(0),
+      score: ref(0),
     },
   ],
+  totalScore: ref(0),
+  todayScore: ref(0),
   href: window.location.href,
   settings: defaultSettings,
-  started: false,
-  pause: false,
+  progress: ref(ProgressType.LOADING),
+  examPause: ref(false),
   login: !!getCookie('token'),
   news: [],
   videos: [],
@@ -139,6 +172,10 @@ const mainStore: {
   scheduleList: [],
   pushToken: '',
   refreshCount: 0,
+  frameShow: ref(false),
+  frameExist: ref(false),
+  frameTile: ref(''),
+  startLogin: ref(false),
 };
 
 export { mainStore, defaultSettings };

@@ -1,3 +1,4 @@
+import { ref, watchEffectRef } from '../utils/composition';
 import { $$, createElementNode, createTextNode } from '../utils/element';
 
 /**
@@ -14,6 +15,10 @@ function createTip(
   if (tips.length) {
     tips.forEach((t) => t.destroy());
   }
+  // 延迟
+  const delayCount = ref(delay);
+  // 文字
+  const textContent = ref(text);
   // 倒计时
   const countdown = createElementNode(
     'span',
@@ -21,17 +26,16 @@ function createTip(
     {
       class: 'egg_countdown',
     },
-    createTextNode(`${delay}s`)
+    createTextNode(watchEffectRef(delayCount, () => `${delayCount.value}s`))
   );
   // 文本
   const span = createElementNode(
     'span',
-    {
-      innerText: text,
-    },
+    undefined,
     {
       class: 'egg_text',
-    }
+    },
+    createTextNode(textContent)
   );
   // 销毁
   let destroyed = false;
@@ -39,21 +43,34 @@ function createTip(
   let done = false;
   // 倒计时
   const countDown = async () => {
-    countdown.innerText = `${delay}s`;
     // 回调
     if (callback) {
-      await callback(delay, operate);
+      await callback(delayCount.value, operate);
     }
     // 倒计时结束
-    if (!delay) {
+    if (!delayCount.value) {
       done = true;
       // 隐藏
       operate.hide();
       return;
     }
-    delay--;
+    delayCount.value--;
     setTimeout(countDown, 1000);
   };
+  //显示
+  const show = ref(false);
+  // 创建提示
+  const tipInfo: HTMLElement = createElementNode(
+    'div',
+    undefined,
+    {
+      class: watchEffectRef(
+        show,
+        () => `egg_tip${show.value ? ' active' : ''}`
+      ),
+    },
+    [span, countdown]
+  );
   // 操作
   const operate = {
     async destroy() {
@@ -68,18 +85,16 @@ function createTip(
     },
     hide() {
       if (!destroyed) {
-        tipInfo.classList.remove('active');
+        show.value = false;
       }
     },
     show() {
       if (!destroyed) {
-        setTimeout(() => {
-          tipInfo.classList.add('active');
-        }, 300);
+        show.value = true;
       }
     },
     setText(text: string) {
-      span.innerText = text;
+      textContent.value = text;
     },
     waitCountDown() {
       return new Promise((resolve) => {
@@ -94,15 +109,7 @@ function createTip(
       });
     },
   };
-  // 创建提示
-  const tipInfo: HTMLElement = createElementNode(
-    'div',
-    undefined,
-    {
-      class: 'egg_tip',
-    },
-    [span, countdown]
-  );
+
   Object.assign(tipInfo, operate);
   // 插入节点
   tipWrap.append(tipInfo);

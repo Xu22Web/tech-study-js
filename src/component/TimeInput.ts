@@ -1,3 +1,4 @@
+import { Ref, ref, watchEffect, watchEffectRef } from '../utils/composition';
 import { $$, createElementNode, createTextNode } from '../utils/element';
 import { formatDateNum } from '../utils/time';
 
@@ -6,14 +7,67 @@ import { formatDateNum } from '../utils/time';
  * @returns
  */
 function TimeInput({
-  onchange,
-  onblur,
+  hour,
+  minute,
 }: {
-  onchange?: (e: { hour: string; minute: string; valid: boolean }) => void;
-  onblur?: (e: { hour: string; minute: string; valid: boolean }) => void;
+  hour: Ref<number>;
+  minute: Ref<number>;
 }) {
-  let hour: string = '';
-  let minute: string = '';
+  // 小时
+  const hours = new Array(24).fill(undefined).map((h, i) => ({
+    value: i,
+    label: formatDateNum(i),
+    active: ref(false),
+    ele: ref<HTMLElement | null>(null),
+  }));
+  // 分钟
+  const minutes = new Array(60).fill(undefined).map((min, i) => ({
+    value: i,
+    label: formatDateNum(i),
+    active: ref(false),
+    ele: ref<HTMLElement | null>(null),
+  }));
+  // 聚焦小时
+  const focusHour = ref(false);
+  // 聚焦分钟
+  const focusMinute = ref(false);
+
+  // 根据小时筛选
+  watchEffect(() => {
+    const list = $$('.egg_hour_wrap .egg_list')[0];
+    if (list) {
+      const index = hours.findIndex(
+        (h) => !!(hour.value && h.label.includes(String(hour.value)))
+      );
+      hours.forEach((h, i) => {
+        if (index + 1) {
+          h.active.value = i === index;
+          h.active.value && (list.scrollTop = h.ele.value?.offsetTop || 0);
+        } else {
+          h.active.value = false;
+          list.scrollTop = 0;
+        }
+      });
+    }
+  });
+  //  根据分钟筛选
+  watchEffect(() => {
+    const list = $$('.egg_minute_wrap .egg_list')[0];
+    if (list) {
+      const index = minutes.findIndex(
+        (min) => !!(minute.value && min.label.includes(String(minute.value)))
+      );
+      minutes.forEach((min, i) => {
+        if (index + 1) {
+          min.active.value = i === index;
+          min.active.value && (list.scrollTop = min.ele.value?.offsetTop || 0);
+        } else {
+          min.active.value = false;
+          list.scrollTop = 0;
+        }
+      });
+    }
+  });
   return createElementNode('div', undefined, { class: 'egg_time_input' }, [
     createElementNode('div', undefined, { class: 'egg_hour_wrap' }, [
       createElementNode('input', undefined, {
@@ -22,113 +76,53 @@ function TimeInput({
         type: 'text',
         maxlength: '2',
         onfocus: () => {
-          // 显示列表
-          const list = $$('.egg_hour_wrap .egg_list')[0];
-          list.classList.remove('hide');
-          // 显示正在选择
-          const times = $$('.egg_hour_wrap .egg_time');
-          const time = times.find(
-            (time) => hour && time.textContent?.includes(hour)
-          );
-          if (time) {
-            list.scrollTop = time.offsetTop;
-          }
-          times.forEach((t) => t.classList.toggle('focus', t === time));
+          focusHour.value = true;
         },
         oninput: (e: Event) => {
           const h = (<HTMLInputElement>e.target).value.trim();
-          if (/^[0-9]$/.test(h)) {
-            hour = formatDateNum(Number(h));
-          } else {
-            hour = h;
+          if (/^([0-9]|[01][0-9]|[2][0-3])$/.test(h)) {
+            hour.value = Number(h);
           }
-          const times = $$('.egg_hour_wrap .egg_time');
-          const list = $$('.egg_hour_wrap .egg_list')[0];
-          const time = times.find(
-            (time) => hour && time.textContent?.includes(hour)
-          );
-          if (time) {
-            list.scrollTop = time.offsetTop;
-          }
-          times.forEach((t) => t.classList.toggle('focus', t === time));
-          // 更改事件
-          onchange &&
-            onchange({
-              hour,
-              minute,
-              valid:
-                /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                /^[0-5][0-9]$/.test(minute),
-            });
         },
         onblur: (e: Event) => {
-          const h = (<HTMLInputElement>e.target).value.trim();
-          if (h && !/^([01][0-9]|[2][0-3])$/.test(h)) {
-            if (/^[0-9]$/.test(h)) {
-              (<HTMLInputElement>e.target).value = hour;
-            } else {
-              // 默认值
-              (<HTMLInputElement>e.target).value = '';
-              hour = '';
-              // 移除样式
-              const times = $$('.egg_hour_wrap .egg_time');
-              times.forEach((t) => t.classList.remove('focus'));
-              // 更改事件
-              onchange &&
-                onchange({
-                  hour,
-                  minute,
-                  valid:
-                    /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                    /^[0-5][0-9]$/.test(minute),
-                });
-            }
+          const input = <HTMLInputElement>e.target;
+          const h = input.value.trim();
+          hour.value = /^([0-9]|[01][0-9]|[2][0-3])$/.test(h) ? Number(h) : -1;
+          if (hour.value === -1) {
+            input.value = '';
           }
-          // 隐藏列表
-          const list = $$('.egg_hour_wrap .egg_list')[0];
           setTimeout(() => {
-            list.classList.add('hide');
+            // 失去焦点
+            focusHour.value = false;
           }, 100);
-          // 失去焦点
-          onblur &&
-            onblur({
-              hour,
-              minute,
-              valid:
-                /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                /^[0-5][0-9]$/.test(minute),
-            });
         },
       }),
       createElementNode(
         'div',
         undefined,
-        { class: 'egg_list hide' },
-        new Array(24).fill(undefined).map((v, i) =>
+        {
+          class: watchEffectRef(
+            focusHour,
+            () => `egg_list${focusHour.value ? '' : ' hide'}`
+          ),
+        },
+        hours.map((v) =>
           createElementNode(
             'div',
             undefined,
             {
-              class: 'egg_time',
-              onclick: (e: Event) => {
-                const time = <HTMLElement>e.target;
-                const list = $$('.egg_hour_wrap .egg_list')[0];
+              class: watchEffectRef(
+                v.active,
+                () => `egg_time${v.active.value ? ' focus' : ''}`
+              ),
+              onclick: () => {
                 const input = $$<HTMLInputElement>('.egg_hour')[0];
-                hour = time.textContent || '';
-                input.value = hour;
-                list.scrollTop = time.offsetTop;
-                // 更改事件
-                onchange &&
-                  onchange({
-                    hour,
-                    minute,
-                    valid:
-                      /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                      /^[0-5][0-9]$/.test(minute),
-                  });
+                hour.value = v.value;
+                input.value = v.label;
               },
+              ref: v.ele,
             },
-            createTextNode(formatDateNum(i))
+            createTextNode(v.label)
           )
         )
       ),
@@ -141,115 +135,53 @@ function TimeInput({
         type: 'text',
         maxlength: '2',
         onfocus: () => {
-          // 显示列表
-          const list = $$('.egg_minute_wrap .egg_list')[0];
-          list.classList.remove('hide');
-          // 显示正在选择
-          const times = $$('.egg_minute_wrap .egg_time');
-          const time = times.find(
-            (time) => minute && time.textContent?.includes(minute)
-          );
-          if (time) {
-            list.scrollTop = time.offsetTop;
-          }
-          times.forEach((t) => t.classList.toggle('focus', t === time));
+          focusMinute.value = true;
         },
         oninput: (e: Event) => {
           const min = (<HTMLInputElement>e.target).value.trim();
-          if (/^[0-9]$/.test(min)) {
-            minute = formatDateNum(Number(min));
-          } else {
-            minute = min;
+          if (/^([0-9]|[0-5][0-9])$/.test(min)) {
+            minute.value = Number(min);
           }
-          const times = $$('.egg_minute_wrap .egg_time');
-          const list = $$('.egg_minute_wrap .egg_list')[0];
-          const time = times.find(
-            (time) => minute && time.textContent?.includes(minute)
-          );
-          if (time) {
-            list.scrollTop = time.offsetTop;
-          }
-          times.forEach((t) => t.classList.toggle('focus', t === time));
-          // 更改事件
-          onchange &&
-            onchange({
-              hour,
-              minute,
-              valid:
-                /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                /^[0-5][0-9]$/.test(minute),
-            });
         },
         onblur: (e: Event) => {
-          const min = (<HTMLInputElement>e.target).value.trim();
-          if (min && !/^[0-5][0-9]$/.test(min)) {
-            if (/^[0-9]$/.test(min)) {
-              (<HTMLInputElement>e.target).value = minute;
-            } else {
-              // 默认值
-              (<HTMLInputElement>e.target).value = '';
-              minute = '';
-              // 移除样式
-              const times = $$('.egg_minute_wrap .egg_time');
-              times.forEach((t) => t.classList.remove('focus'));
-              // 更改事件
-              onchange &&
-                onchange({
-                  hour,
-                  minute,
-                  valid:
-                    /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                    /^[0-5][0-9]$/.test(minute),
-                });
-            }
+          const input = <HTMLInputElement>e.target;
+          const min = input.value.trim();
+          minute.value = /^([0-9]|[0-5][0-9])$/.test(min) ? Number(min) : -1;
+          if (minute.value === -1) {
+            input.value = '';
           }
-          // 隐藏列表
-          const list = $$('.egg_minute_wrap .egg_list')[0];
           setTimeout(() => {
-            list.classList.add('hide');
+            // 失去焦点
+            focusMinute.value = false;
           }, 100);
-          // 失去焦点
-          onblur &&
-            onblur({
-              hour,
-              minute,
-              valid:
-                /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                /^[0-5][0-9]$/.test(minute),
-            });
         },
       }),
       createElementNode(
         'div',
         undefined,
-        { class: 'egg_list hide' },
-        new Array(60).fill(undefined).map((v, i) =>
+        {
+          class: watchEffectRef(
+            focusMinute,
+            () => `egg_list${focusMinute.value ? '' : ' hide'}`
+          ),
+        },
+        minutes.map((v) =>
           createElementNode(
             'div',
             undefined,
             {
-              class: 'egg_time',
-              onclick: (e: Event) => {
-                const times = $$('.egg_minute_wrap .egg_time');
-                const time = <HTMLElement>e.target;
-                const list = $$('.egg_minute_wrap .egg_list')[0];
+              class: watchEffectRef(
+                v.active,
+                () => `egg_time${v.active.value ? ' focus' : ''}`
+              ),
+              onclick: () => {
                 const input = $$<HTMLInputElement>('.egg_minute')[0];
-                minute = time.textContent || '';
-                input.value = minute;
-                list.scrollTop = time.offsetTop;
-                times.forEach((t) => t.classList.toggle('focus', t === time));
-                // 更改事件
-                onchange &&
-                  onchange({
-                    hour,
-                    minute,
-                    valid:
-                      /^([01][0-9]|[2][0-3])$/.test(hour) &&
-                      /^[0-5][0-9]$/.test(minute),
-                  });
+                minute.value = v.value;
+                input.value = v.label;
               },
+              ref: v.ele,
             },
-            createTextNode(formatDateNum(i))
+            createTextNode(v.label)
           )
         )
       ),

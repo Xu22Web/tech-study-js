@@ -1,3 +1,5 @@
+import { Ref } from '../utils/composition';
+
 /**
  * @description 任务类型
  */
@@ -19,7 +21,8 @@ type Task = {
   need: number;
   tip: string;
   type: TaskType;
-  percent: number;
+  percent: Ref<number>;
+  score: Ref<number>;
 };
 
 /**
@@ -68,4 +71,23 @@ type Schedule = {
  */
 type URLData = { url: string };
 
-export { TaskType, Task, SettingType, Settings, Schedule, URLData };
+/**
+ * @description 进度类型
+ */
+enum ProgressType {
+  LOADING,
+  LOADED,
+  START,
+  PAUSE,
+  FINISH,
+}
+
+export {
+  TaskType,
+  Task,
+  SettingType,
+  Settings,
+  Schedule,
+  URLData,
+  ProgressType,
+};

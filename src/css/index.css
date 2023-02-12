@@ -395,7 +395,7 @@
   color: white;
   transition: 80ms ease;
 }
-.egg_study_item .egg_study_btn:active {
+.egg_study_item .egg_study_btn:not(.loading, .disabled):active {
   opacity: 0.8;
 }
 .egg_study_item .egg_study_btn.loading {

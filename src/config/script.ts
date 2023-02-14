@@ -50,7 +50,6 @@ const SCRIPT_CONFIG = {
     'GM_addStyle',
     'GM_setValue',
     'GM_getValue',
-    'GM_deleteValue',
     'GM_openInTab',
     'unsafeWindow',
   ],

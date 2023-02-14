@@ -1,9 +1,5 @@
 /* task·配置 */
 /**
- * @description 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
- */
-const examPaperReverse = true;
-/**
  * @description 单次最大新闻数
  */
 const maxNewsNum = 6;
@@ -25,10 +21,9 @@ const autoRefreshQRCodeInterval = 100000;
 const muted = true;
 
 export {
-  examPaperReverse,
   maxNewsNum,
   maxVideoNum,
   maxRefreshCount,
   autoRefreshQRCodeInterval,
-  muted
+  muted,
 };

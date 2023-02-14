@@ -11,8 +11,8 @@ import { ProgressType, SettingType, TaskType } from './types';
 import { hasMobile, studyPauseLock } from './utils/utils';
 import { getHighlightHTML, getProgressHTML, pushModal } from './utils/push';
 import { log } from './utils/log';
-import { $$, $_, createElementNode, createTextNode } from './utils/element';
-import { watchEffectRef } from './utils/composition';
+import { $$, $_, createElementNode } from './utils/element';
+import {} from './utils/composition';
 import {} from './utils/random';
 import {} from './utils/time';
 import { defaultSettings, mainStore } from './store';
@@ -128,8 +128,9 @@ window.addEventListener('load', async () => {
     const videos = await $_('video', undefined, 10000);
     // 视频
     const video = <HTMLVideoElement | undefined>videos[0];
-    const pauseBtn = $$('.prism-play-btn')[0];
-    if (video && pauseBtn) {
+    // 播放按键
+    const playBtn = $$('.prism-play-btn')[0];
+    if (video && playBtn) {
       // 设置是否静音
       video.muted = muted;
       log('正在尝试播放视频...');
@@ -147,7 +148,7 @@ window.addEventListener('load', async () => {
           video.play();
           if (video.paused) {
             // 尝试点击播放按钮播放
-            pauseBtn.click();
+            playBtn.click();
           }
         }
         // 已经播放

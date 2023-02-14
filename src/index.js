@@ -76,8 +76,9 @@ window.addEventListener('load', async () => {
         const videos = await $_('video', undefined, 10000);
         // 视频
         const video = videos[0];
-        const pauseBtn = $$('.prism-play-btn')[0];
-        if (video && pauseBtn) {
+        // 播放按键
+        const playBtn = $$('.prism-play-btn')[0];
+        if (video && playBtn) {
             // 设置是否静音
             video.muted = muted;
             log('正在尝试播放视频...');
@@ -95,7 +96,7 @@ window.addEventListener('load', async () => {
                     video.play();
                     if (video.paused) {
                         // 尝试点击播放按钮播放
-                        pauseBtn.click();
+                        playBtn.click();
                     }
                 }
                 // 已经播放
@@ -529,7 +530,7 @@ async function start() {
 /**
  * @description 版本号
  */
-const version = '1.5.5';
+const version = '1.5.7';
 
 
 /**
@@ -598,10 +599,6 @@ const URL_CONFIG = {
 
 
 /* task·配置 */
-/**
- * @description 专项答题开启逆序答题: false: 顺序答题; true: 逆序答题
- */
-const examPaperReverse = true;
 /**
  * @description 单次最大新闻数
  */
@@ -990,7 +987,8 @@ var SettingType;
     SettingType[SettingType["SILENT_RUN"] = 6] = "SILENT_RUN";
     SettingType[SettingType["SCHEDULE_RUN"] = 7] = "SCHEDULE_RUN";
     SettingType[SettingType["RANDOM_EXAM"] = 8] = "RANDOM_EXAM";
-    SettingType[SettingType["REMOTE_PUSH"] = 9] = "REMOTE_PUSH";
+    SettingType[SettingType["PAPER_REVERSE"] = 9] = "PAPER_REVERSE";
+    SettingType[SettingType["REMOTE_PUSH"] = 10] = "REMOTE_PUSH";
 })(SettingType || (SettingType = {}));
 /**
  * @description 进度类型
@@ -2285,11 +2283,15 @@ function isNow({ hour, minute }) {
 
 
 /* 变量 */
+/**
+ * @description 默认设置
+ */
 const defaultSettings = [
     true,
     true,
     true,
     true,
+    false,
     false,
     false,
     false,
@@ -2972,8 +2974,13 @@ function Panel({ login }) {
     const examLabels = [
         {
             title: '随机作答',
-            tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
+            tip: '无答案时, 随机选择或者填入答案, 不保证正确',
             type: SettingType.RANDOM_EXAM,
+        },
+        {
+            title: '专项逆序',
+            tip: '专项答题时, 逆序作答',
+            type: SettingType.PAPER_REVERSE,
         },
     ];
     // 推送设置标签
@@ -2982,8 +2989,7 @@ function Panel({ login }) {
             title: '远程推送',
             tip: '利用 pushplus 推送, 将登录二维码直接推送到微信公众号',
             type: SettingType.REMOTE_PUSH,
-            handler() {
-            }
+            handler() { },
         },
     ];
     // 处理设置变化
@@ -3333,8 +3339,6 @@ function createTip(text, delay = 2, callback) {
 async function openFrame(url, title) {
     const conn = $$('.egg_frame_wrap')[0];
     if (conn) {
-        // 标题
-        const frameTitle = $$('.egg_frame_title', conn)[0];
         // 窗口
         const frame = $$('.egg_frame', conn)[0];
         // id
@@ -3361,17 +3365,17 @@ async function openFrame(url, title) {
 function closeFrame() {
     const conn = $$('.egg_frame_wrap')[0];
     const frameBtn = $$('.egg_frame_show_btn')[0];
-    mainStore.frameShow.value = false;
     if (conn && frameBtn) {
-        // 标题
-        const frameTitle = $$('.egg_frame_title', conn)[0];
         // 窗口
         const frame = $$('.egg_frame', conn)[0];
+        // 窗口显示
+        mainStore.frameShow.value = false;
         // 关闭
         mainStore.closed = true;
         // 标题
         mainStore.frameTile.value = '';
-        frame.src = '';
+        // src
+        frame.src = 'about:blank';
     }
 }
 /**
@@ -3380,14 +3384,18 @@ function closeFrame() {
  * @returns
  */
 function waitFrameClose(id) {
+    // 监听关闭
+    window.addEventListener('message', (msg) => {
+        const { data } = msg;
+        if (data.id === id && data.closed) {
+            // 关闭窗口
+            closeFrame();
+        }
+    });
     return new Promise((resolve) => {
-        window.addEventListener('message', (msg) => {
-            const { data } = msg;
-            if (data.id === id && data.closed) {
-                resolve(true);
-            }
-        });
+        // 关闭
         setInterval(() => {
+            // 窗口关闭
             if (mainStore.closed) {
                 resolve(true);
             }
@@ -4730,9 +4738,11 @@ async function findExamPaper() {
     log('正在寻找未完成的专项练习...');
     // 获取总页数
     const total = await initExam();
+    // 专项逆序
+    const paperReverse = mainStore.settings[SettingType.PAPER_REVERSE];
     // 当前页数
-    let current = examPaperReverse ? total : 1;
-    if (examPaperReverse) {
+    let current = paperReverse ? total : 1;
+    if (paperReverse) {
         log('专项练习, 开启逆序模式, 从最早的题目开始答题');
     }
     else {
@@ -4745,7 +4755,7 @@ async function findExamPaper() {
         if (data) {
             // 获取专项练习的列表
             const examPapers = data.list;
-            if (examPaperReverse) {
+            if (paperReverse) {
                 // 若开启逆序答题, 则反转专项练习列表
                 examPapers.reverse();
             }
@@ -4757,7 +4767,7 @@ async function findExamPaper() {
                 }
             }
             // 增加页码 (若开启逆序翻页, 则减少页码)
-            current += examPaperReverse ? -1 : 1;
+            current += paperReverse ? -1 : 1;
             // 等待
             await sleep(3000);
         }

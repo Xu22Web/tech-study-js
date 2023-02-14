@@ -12,8 +12,6 @@ import { generateMix } from '../utils/random';
 async function openFrame(url: string, title?: string) {
   const conn = $$('.egg_frame_wrap')[0];
   if (conn) {
-    // 标题
-    const frameTitle = $$('.egg_frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
     // id
@@ -41,17 +39,17 @@ async function openFrame(url: string, title?: string) {
 function closeFrame() {
   const conn = $$('.egg_frame_wrap')[0];
   const frameBtn = $$('.egg_frame_show_btn')[0];
-  mainStore.frameShow.value = false;
   if (conn && frameBtn) {
-    // 标题
-    const frameTitle = $$('.egg_frame_title', conn)[0];
     // 窗口
     const frame = $$<HTMLIFrameElement>('.egg_frame', conn)[0];
+    // 窗口显示
+    mainStore.frameShow.value = false;
     // 关闭
     mainStore.closed = true;
     // 标题
     mainStore.frameTile.value = '';
-    frame.src = '';
+    // src
+    frame.src = 'about:blank';
   }
 }
 
@@ -61,14 +59,18 @@ function closeFrame() {
  * @returns
  */
 function waitFrameClose(id: string) {
+  // 监听关闭
+  window.addEventListener('message', (msg: MessageEvent) => {
+    const { data } = msg;
+    if (data.id === id && data.closed) {
+      // 关闭窗口
+      closeFrame();
+    }
+  });
   return new Promise((resolve) => {
-    window.addEventListener('message', (msg: MessageEvent) => {
-      const { data } = msg;
-      if (data.id === id && data.closed) {
-        resolve(true);
-      }
-    });
+    // 关闭
     setInterval(() => {
+      // 窗口关闭
       if (mainStore.closed) {
         resolve(true);
       }

@@ -11,11 +11,15 @@ import {
 import { getCookie } from '../utils/utils';
 import { Ref, ref } from '../utils/composition';
 
+/**
+ * @description 默认设置
+ */
 const defaultSettings: Settings = [
   true,
   true,
   true,
   true,
+  false,
   false,
   false,
   false,

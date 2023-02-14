@@ -1,6 +1,5 @@
 import { getAnswer, saveAnswer } from '../api/answer';
 import { getExamPaper } from '../api/data';
-import { examPaperReverse } from '../config/task';
 import URL_CONFIG from '../config/url';
 import { mainStore } from '../store';
 import { SettingType, TaskType } from '../types';
@@ -791,9 +790,11 @@ async function findExamPaper() {
   log('正在寻找未完成的专项练习...');
   // 获取总页数
   const total = await initExam();
+  // 专项逆序
+  const paperReverse = mainStore.settings[SettingType.PAPER_REVERSE];
   // 当前页数
-  let current = examPaperReverse ? total : 1;
-  if (examPaperReverse) {
+  let current = paperReverse ? total : 1;
+  if (paperReverse) {
     log('专项练习, 开启逆序模式, 从最早的题目开始答题');
   } else {
     log('专项练习, 开启顺序模式, 从最近的题目开始答题');
@@ -805,7 +806,7 @@ async function findExamPaper() {
     if (data) {
       // 获取专项练习的列表
       const examPapers = data.list;
-      if (examPaperReverse) {
+      if (paperReverse) {
         // 若开启逆序答题, 则反转专项练习列表
         examPapers.reverse();
       }
@@ -817,7 +818,7 @@ async function findExamPaper() {
         }
       }
       // 增加页码 (若开启逆序翻页, 则减少页码)
-      current += examPaperReverse ? -1 : 1;
+      current += paperReverse ? -1 : 1;
       // 等待
       await sleep(3000);
     } else {

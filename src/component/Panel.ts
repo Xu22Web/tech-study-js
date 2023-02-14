@@ -52,8 +52,13 @@ function Panel({ login }: { login: boolean }) {
   const examLabels = [
     {
       title: '随机作答',
-      tip: '无答案时, 随机选择或者填入答案, 不保证正确!',
+      tip: '无答案时, 随机选择或者填入答案, 不保证正确',
       type: SettingType.RANDOM_EXAM,
+    },
+    {
+      title: '专项逆序',
+      tip: '专项答题时, 逆序作答',
+      type: SettingType.PAPER_REVERSE,
     },
   ];
   // 推送设置标签
@@ -62,9 +67,7 @@ function Panel({ login }: { login: boolean }) {
       title: '远程推送',
       tip: '利用 pushplus 推送, 将登录二维码直接推送到微信公众号',
       type: SettingType.REMOTE_PUSH,
-      handler(){
-        
-      }
+      handler() {},
     },
   ];
   // 处理设置变化

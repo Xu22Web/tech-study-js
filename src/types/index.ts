@@ -38,6 +38,7 @@ enum SettingType {
   SILENT_RUN,
   SCHEDULE_RUN,
   RANDOM_EXAM,
+  PAPER_REVERSE,
   REMOTE_PUSH,
 }
 
@@ -45,6 +46,7 @@ enum SettingType {
  * @description 设置
  */
 type Settings = [
+  boolean,
   boolean,
   boolean,
   boolean,

@@ -1,14 +1,33 @@
-import { createTip } from '../controller/tip';
-import { mainStore } from '../store';
 import { log } from './log';
 
 /* 工具函数 */
+
+/**
+ * @description 设置cookie
+ * @param name
+ * @param value
+ * @param expires
+ */
+function setCookie(
+  name: string,
+  value: string,
+  expires: number,
+  domain: string
+) {
+  // 当前日期
+  const date = new Date();
+  // 过期日期
+  date.setTime(date.getTime() + expires);
+  // 设置cookie
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/;domain=${domain}`;
+}
+
 /**
  * @description 获取cookie
  * @param name
  * @returns
  */
-function getCookie(name) {
+function getCookie(name: string) {
   // 获取当前所有cookie
   const strCookies = document.cookie;
   // 截取变成cookie数组
@@ -26,14 +45,26 @@ function getCookie(name) {
 }
 
 /**
+ * @description 删除cookie
+ * @param name
+ */
+function delCookie(name: string, domain: string) {
+  // 存在cookie
+  const value = getCookie(name);
+  if (value !== null) {
+    setCookie(name, '', -1, domain);
+  }
+}
+
+/**
  * @description 防抖
  * @param callback
  * @param delay
  * @returns
  */
-function debounce(callback, delay) {
+function debounce<T extends (...args: any) => any>(callback: T, delay: number) {
   let timer = -1;
-  return function (this: any, ...args) {
+  return function (this: any, ...args: Parameters<T>) {
     if (timer !== -1) {
       clearTimeout(timer);
     }
@@ -81,48 +112,9 @@ function sleep(time) {
 }
 
 /**
- * @description 暂停锁
- */
-function examPauseLock(callback?: (status: boolean) => void) {
-  return new Promise<boolean>((resolve) => {
-    // 学习暂停
-    const pauseStudy = <boolean>(GM_getValue('pauseStudy') || false);
-    // 全局暂停
-    if (pauseStudy) {
-      mainStore.examPause.value = true;
-    }
-    // 暂停
-    if (mainStore.examPause.value) {
-      // 创建提示
-      createTip('已暂停, 手动开启自动答题! ', 10);
-      const doing = setInterval(() => {
-        if (!mainStore.examPause.value) {
-          // 停止定时器
-          clearInterval(doing);
-          log('答题等待结束!');
-          if (callback && callback instanceof Function) {
-            // 创建提示
-            createTip('已开启, 自动答题!');
-            callback(true);
-          }
-          resolve(true);
-          return;
-        }
-        if (callback && callback instanceof Function) {
-          callback(false);
-        }
-        log('答题等待...');
-      }, 500);
-      return;
-    }
-    resolve(true);
-  });
-}
-
-/**
  * @description 暂停学习锁
  */
-function studyPauseLock(callback?: (msg: string) => void) {
+function studyPauseLock(callback?: (msg: boolean) => void) {
   return new Promise((resolve) => {
     // 暂停
     const pauseStudy = GM_getValue('pauseStudy') || false;
@@ -135,20 +127,59 @@ function studyPauseLock(callback?: (msg: string) => void) {
           clearInterval(doing);
           log('学习等待结束!');
           if (callback && callback instanceof Function) {
-            callback('done');
+            callback(true);
           }
-          resolve('done');
+          resolve(true);
           return;
         }
         if (callback && callback instanceof Function) {
-          callback('pending');
+          callback(false);
         }
         log('学习等待...');
       }, 500);
       return;
     }
-    resolve('done');
+    resolve(true);
   });
 }
 
-export { debounce, sleep, hasMobile, getCookie, examPauseLock, studyPauseLock };
+/**
+ * @description 加载
+ * @param match
+ * @param callback
+ */
+function load(
+  match: string | RegExp | ((href: string) => any) | boolean,
+  callback: () => void
+) {
+  // 链接
+  const { href } = window.location;
+  window.addEventListener('load', () => {
+    // 函数
+    if (match instanceof Function) {
+      match(href) && callback();
+      return;
+    }
+    // 布尔
+    if (typeof match === 'boolean') {
+      match && callback();
+      return;
+    }
+    // 字符正则
+    if (href.match(match)) {
+      callback();
+      return;
+    }
+  });
+}
+
+export {
+  debounce,
+  sleep,
+  hasMobile,
+  setCookie,
+  delCookie,
+  getCookie,
+  studyPauseLock,
+  load,
+};

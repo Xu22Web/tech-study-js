@@ -1,4 +1,4 @@
-import { mainStore } from '../store';
+import { examPause } from '../shared';
 import { watchEffectRef } from '../utils/composition';
 import { createElementNode, createTextNode } from '../utils/element';
 
@@ -11,18 +11,16 @@ function ExamBtn() {
     undefined,
     {
       class: watchEffectRef(
-        mainStore.examPause,
-        () => `egg_exam_btn${mainStore.examPause.value ? ' manual' : ''}`
+        () => `egg_exam_btn${examPause.value ? ' manual' : ''}`
       ),
       type: 'button',
       onclick: () => {
-        mainStore.examPause.value = !mainStore.examPause.value;
+        examPause.value = !examPause.value;
       },
     },
     createTextNode(
       watchEffectRef(
-        mainStore.examPause,
-        () => `${mainStore.examPause.value ? '开启自动答题' : '关闭自动答题'}`
+        () => `${examPause.value ? '开启自动答题' : '关闭自动答题'}`
       )
     )
   );

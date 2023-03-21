@@ -1,33 +1,112 @@
 import { getNewsList, getVideoList } from '../api/data';
-import { maxNewsNum, maxVideoNum } from '../config/task';
-import { mainStore } from '../store';
-import { SettingType, TaskType } from '../types';
-import { sleep, studyPauseLock } from '../utils/utils';
-import { $$ } from '../utils/element';
+import { maxNewsNum, maxVideoNum, muted } from '../config/task';
+import { maxRead, maxWatch, taskConfig } from '../shared';
+import { NewsVideoList, TaskType } from '../types';
+import { $$, $_ } from '../utils/element';
 import { log } from '../utils/log';
-import { closeTaskWin, waitTaskWin } from './frame';
+import { sleep, studyPauseLock } from '../utils/utils';
+import { handleCloseTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
 import { refreshScoreInfo, refreshTaskList } from './user';
+
+/**
+ * @description 新闻
+ */
+let news: NewsVideoList = [];
+
+/**
+ * @description 视频
+ */
+let videos: NewsVideoList = [];
+
+/**
+ * @description 处理文章
+ */
+async function handleNews() {
+  // section
+  const sections = await $_('section', undefined, 5000);
+  const section = sections[0];
+  if (!(section && section.innerText.includes('系统正在维护中'))) {
+    // 文章选读
+    reading(0);
+    return;
+  }
+  log('未找到文章!');
+  // 提示
+  createTip('未找到文章!');
+  // 关闭页面
+  handleCloseTaskWin();
+}
+
+/**
+ * @description 处理视频
+ */
+async function handleVideo() {
+  // videos
+  const videos = await $_('video', undefined, 10000);
+  // 视频
+  const video = <HTMLVideoElement | undefined>videos[0];
+  // 播放按键
+  const playBtn = $$('.prism-play-btn')[0];
+  if (video && playBtn) {
+    // 设置是否静音
+    video.muted = muted;
+    log('正在尝试播放视频...');
+    // 播放超时
+    const timeout = setTimeout(() => {
+      log('视频播放超时!');
+      // 提示
+      createTip('视频播放超时!');
+      // 关闭页面
+      handleCloseTaskWin();
+    }, 20000);
+    // 能播放
+    video.addEventListener('canplay', () => {
+      log('正在尝试播放视频...');
+      if (video.paused) {
+        // 尝试使用js的方式播放
+        video.play();
+        if (video.paused) {
+          // 尝试点击播放按钮播放
+          playBtn.click();
+        }
+      }
+      // 已经播放
+      if (!video.paused) {
+        clearTimeout(timeout);
+        // 视听学习
+        reading(1);
+      }
+    });
+    return;
+  }
+  log('未找到视频!');
+  // 关闭页面
+  handleCloseTaskWin();
+}
 
 /**
  * @description 读新闻或者看视频
  * @param type :0为新闻,1为视频
  */
 async function reading(type: number) {
-  // 看文章或者视频
-  let time;
+  let time = 30;
+  // 文章选读
   if (type === 0) {
-    // 80-100秒后关闭页面, 看文章
-    time = ~~(Math.random() * 20 + 80) + 1;
+    // maxRead.value 秒后关闭页面, 看文章
+    time = maxRead.value;
   }
+  // 视听学习
   if (type === 1) {
     // 视频
     const video = $$<HTMLVideoElement>('video')[0];
     // 总时长
-    const duration = ~~video.duration;
-    // 看视频
-    time = (duration > 120 ? 120 : duration) + (~~(Math.random() * 10) + 10);
+    const { duration } = video;
+    // min(duration,  maxWatch.value) 秒后关闭页面, 看文章
+    time = duration > maxWatch.value ? maxWatch.value : ~~duration;
   }
+  // 随机
+  time = time - ~~(Math.random() * 10) + 5;
   // 第一次滚动时间
   const firstTime = time - (~~(Math.random() * 4) + 4);
   // 第二次滚动时间
@@ -35,9 +114,20 @@ async function reading(type: number) {
   // 窗口
   const window = unsafeWindow;
   // 创建提示
-  const tip = createTip('距离关闭页面还剩', time, async (time) => {
+  const tip = createTip('距离关闭页面还剩', time, true, async (time) => {
     // 暂停锁
-    await studyPauseLock();
+    await studyPauseLock((flag) => {
+      if (type === 1) {
+        // 视频
+        const video = $$<HTMLVideoElement>('video')[0];
+        // 排除反复设置
+        if (video.paused === !flag) {
+          return;
+        }
+        // 设置播放状态
+        video[flag ? 'play' : 'pause']();
+      }
+    });
     // 第一次滚动
     if (time === firstTime) {
       // 滚动
@@ -84,7 +174,7 @@ async function reading(type: number) {
   // 倒计时结束
   await tip.waitCountDown();
   // 关闭任务窗口
-  closeTaskWin(mainStore.id);
+  handleCloseTaskWin();
 }
 
 /**
@@ -94,26 +184,26 @@ function getNews() {
   return new Promise(async (resolve) => {
     // 需要学习的新闻数量
     const need =
-      mainStore.tasks[TaskType.READ].need < maxNewsNum
-        ? mainStore.tasks[TaskType.READ].need
+      taskConfig[TaskType.READ].need < maxNewsNum
+        ? taskConfig[TaskType.READ].need
         : maxNewsNum;
     log(`剩余 ${need} 个新闻`);
     // 获取重要新闻
     const data = await getNewsList();
     if (data && data.length) {
       // 数量补足需要数量
-      while (mainStore.news.length < need) {
+      while (news.length < need) {
         // 随便取
         const randomIndex = ~~(Math.random() * data.length);
         // 新闻
         const item = data[randomIndex];
         // 是否存在新闻
         if (item.dataValid && item.type === 'tuwen') {
-          mainStore.news.push(item);
+          news.push(item);
         }
       }
     } else {
-      mainStore.news = [];
+      news = [];
     }
     resolve('done');
   });
@@ -126,15 +216,15 @@ function getVideos() {
   return new Promise(async (resolve) => {
     // 需要学习的视频数量
     const need =
-      mainStore.tasks[TaskType.WATCH].need < maxVideoNum
-        ? mainStore.tasks[TaskType.WATCH].need
+      taskConfig[TaskType.WATCH].need < maxVideoNum
+        ? taskConfig[TaskType.WATCH].need
         : maxVideoNum;
     log(`剩余 ${need} 个视频`);
     // 获取重要视频
     const data = await getVideoList();
     if (data && data.length) {
       // 数量补足需要数量
-      while (mainStore.videos.length < need) {
+      while (videos.length < need) {
         // 随便取
         const randomIndex = ~~(Math.random() * data.length);
         // 视频
@@ -144,11 +234,11 @@ function getVideos() {
           item.dataValid &&
           (item.type === 'shipin' || item.type === 'juji')
         ) {
-          mainStore.videos.push(item);
+          videos.push(item);
         }
       }
     } else {
-      mainStore.videos = [];
+      videos = [];
     }
     resolve('done');
   });
@@ -161,14 +251,18 @@ async function readNews() {
   // 获取文章
   await getNews();
   // 观看文章
-  for (const i in mainStore.news) {
+  for (const i in news) {
+    // 任务关闭跳出循环
+    if (!taskConfig[TaskType.READ].active) {
+      return;
+    }
     // 暂停
     await studyPauseLock();
     log(`正在阅读第 ${Number(i) + 1} 个新闻...`);
     // 创建提示
     createTip(`正在阅读第 ${Number(i) + 1} 个新闻`);
     // 链接
-    const { url } = mainStore.news[i];
+    const { url } = news[i];
     // 链接
     GM_setValue('readingUrl', url);
     // 等待任务窗口
@@ -184,18 +278,16 @@ async function readNews() {
     // 刷新任务数据
     await refreshTaskList();
     // 任务完成跳出循环
-    if (
-      mainStore.settings[SettingType.READ] &&
-      mainStore.tasks[TaskType.READ].status
-    ) {
+    if (taskConfig[TaskType.READ].active && taskConfig[TaskType.READ].status) {
       break;
     }
   }
+  // 任务关闭跳出循环
+  if (!taskConfig[TaskType.READ].active) {
+    return;
+  }
   // 任务完成状况
-  if (
-    mainStore.settings[SettingType.READ] &&
-    !mainStore.tasks[TaskType.READ].status
-  ) {
+  if (taskConfig[TaskType.READ].active && !taskConfig[TaskType.READ].status) {
     log('任务未完成, 继续阅读新闻!');
     // 创建提示
     createTip('任务未完成, 继续阅读新闻!');
@@ -210,14 +302,18 @@ async function watchVideo() {
   // 获取视频
   await getVideos();
   // 观看视频
-  for (const i in mainStore.videos) {
+  for (const i in videos) {
+    // 任务关闭跳出循环
+    if (!taskConfig[TaskType.WATCH].active) {
+      return;
+    }
     // 暂停
     await studyPauseLock();
     log(`正在观看第 ${Number(i) + 1} 个视频...`);
     // 创建提示
     createTip(`正在观看第 ${Number(i) + 1} 个视频`);
     // 链接
-    const { url } = mainStore.videos[i];
+    const { url } = videos[i];
     // 链接
     GM_setValue('watchingUrl', url);
     // 等待任务窗口
@@ -234,17 +330,18 @@ async function watchVideo() {
     await refreshTaskList();
     // 任务完成跳出循环
     if (
-      mainStore.settings[SettingType.WATCH] &&
-      mainStore.tasks[TaskType.WATCH].status
+      taskConfig[TaskType.WATCH].active &&
+      taskConfig[TaskType.WATCH].status
     ) {
       break;
     }
   }
+  // 任务关闭跳出循环
+  if (!taskConfig[TaskType.WATCH].active) {
+    return;
+  }
   // 任务完成状况
-  if (
-    mainStore.settings[SettingType.WATCH] &&
-    !mainStore.tasks[TaskType.WATCH].status
-  ) {
+  if (taskConfig[TaskType.WATCH].active && !taskConfig[TaskType.WATCH].status) {
     log('任务未完成, 继续观看视频!');
     // 创建提示
     createTip('任务未完成, 继续观看看视频!');
@@ -252,4 +349,4 @@ async function watchVideo() {
   }
 }
 
-export { readNews, watchVideo, reading };
+export { readNews, watchVideo, reading, handleVideo, handleNews };

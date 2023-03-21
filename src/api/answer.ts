@@ -1,4 +1,5 @@
 import API_CONFIG from '../config/api';
+import { log } from '../utils/log';
 /* 答案 API */
 
 /**
@@ -7,29 +8,36 @@ import API_CONFIG from '../config/api';
 async function getAnswer(question: string) {
   // 数据
   const data = {
-    question,
+    txt_name: md5(question),
+    password: '',
   };
   try {
+    const params = new URLSearchParams(data);
     // 请求
     const res = await fetch(API_CONFIG.answerSearch, {
       method: 'POST',
       mode: 'cors',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify(data),
+      body: params.toString(),
     });
     // 请求成功
     if (res.ok) {
-      const data: {
-        errno: number;
-        data: { answers: string[] };
-      } = await res.json();
-      // 状态
-      const { errno } = data;
-      if (errno !== -1) {
+      const result = await res.json();
+      const { data, status } = <
+        {
+          status: number;
+          data: { txt_content: string; txt_name: string };
+        }
+      >result;
+      if (status !== 0) {
+        // 答案列表
+        const answerList: { content: string; title: string }[] = JSON.parse(
+          data.txt_content
+        );
         // 答案
-        const { answers } = data.data;
+        const answers = answerList[0].content.split(/[;\s]/);
         return answers;
       }
     }
@@ -40,13 +48,13 @@ async function getAnswer(question: string) {
 /**
  * @description 保存答案
  */
-async function saveAnswer(key, value) {
+async function saveAnswer(question: string, answer: string) {
   try {
     // 内容
-    const content = JSON.stringify([{ title: key, content: value }]);
+    const content = JSON.stringify([{ title: md5(question), content: answer }]);
     // 数据
     const data = {
-      txt_name: key,
+      txt_name: md5(question),
       txt_content: content,
       password: '',
       v_id: '',
@@ -64,7 +72,7 @@ async function saveAnswer(key, value) {
     // 请求成功
     if (res.ok) {
       const data = await res.json();
-      return data;
+      return <object>data;
     }
   } catch (error) {}
 }

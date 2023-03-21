@@ -1,30 +1,23 @@
 import { createTip } from '../controller/tip';
-import { mainStore } from '../store';
-import { ProgressType, SettingType } from '../types';
+import { frame, settings } from '../shared';
+import { SettingType } from '../types';
+import { ref, watchEffectRef, watchRef } from '../utils/composition';
+import { createElementNode, createNSElementNode } from '../utils/element';
 import { debounce, hasMobile } from '../utils/utils';
-import { ref, watchEffectRef, watchEffectRefs } from '../utils/composition';
-import {
-  createElementNode,
-  createNSElementNode,
-  createTextNode,
-} from '../utils/element';
 import { Hr } from './Hr';
-import { Info } from './Infor';
+import { InfoItem } from './InfoItem';
+import { LoginItem } from './LoginItem';
 import { NomalItem } from './NoramlItem';
-import { SchedulePanel } from './SchdulePanel';
-import { ScoreInfo } from './ScoreInfo';
-import { TaskItem } from './TaskItem';
+import { SettingsPanel } from './SettingsPanel';
+import { ScoreItem } from './ScoreItem';
+import { TaskBtn } from './TaskBtn';
+import { TaskList } from './TaskList';
+
 /**
  * @description 面板
  * @returns
  */
-function Panel({ login }: { login: boolean }) {
-  // 任务标签
-  const taskLabels = mainStore.tasks.map((task) => ({
-    title: task.title,
-    tip: task.tip,
-    type: task.type,
-  }));
+function Panel() {
   // 运行设置标签
   const runLabels = [
     {
@@ -71,17 +64,13 @@ function Panel({ login }: { login: boolean }) {
     },
   ];
   // 处理设置变化
-  const handleChangeAndNotice = (
-    e: Event,
-    type: SettingType,
-    title: string
-  ) => {
+  const handleSettingsChange = (e: Event, type: SettingType, title: string) => {
     // 开关
     const { checked } = <HTMLInputElement>e.target;
-    if (mainStore.settings[type] !== checked) {
-      mainStore.settings[type] = checked;
+    if (settings[type] !== checked) {
+      settings[type] = checked;
       // 设置
-      GM_setValue('studySetting', JSON.stringify(mainStore.settings));
+      GM_setValue('studySettings', JSON.stringify(settings));
       // 创建提示
       createTip(`${title} ${checked ? '打开' : '关闭'}!`);
     }
@@ -101,84 +90,82 @@ function Panel({ login }: { login: boolean }) {
       undefined,
       {
         class: watchEffectRef(
-          panelShow,
           () => `egg_panel${panelShow.value ? ' hide' : ''}`
         ),
       },
       [
-        createElementNode(
-          'div',
-          undefined,
-          {
-            class: 'egg_user_item',
-          },
-          Info({ login })
-        ),
-        createElementNode(
-          'div',
-          undefined,
-          {
-            class: 'egg_score_item',
-          },
-          ScoreInfo({ login })
-        ),
+        // 登录
+        LoginItem(),
+        // 信息
+        InfoItem(),
+        // 分数
+        ScoreItem(),
         // 任务部分
         Hr({ text: '任务' }),
-        ...taskLabels.map((label, i) => {
-          // 处理变化
-          const handleChange = debounce(handleChangeAndNotice, 500);
-          return TaskItem({
-            title: label.title,
-            tip: label.tip,
-            checked: mainStore.settings[label.type],
-            percent: mainStore.tasks[i].percent,
-            onChange: (e) => {
-              handleChange(e, label.type, label.title);
-            },
-          });
-        }),
+        TaskList(),
         // 运行部分
         Hr({ text: '运行' }),
-        ...runLabels.map((label) => {
-          // 处理变化
-          const handleChange = debounce(handleChangeAndNotice, 500);
-          return NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: mainStore.settings[label.type],
-            onChange: (e) => {
-              handleChange(e, label.type, label.title);
-            },
-          });
-        }),
+        createElementNode(
+          'div',
+          undefined,
+          { class: 'egg_run_list' },
+          watchEffectRef(() => {
+            return runLabels.map((label) => {
+              // 处理变化
+              const handleChange = debounce(handleSettingsChange, 300);
+              return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onChange: (e) => {
+                  handleChange(e, label.type, label.title);
+                },
+              });
+            });
+          })
+        ),
         // 答题部分
         Hr({ text: '答题' }),
-        ...examLabels.map((label) => {
-          // 处理变化
-          const handleChange = debounce(handleChangeAndNotice, 500);
-          return NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: mainStore.settings[label.type],
-            onChange: (e) => {
-              handleChange(e, label.type, label.title);
-            },
-          });
-        }),
+        createElementNode(
+          'div',
+          undefined,
+          { class: 'egg_exam_list' },
+          watchEffectRef(() => {
+            return examLabels.map((label) => {
+              // 处理变化
+              const handleChange = debounce(handleSettingsChange, 300);
+              return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onChange: (e) => {
+                  handleChange(e, label.type, label.title);
+                },
+              });
+            });
+          })
+        ),
         // 推送部分
         Hr({ text: '推送' }),
-        ...pushLabels.map((label) => {
-          // 处理变化
-          const handleChange = debounce(handleChangeAndNotice, 500);
-          return NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: mainStore.settings[label.type],
-            onChange: (e) => {
-              handleChange(e, label.type, label.title);
-            },
-          });
-        }),
+        createElementNode(
+          'div',
+          undefined,
+          { class: 'egg_push_list' },
+          watchEffectRef(() => {
+            return pushLabels.map((label) => {
+              // 处理变化
+              const handleChange = debounce(handleSettingsChange, 300);
+              return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onChange: (e) => {
+                  handleChange(e, label.type, label.title);
+                },
+              });
+            });
+          })
+        ),
         // 按钮集合
         createElementNode(
           'div',
@@ -191,19 +178,19 @@ function Panel({ login }: { login: boolean }) {
               'button',
               undefined,
               {
-                class: watchEffectRefs(
-                  [mainStore.frameShow, mainStore.frameExist],
+                class: watchRef(
+                  () => [frame.exist, frame.show],
                   () =>
                     `egg_frame_show_btn${
-                      !mainStore.frameExist.value || mainStore.frameShow.value
-                        ? ' hide'
-                        : ''
+                      !frame.exist || frame.show ? ' hide' : ''
                     }`
                 ),
+                title: '窗口',
                 type: 'button',
-                onclick: () => {
-                  mainStore.frameShow.value = true;
-                },
+                onclick: debounce(() => {
+                  // 窗口显示
+                  frame.show = true;
+                }, 300),
               },
               createNSElementNode(
                 'svg',
@@ -221,11 +208,12 @@ function Panel({ login }: { login: boolean }) {
               'button',
               undefined,
               {
-                class: 'egg_setting_show_btn',
+                class: 'egg_panel_show_btn',
+                title: '面板',
                 type: 'button',
-                onclick: () => {
+                onclick: debounce(() => {
                   panelShow.value = !panelShow.value;
-                },
+                }, 300),
               },
               createNSElementNode(
                 'svg',
@@ -243,21 +231,17 @@ function Panel({ login }: { login: boolean }) {
               'button',
               undefined,
               {
-                class:
-                  mainStore.settings[SettingType.REMOTE_PUSH] ||
-                  mainStore.settings[SettingType.SCHEDULE_RUN]
-                    ? watchEffectRef(
-                        scheduleShow,
-                        () =>
-                          `egg_setting_push_btn${
-                            scheduleShow.value ? ' active' : ''
-                          }`
-                      )
-                    : 'egg_setting_push_btn hide',
+                class: watchEffectRef(
+                  () =>
+                    `egg_settings_show_btn${
+                      scheduleShow.value ? ' active' : ''
+                    }`
+                ),
+                title: '设置',
                 type: 'button',
-                onclick: () => {
+                onclick: debounce(() => {
                   scheduleShow.value = !scheduleShow.value;
-                },
+                }, 300),
               },
               createNSElementNode(
                 'svg',
@@ -268,75 +252,21 @@ function Panel({ login }: { login: boolean }) {
                 },
                 [
                   createNSElementNode('path', undefined, {
-                    d: 'M825.571556 176.355556c68.778667 0 124.472889 55.751111 124.472888 124.416v422.456888c0 68.721778-55.751111 124.416-124.472888 124.416H198.485333A124.416 124.416 0 0 1 73.955556 723.171556V300.828444C73.955556 232.106667 129.706667 176.355556 198.428444 176.355556zM893.155556 358.456889l-366.08 228.864a28.444444 28.444444 0 0 1-25.372445 2.389333l-4.778667-2.389333L130.844444 358.456889v364.771555c0 34.929778 26.567111 63.715556 60.643556 67.128889l6.883556 0.398223h627.2c37.319111 0 67.584-30.264889 67.584-67.584V358.513778zM825.571556 233.244444H198.485333c-34.304 0-62.577778 25.486222-67.015111 58.595556L512 529.635556l380.586667-237.795556A67.584 67.584 0 0 0 825.628444 233.244444z',
+                    d: 'M7.25325 705.466473a503.508932 503.508932 0 0 0 75.26742 121.391295 95.499302 95.499302 0 0 0 93.211173 31.07039 168.59902 168.59902 0 0 1 114.526906 16.257763 148.487566 148.487566 0 0 1 71.052444 83.456515 91.163899 91.163899 0 0 0 75.989987 61.538643 578.053784 578.053784 0 0 0 148.969278 0A91.163899 91.163899 0 0 0 662.380873 957.642436a148.487566 148.487566 0 0 1 72.256723-83.456515 168.59902 168.59902 0 0 1 114.406478-16.257763 95.61973 95.61973 0 0 0 93.331601-31.07039 503.508932 503.508932 0 0 0 75.267419-121.391295 84.29951 84.29951 0 0 0-18.545892-94.897163 138.251197 138.251197 0 0 1 0-197.140426 84.29951 84.29951 0 0 0 18.545892-94.897163 503.508932 503.508932 0 0 0-75.869559-121.391295 95.499302 95.499302 0 0 0-93.211173-31.070391A168.59902 168.59902 0 0 1 734.637596 149.812272a148.848849 148.848849 0 0 1-72.256723-83.456515A91.163899 91.163899 0 0 0 586.631741 4.817115a581.907476 581.907476 0 0 0-148.969277 0A91.163899 91.163899 0 0 0 361.311193 66.355757a148.848849 148.848849 0 0 1-71.413728 83.456515 168.59902 168.59902 0 0 1-114.406478 16.257763 95.378874 95.378874 0 0 0-93.3316 31.070391A503.508932 503.508932 0 0 0 7.25325 318.531721a84.29951 84.29951 0 0 0 18.545893 94.897163 140.057615 140.057615 0 0 1 41.30676 98.509999 140.057615 140.057615 0 0 1-41.30676 98.630427A84.29951 84.29951 0 0 0 7.25325 705.466473z m929.462315-349.240828a219.901294 219.901294 0 0 0 0 312.028615c0.842995 0.842995 2.649413 3.010697 1.806418 5.057971a427.398517 427.398517 0 0 1-63.104205 101.520696 9.513802 9.513802 0 0 1-9.032091 2.167702 255.547944 255.547944 0 0 0-173.777418 24.928569 231.823653 231.823653 0 0 0-111.275354 130.302957 6.984817 6.984817 0 0 1-6.021394 4.937543 492.790851 492.790851 0 0 1-126.328837 0 6.984817 6.984817 0 0 1-6.021394-4.937543 231.823653 231.823653 0 0 0-111.275353-130.302957 255.668372 255.668372 0 0 0-120.427872-30.468252 258.919924 258.919924 0 0 0-52.747408 5.539683 9.513802 9.513802 0 0 1-9.03209-2.167702 427.398517 427.398517 0 0 1-63.104205-101.520696c-0.842995-2.047274 0.963423-4.214976 1.806418-5.057971a221.82814 221.82814 0 0 0 64.910623-156.556233 221.707712 221.707712 0 0 0-65.512762-155.713238c-0.842995-0.842995-2.649413-3.010697-1.806418-5.057971a427.398517 427.398517 0 0 1 63.104205-101.520696 9.393374 9.393374 0 0 1 8.911662-2.167701 255.7888 255.7888 0 0 0 173.897847-24.92857 231.823653 231.823653 0 0 0 111.275353-130.302957 6.984817 6.984817 0 0 1 6.021394-4.937543 492.790851 492.790851 0 0 1 126.328837 0 6.984817 6.984817 0 0 1 6.021394 4.937543 231.823653 231.823653 0 0 0 111.275354 130.302957 255.547944 255.547944 0 0 0 173.777418 24.92857 9.513802 9.513802 0 0 1 9.032091 2.167701 423.063113 423.063113 0 0 1 62.983777 101.520696c0.963423 2.047274-0.842995 4.214976-1.68599 5.057971z',
+                  }),
+                  createNSElementNode('path', undefined, {
+                    d: 'M512.086889 305.766366a206.292944 206.292944 0 1 0 206.172516 206.172517 206.413372 206.413372 0 0 0-206.172516-206.172517z m123.197713 206.172517a123.197713 123.197713 0 1 1-123.197713-123.077285 123.318141 123.318141 0 0 1 123.197713 123.077285z',
                   }),
                 ]
               )
             ),
           ]
         ),
-        // 开始按钮
-        login
-          ? createElementNode(
-              'div',
-              undefined,
-              { class: 'egg_study_item' },
-              createElementNode(
-                'button',
-                undefined,
-                {
-                  class: watchEffectRef(
-                    mainStore.progress,
-                    () =>
-                      `egg_study_btn${
-                        mainStore.progress.value === ProgressType.LOADING ||
-                        mainStore.progress.value === ProgressType.START
-                          ? ' loading'
-                          : mainStore.progress.value === ProgressType.FINISH
-                          ? ' disabled'
-                          : ''
-                      }`
-                  ),
-
-                  type: 'button',
-                  disabled: watchEffectRef(
-                    mainStore.progress,
-                    () =>
-                      mainStore.progress.value === ProgressType.LOADING ||
-                      mainStore.progress.value === ProgressType.FINISH
-                  ),
-                },
-                createTextNode(
-                  watchEffectRef(
-                    mainStore.progress,
-                    () =>
-                      `${
-                        mainStore.progress.value === ProgressType.LOADING
-                          ? '等待中'
-                          : mainStore.progress.value === ProgressType.LOADED
-                          ? '开始学习'
-                          : mainStore.progress.value === ProgressType.START
-                          ? '正在学习, 点击暂停'
-                          : mainStore.progress.value === ProgressType.PAUSE
-                          ? '继续学习'
-                          : mainStore.progress.value === ProgressType.FINISH
-                          ? '已完成'
-                          : ''
-                      }`
-                  )
-                )
-              )
-            )
-          : undefined,
-        createElementNode(
-          'div',
-          undefined,
-          { class: 'egg_schedule_settings_item' },
-          SchedulePanel({
-            scheduleList: mainStore.scheduleList,
-            show: scheduleShow,
-          })
-        ),
+        // 任务按钮
+        TaskBtn(),
+        createElementNode('div', undefined, { class: 'egg_settings_item' }, [
+          SettingsPanel({ show: scheduleShow }),
+        ]),
       ]
     )
   );

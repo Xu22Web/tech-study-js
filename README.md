@@ -76,7 +76,7 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 新增专项练习逆序，考虑到不同需求，能顺序或逆序查找到专项练习作答
+1. 更新任务 API，新增响应式界面
 
 2. 尝试修复同屏任务无效问题，由于问题原因未知，后续仍将继续修复
 
@@ -85,30 +85,6 @@
    - [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版')
 
    - [Docker 版](https://github.com/Xu22Web/tech-study-docker 'Docker 版')
-
-### 公告 announcement
-
-- **现征集在线题库，特此公告**
-
-  不知道大家有没有发现，在新版的脚本中，我将原本混乱的搜题`API`，替换成了自行整合的搜题`API`
-
-  由于以下原因:
-
-  1. 答题需要收集和优化题库，方便搜题请求
-
-  2. 便于其他方式的调用，目前，搜题`API`的题库有`7`个
-
-  存在的问题:
-
-  1. 题量有限
-
-  2. 准确度欠佳
-
-- 如果大家发现新的题库或者对于题库有何建议，可以去下面的仓库反馈
-
-- 关于题库: [answer-search-bank](https://github.com/Xu22Web/answer-search-bank) `https://github.com/Xu22Web/answer-search-bank`
-
-最后，希望在大家的帮助下，提供更高质量、更优质的脚本！
 
 ### 关于开发 Development
 

@@ -1,18 +1,23 @@
+// 当前订阅
+let currentSub: ((newVal?: any, oldVal?: any) => any) | undefined;
+
 // 订阅
 const subscription = new WeakMap<
   object,
-  Set<(newVal: any, oldVal: any) => any>
+  Map<string, Set<(newVal: any, oldVal: any) => any>>
 >();
 
-// 当前订阅
-let currentSub: ((newVal: any, oldVal: any) => any) | undefined;
+/**
+ * @description Proxy Map
+ */
+const proxyMap = new WeakMap<object, object>();
 
 /**
- * @description 收集依赖
+ * @description 收集 Ref 依赖
  * @param target
  * @param key
  */
-const track = (target: object) => {
+const trackRef = (target: object) => {
   // 当前订阅
   if (!currentSub) {
     return;
@@ -21,10 +26,96 @@ const track = (target: object) => {
   let subList = subscription.get(target);
   // 不存在订阅列表
   if (!subList) {
-    subList = new Set();
+    subList = new Map();
+    // 键订阅
+    const subkeyList = new Set<(newVal: any, oldVal: any) => any>();
+    // 添加订阅
+    subkeyList.add(currentSub);
+    subList.set('value', subkeyList);
     subscription.set(target, subList);
+    return;
   }
-  subList.add(currentSub);
+  // 键订阅
+  let subkeyList = subList.get('value');
+  if (!subkeyList) {
+    // 键订阅
+    subkeyList = new Set<(newVal: any, oldVal: any) => any>();
+    // 添加订阅
+    subkeyList.add(currentSub);
+    subList.set('value', subkeyList);
+    subscription.set(target, subList);
+    return;
+  }
+  // 添加订阅
+  subkeyList.add(currentSub);
+};
+
+/**
+ * @description 通知 Ref 订阅
+ * @param terget
+ * @param key
+ * @returns
+ */
+function triggerRef(target: object, newVal: any, oldVal: any) {
+  // target 订阅列表
+  const subList = subscription.get(target);
+  if (!subList) {
+    return;
+  }
+  // 键订阅
+  let subkeyList = subList.get('value');
+  if (!subkeyList) {
+    return;
+  }
+  // 通知订阅
+  for (const fn of subkeyList) {
+    if (fn instanceof Function) {
+      fn(newVal, oldVal);
+    }
+  }
+}
+
+/**
+ * @description 收集依赖
+ * @param target
+ * @param key
+ */
+const track = (target: object, key: string) => {
+  // 当前订阅
+  if (!currentSub) {
+    return;
+  }
+  // proxy
+  const proxyTarget = proxyMap.get(target);
+  if (!proxyTarget) {
+    return;
+  }
+  // target 订阅列表
+  let subList = subscription.get(target);
+  // 不存在订阅列表
+  if (!subList) {
+    subList = new Map();
+    // 键订阅
+    const subkeyList = new Set<(newVal: any, oldVal: any) => any>();
+    // 添加订阅
+    subkeyList.add(currentSub);
+    subList.set(key, subkeyList);
+    subscription.set(target, subList);
+    return;
+  }
+  // 键订阅
+  let subkeyList = subList.get(key);
+  if (!subkeyList) {
+    // 键订阅
+    subkeyList = new Set<(newVal: any, oldVal: any) => any>();
+    // 添加订阅
+    subkeyList.add(currentSub);
+    subList.set(key, subkeyList);
+    subscription.set(target, subList);
+    return;
+  }
+  // 添加订阅
+  subkeyList.add(currentSub);
 };
 
 /**
@@ -33,20 +124,25 @@ const track = (target: object) => {
  * @param key
  * @returns
  */
-function trigger(target: object, newVal: any, oldVal: any) {
-  // target 订阅列表
+function trigger(target: object, key: string, newVal: any, oldVal: any) {
+  // proxy
+  const proxyTarget = proxyMap.get(target);
+  if (!proxyTarget) {
+    return;
+  }
+  // proxyTarget 订阅列表
   const subList = subscription.get(target);
   if (!subList) {
     return;
   }
-  // target 订阅
-  if (subList) {
-    // 通知订阅
-    for (const fn of subList) {
-      if (fn instanceof Function) {
-        fn(newVal, oldVal);
-      }
-    }
+  // 键订阅
+  let subkeyList = subList.get(key);
+  if (!subkeyList) {
+    return;
+  }
+  // 通知订阅
+  for (const fn of subkeyList) {
+    fn(newVal, oldVal);
   }
 }
 
@@ -64,14 +160,14 @@ enum ReactiveFlags {
  * @description Ref
  */
 class Ref<T = any> {
-  readonly _shallow: boolean = false;
+  readonly _isShallow: boolean = false;
   readonly _isRef: boolean = true;
   _value: T;
   value: T;
   constructor(val: T, shallow: boolean = false) {
     const _this = this;
-    this._shallow = shallow;
-    if (val instanceof Object && shallow) {
+    this._isShallow = shallow;
+    if (val && typeof val === 'object' && shallow) {
       const reactiveVal = reactive(val);
       this._value = reactiveVal;
       this.value = reactiveVal;
@@ -83,7 +179,7 @@ class Ref<T = any> {
     Object.defineProperty(this, 'value', {
       get() {
         // 收集依赖
-        track(this);
+        trackRef(this);
         return _this._value;
       },
       set(newVal: any) {
@@ -94,10 +190,13 @@ class Ref<T = any> {
           // 设置新数据值
           _this._value = newVal;
           // 通知依赖
-          trigger(this, newVal, oldVal);
+          triggerRef(this, newVal, oldVal);
         }
       },
     });
+  }
+  toJSON() {
+    return this._value;
   }
 }
 
@@ -109,7 +208,9 @@ type UnwrapRef<T> = T extends Ref<infer P> ? P : T;
 /**
  * @description 数组脱除 ref
  */
-type UnwrapRefArray<T> = T extends [infer K, ...infer P]
+type UnwrapRefArray<T> = T extends Ref<infer K>[]
+  ? K[]
+  : T extends [infer K, ...infer P]
   ? P extends Ref[]
     ? [UnwrapRef<K>, ...UnwrapRefArray<P>]
     : [UnwrapRef<K>]
@@ -120,8 +221,8 @@ type UnwrapRefArray<T> = T extends [infer K, ...infer P]
  * @param v
  * @returns
  */
-const isRef = <T>(v: Ref<T> | unknown): v is Ref<T> => {
-  return v && v[ReactiveFlags.IS_REF];
+const isRef = <T = any>(v: Ref<T> | unknown): v is Ref<T> => {
+  return !!(v && v[ReactiveFlags.IS_REF]);
 };
 
 /**
@@ -130,7 +231,7 @@ const isRef = <T>(v: Ref<T> | unknown): v is Ref<T> => {
  * @returns
  */
 const isShallow = (v: unknown) => {
-  return v && v[ReactiveFlags.IS_SHALLOW];
+  return !!(v && v[ReactiveFlags.IS_SHALLOW]);
 };
 
 /**
@@ -147,8 +248,8 @@ const createRef = <T>(rawVal: T, shallow: boolean) => {
  * @param val
  * @returns
  */
-const unref = <T>(val: T | Ref<T>) => {
-  return isRef(val) ? val.value : val;
+const unref = <T>(val: T) => {
+  return <UnwrapRef<T>>(isRef(val) ? val.value : val);
 };
 
 /**
@@ -159,7 +260,7 @@ const unref = <T>(val: T | Ref<T>) => {
 const ref = <T>(value: T): Ref<UnwrapRef<T>> => {
   return isRef<UnwrapRef<T>>(value)
     ? value
-    : createRef(<UnwrapRef<T>>value, false);
+    : createRef(<UnwrapRef<T>>value, true);
 };
 
 /**
@@ -170,42 +271,19 @@ const ref = <T>(value: T): Ref<UnwrapRef<T>> => {
 const shallowRef = <T>(value: T): Ref<UnwrapRef<T>> => {
   return isRef<UnwrapRef<T>>(value)
     ? value
-    : createRef(<UnwrapRef<T>>value, true);
-};
-
-/**
- * @description 响应式
- */
-type Reactive<T> = {
-  _isReactive: boolean;
-  _isReadonly: boolean;
-} & {
-  [P in keyof T]: T[P];
-};
-
-/**
- * @description 只读键
- * @param key
- * @returns
- */
-const isReadonlyKey = (key: any) => {
-  return ![
-    ReactiveFlags.IS_REF,
-    ReactiveFlags.IS_SHALLOW,
-    ReactiveFlags.IS_REACTIVE,
-    ReactiveFlags.IS_READONLY,
-  ].includes(key);
+    : createRef(<UnwrapRef<T>>value, false);
 };
 
 /**
  * @description 创建处理 reactive
  * @param isReadonly
+ * @param isShallow
  * @returns
  */
 const createReactiveHandlers = (isReadonly: boolean, isShallow: boolean) => {
   return {
     get: createGetters(isReadonly, isShallow),
-    set: createSetters(isShallow),
+    set: createSetters(isReadonly, isShallow),
   };
 };
 
@@ -223,11 +301,14 @@ const createGetters = (isReadonly: boolean, isShallow: boolean) => {
     if (key === ReactiveFlags.IS_READONLY) {
       return isReadonly;
     }
+    if (key === ReactiveFlags.IS_SHALLOW) {
+      return isShallow;
+    }
     // 结果
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
       // 收集依赖
-      track(receiver);
+      track(target, key);
     }
     if (isShallow) {
       return res;
@@ -235,7 +316,10 @@ const createGetters = (isReadonly: boolean, isShallow: boolean) => {
     if (isRef(res)) {
       return res.value;
     }
-    if (res instanceof Object) {
+    if (res && typeof res === 'object') {
+      if (res instanceof Element) {
+        return res;
+      }
       return isReadonly ? readonly(res) : reactive(res);
     }
     return res;
@@ -244,11 +328,16 @@ const createGetters = (isReadonly: boolean, isShallow: boolean) => {
 
 /**
  * @description setters
+ * @param readonly
  * @param shallow
  * @returns
  */
-const createSetters = (shallow: boolean) => {
+const createSetters = (readonly: boolean, shallow: boolean) => {
   return function set(target, key, newVal, receiver) {
+    // 只读
+    if (readonly) {
+      return false;
+    }
     // 旧值
     const oldVal = target[key];
     if (isReadonly(oldVal) && isRef(oldVal) && !isRef(newVal)) {
@@ -261,14 +350,26 @@ const createSetters = (shallow: boolean) => {
       }
     }
     const res = Reflect.set(target, key, newVal, receiver);
+    // length
+    if (Array.isArray(target) && key === 'length') {
+      // 通知依赖
+      trigger(target, key, newVal, oldVal);
+      return res;
+    }
     // 数据变化
     if (oldVal !== newVal) {
       // 通知依赖
-      trigger(receiver, newVal, oldVal);
+      trigger(target, key, newVal, oldVal);
     }
     return res;
   };
 };
+
+// 响应式
+type Reactive<T extends object = object> = {
+  _isReactive: boolean;
+  _isReadonly: boolean;
+} & T;
 
 /**
  * @description reactive object
@@ -278,9 +379,15 @@ const createReactiveObj = <T extends object>(
   isReadonly: boolean,
   shallow: boolean
 ) => {
-  return <Reactive<T>>(
-    new Proxy(target, createReactiveHandlers(isReadonly, shallow))
-  );
+  // 存在 Proxy
+  const existingProxy = proxyMap.get(target);
+  if (existingProxy) {
+    return <Reactive<T>>existingProxy;
+  }
+  // 新建
+  const proxy = new Proxy(target, createReactiveHandlers(isReadonly, shallow));
+  proxyMap.set(target, proxy);
+  return <Reactive<T>>proxy;
 };
 
 /**
@@ -288,8 +395,8 @@ const createReactiveObj = <T extends object>(
  * @param val
  * @returns
  */
-const isReactive = (val: unknown): val is object => {
-  return val && val[ReactiveFlags.IS_REACTIVE];
+const isReactive = (val: unknown): val is boolean => {
+  return !!(val && val[ReactiveFlags.IS_REACTIVE]);
 };
 
 /**
@@ -297,8 +404,8 @@ const isReactive = (val: unknown): val is object => {
  * @param target
  * @returns
  */
-const createReactive = <T extends object>(target: T): T => {
-  return createReactiveObj(target, false, true);
+const createReactive = <T extends object>(target: T): Reactive<T> => {
+  return createReactiveObj(target, false, false);
 };
 
 /**
@@ -307,7 +414,7 @@ const createReactive = <T extends object>(target: T): T => {
  * @returns
  */
 const shallowReactive = <T extends object>(target: T) => {
-  return createReactiveObj(target, false, false);
+  return createReactiveObj(target, false, true);
 };
 
 /**
@@ -316,7 +423,7 @@ const shallowReactive = <T extends object>(target: T) => {
  * @returns
  */
 const isReadonly = (val: unknown): val is object => {
-  return val && val[ReactiveFlags.IS_READONLY];
+  return !!(val && val[ReactiveFlags.IS_READONLY]);
 };
 
 /**
@@ -325,7 +432,7 @@ const isReadonly = (val: unknown): val is object => {
  * @returns
  */
 const createReadonly = <T extends object>(target: T): T => {
-  return createReactiveObj(target, true, true);
+  return createReactiveObj(target, true, false);
 };
 
 /**
@@ -334,7 +441,7 @@ const createReadonly = <T extends object>(target: T): T => {
  * @returns
  */
 const shallowReadonly = <T extends object>(target: T) => {
-  return createReactiveObj(target, true, false);
+  return createReactiveObj(target, true, true);
 };
 
 /**
@@ -342,7 +449,7 @@ const shallowReadonly = <T extends object>(target: T) => {
  * @param val
  * @returns
  */
-const isProxy = (val: unknown): val is object => {
+const isProxy = (val: unknown): val is Reactive => {
   return isReactive(val) || isReadonly(val);
 };
 
@@ -369,38 +476,77 @@ const readonly = <T extends object>(target: T) => {
  * @param source
  * @param callback
  */
-const watch = <T extends object>(
+const watch = <T extends Ref | Reactive | Ref[] | (() => any)>(
   source: T,
   callback: (
-    newValue: T extends Ref ? UnwrapRef<T> : T,
-    oldValue: T extends Ref ? UnwrapRef<T> : T
-  ) => void
+    newValue: T extends Ref[]
+      ? UnwrapRefArray<T>
+      : T extends () => infer P
+      ? P extends Ref[]
+        ? UnwrapRefArray<P>
+        : P
+      : UnwrapRef<T>,
+    oldValue: T extends Ref[]
+      ? UnwrapRefArray<T>
+      : T extends () => infer P
+      ? P extends Ref[]
+        ? UnwrapRefArray<P>
+        : P
+      : UnwrapRef<T>
+  ) => void,
+  immediate: boolean = false
 ) => {
-  // target 订阅列表
-  let subList = subscription.get(source);
-  if (!subList) {
-    subList = new Set();
-    subscription.set(source, subList);
-  }
-  // 添加订阅
-  subList.add(callback);
-
-  // Proxy
-  if (isProxy(source)) {
-    for (const key in source) {
-      const subSource = source[key];
-      if (isProxy(subSource)) {
-        watch(subSource, () => {
-          callback(<any>source, <any>source);
+  // 立刻执行
+  immediate && callback(unref(<any>source), unref(<any>source));
+  // array
+  if (Array.isArray(source) && source.every((s) => isRef(s))) {
+    for (const i in source) {
+      // Proxy
+      if (isProxy(source[i])) {
+        watch(source[i], () => {
+          const res = source.map((s) => unref(s));
+          callback(<any>res, <any>res);
         });
       }
     }
+    watch<() => any>(() => source.map((s) => unref(s)), callback);
+    return;
   }
-  // shallow Ref
-  if (isRef(source) && isProxy(source.value)) {
-    watch(source.value, () => {
-      callback(<any>source, <any>source);
+  // function
+  if (source instanceof Function) {
+    watch<Ref>(watchEffectRef(source), (n, o) => {
+      callback(<any>unref(n), <any>unref(o));
     });
+    return;
+  }
+  // Proxy
+  if (isProxy(source)) {
+    for (const key in source) {
+      currentSub = () => {
+        callback(<any>source, <any>source);
+      };
+      // sub source
+      const subSource = source[key];
+      currentSub = undefined;
+      watch(subSource, () => {
+        callback(<any>source, <any>source);
+      });
+    }
+    return;
+  }
+  // Ref
+  if (isRef(source)) {
+    // Ref.value Proxy
+    if (isProxy(source.value)) {
+      watch(source.value, () => {
+        callback(<any>unref(source), <any>unref(source));
+      });
+    }
+    currentSub = callback;
+    // 收集依赖
+    trackRef(source);
+    currentSub = undefined;
+    return;
   }
 };
 
@@ -422,45 +568,29 @@ const watchEffect = (callback: () => any) => {
  * @param callback
  * @returns
  */
-const watchEffectRef = <T extends Ref, P>(
-  refVal: T,
-  callback: (val: UnwrapRef<T>) => P
+const watchRef = <T extends Ref | Reactive | Ref[] | (() => any), P>(
+  source: T,
+  callback: () => P
 ) => {
-  if (isRef(refVal)) {
-    // 影响
-    const effect = ref(callback(refVal.value));
-    // 监听
-    watchEffect(() => (effect.value = <UnwrapRef<P>>callback(refVal.value)));
-    return effect;
-  }
+  // 收集依赖
+  const effectRes = shallowRef<P>(callback());
+  // 监听
+  watch(source, () => (effectRes.value = unref(callback())));
+  return effectRes;
 };
 
 /**
- * @description 监听影响 refs
+ * @description 监听影响 ref
  * @param refVal
  * @param callback
  * @returns
  */
-const watchEffectRefs = <T extends Ref[], P>(
-  refVal: T,
-  callback: (val: UnwrapRefArray<T>) => P
-) => {
-  if (Array.isArray(refVal)) {
-    // 影响
-    const effect = ref(
-      callback(<UnwrapRefArray<T>>refVal.map((v) => unref(v)))
-    );
-    refVal.forEach((ref) => {
-      watch(
-        ref,
-        () =>
-          (effect.value = <UnwrapRef<P>>(
-            callback(<UnwrapRefArray<T>>refVal.map((v) => unref(v)))
-          ))
-      );
-    });
-    return effect;
-  }
+const watchEffectRef = <T>(callback: () => T) => {
+  // 收集依赖
+  const effectRes = shallowRef<T | undefined>(undefined);
+  // 监听
+  watchEffect(() => (effectRes.value = unref(callback())));
+  return <Ref<UnwrapRef<T>>>effectRes;
 };
 
 export {
@@ -470,8 +600,8 @@ export {
   unref,
   isRef,
   watch,
+  watchRef,
   watchEffectRef,
-  watchEffectRefs,
   watchEffect,
   reactive,
   shallowReactive,
@@ -480,4 +610,6 @@ export {
   shallowReadonly,
   isReadonly,
   isProxy,
+  isShallow,
+  Reactive,
 };

@@ -22,7 +22,7 @@ const COMPILE_CONFIG = {
   /**
    * @description 是否压缩代码
    */
-  compress: true,
+  compress: false,
   /**
    * @description rollup 配置
    */

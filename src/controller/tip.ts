@@ -1,5 +1,6 @@
-import { ref, watchEffectRef } from '../utils/composition';
-import { $$, createElementNode, createTextNode } from '../utils/element';
+import { Tip } from '../component/Tip';
+import { ref } from '../utils/composition';
+import { $$, mountElement } from '../utils/element';
 
 /**
  * @description 创建学习提示
@@ -7,80 +8,61 @@ import { $$, createElementNode, createTextNode } from '../utils/element';
 function createTip(
   text: string,
   delay: number = 2,
-  callback?: (current: number, operate: object) => any
+  countShow: boolean = false,
+  callback?: (current: number) => any
 ) {
   const tipWrap = $$('.egg_tip_wrap')[0];
   // 提前去除
-  const tips = $$<HTMLElement & { destroy: () => void }>('.egg_tip');
+  const tips = $$<HTMLElement & { delay: () => void }>('.egg_tip');
   if (tips.length) {
-    tips.forEach((t) => t.destroy());
+    tips.forEach((t) => t.delay());
   }
   // 延迟
   const delayCount = ref(delay);
   // 文字
   const textContent = ref(text);
-  // 倒计时
-  const countdown = createElementNode(
-    'span',
-    undefined,
-    {
-      class: 'egg_countdown',
-    },
-    createTextNode(watchEffectRef(delayCount, () => `${delayCount.value}s`))
-  );
-  // 文本
-  const span = createElementNode(
-    'span',
-    undefined,
-    {
-      class: 'egg_text',
-    },
-    createTextNode(textContent)
-  );
+  //显示
+  const show = ref(false);
+  // 延迟显示
+  const delayShow = ref(false);
   // 销毁
   let destroyed = false;
   // 倒计时结束
   let done = false;
-  // 倒计时
-  const countDown = async () => {
-    // 回调
-    if (callback) {
-      await callback(delayCount.value, operate);
-    }
-    // 倒计时结束
-    if (!delayCount.value) {
-      done = true;
-      // 隐藏
-      operate.hide();
-      return;
-    }
-    delayCount.value--;
-    setTimeout(countDown, 1000);
-  };
-  //显示
-  const show = ref(false);
-  // 创建提示
-  const tipInfo: HTMLElement = createElementNode(
-    'div',
-    undefined,
-    {
-      class: watchEffectRef(
-        show,
-        () => `egg_tip${show.value ? ' active' : ''}`
-      ),
+  // 提示
+  const tip = Tip({
+    text: textContent,
+    count: delayCount,
+    show,
+    delayShow,
+    countShow: ref(countShow),
+    callback: async (count) => {
+      callback && (await callback(count));
+      // 恢复显示
+      if (delayShow.value && count === delay) {
+        delayShow.value = false;
+      }
+      // 倒计时结束
+      if (!count) {
+        done = true;
+        operate.destroy();
+      }
     },
-    [span, countdown]
-  );
+  });
   // 操作
   const operate = {
-    async destroy() {
+    destroy() {
       if (!destroyed) {
         // 隐藏
         operate.hide();
+        // 销毁
         destroyed = true;
-        setTimeout(() => {
-          tipInfo.remove();
-        }, 300);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            tip.ele.remove();
+            resolve(undefined);
+          }, 300);
+        });
       }
     },
     hide() {
@@ -90,11 +72,18 @@ function createTip(
     },
     show() {
       if (!destroyed) {
-        show.value = true;
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            show.value = true;
+            resolve(undefined);
+          }, 300);
+        });
       }
     },
     setText(text: string) {
-      textContent.value = text;
+      if (!destroyed) {
+        textContent.value = text;
+      }
     },
     waitCountDown() {
       return new Promise((resolve) => {
@@ -108,15 +97,18 @@ function createTip(
         }, 100);
       });
     },
+    delay() {
+      if (!destroyed) {
+        delayShow.value = true;
+        delayCount.value += 2;
+      }
+    },
   };
-
-  Object.assign(tipInfo, operate);
+  Object.assign(tip.ele, operate);
   // 插入节点
-  tipWrap.append(tipInfo);
+  mountElement(tip, tipWrap);
   // 显示
   operate.show();
-  // 倒计时
-  countDown();
   return operate;
 }
 

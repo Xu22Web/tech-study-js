@@ -69,8 +69,26 @@
 .egg_exam_btn.manual {
   background: #e3484b;
 }
-.egg_panel {
+.egg_panel_wrap * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+}
+.egg_panel_wrap {
   position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 99999;
+  width: 100%;
+  height: 100%;
+  color: #333;
+  font-size: 1.6rem;
+  pointer-events: none;
+}
+.egg_panel {
+  position: absolute;
   top: 5rem;
   left: 1rem;
   padding: 1.2rem 2rem;
@@ -79,8 +97,7 @@
   backdrop-filter: blur(1rem);
   box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;
   transition: 80ms ease-out;
-  z-index: 99999;
-  color: #333;
+  pointer-events: all;
 }
 .egg_panel.hide {
   left: 0;
@@ -130,10 +147,10 @@
   place-items: center;
   font-size: 1.8rem;
 }
-.egg_panel.hide .egg_setting_show_btn {
+.egg_panel.hide .egg_panel_show_btn {
   background: var(--themeColor);
 }
-.egg_panel .egg_setting_show_btn {
+.egg_panel .egg_panel_show_btn {
   background: #ccc;
 }
 .egg_panel .egg_frame_show_btn {
@@ -143,49 +160,38 @@
 .egg_panel .egg_frame_show_btn.hide {
   display: none;
 }
-.egg_panel .egg_setting_push_btn {
+.egg_panel .egg_settings_show_btn {
   background: #ccc;
   margin-top: 1rem;
 }
-.egg_panel .egg_setting_push_btn.hide {
-  display: none;
-}
-.egg_panel .egg_setting_push_btn.active {
+.egg_panel .egg_settings_show_btn.active {
   background: var(--themeColor);
 }
-.egg_login_wrap .egg_login_btn,
-.egg_user_wrap .egg_login_btn {
-  font-size: 1.4rem;
-  border-radius: 1rem;
-  transition: 80ms ease;
-  color: white;
-}
-.egg_login_wrap .egg_login_btn:active,
-.egg_user_wrap .egg_login_btn:active {
-  opacity: 0.8;
-}
-.egg_login_wrap .egg_login_btn {
-  background: var(--themeColor);
-  padding: 0.8rem 2.4rem;
-}
-.egg_user_wrap .egg_login_btn {
-  background: #ccc;
-  padding: 0.4rem 0.8rem;
-}
-.egg_login_wrap {
+.egg_login_item {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   padding: 0.5rem 0;
 }
-.egg_login_wrap .egg_login_img_wrap {
+.egg_login_item .egg_login_btn {
+  font-size: 1.4rem;
+  border-radius: 1rem;
+  transition: 80ms ease;
+  color: white;
+  background: var(--themeColor);
+  padding: 0.8rem 2.4rem;
+}
+.egg_login_item .egg_login_btn:active {
+  opacity: 0.8;
+}
+.egg_login_item .egg_login_img_wrap {
   height: 0;
   border-radius: 1rem;
   transition: height 80ms ease;
   overflow: hidden;
 }
-.egg_login_wrap .egg_login_img_wrap.active {
+.egg_login_item .egg_login_img_wrap.active {
   padding: 0.8rem;
   margin-top: 0.8rem;
   height: auto;
@@ -195,18 +201,31 @@
   width: 15rem;
   height: 15rem;
 }
-.egg_user_wrap {
+.egg_info_item .egg_login_btn {
+  font-size: 1.4rem;
+  border-radius: 1rem;
+  transition: 80ms ease;
+  color: white;
+}
+.egg_info_item .egg_login_btn:active {
+  opacity: 0.8;
+}
+.egg_info_item .egg_login_btn {
+  background: #ccc;
+  padding: 0.4rem 0.8rem;
+}
+.egg_info_item {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.egg_user_wrap .egg_userinfo {
+.egg_info_item .egg_userinfo {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0.5rem 0;
 }
-.egg_userinfo .egg_avatar .egg_sub_nickname,
+.egg_userinfo .egg_avatar .egg_avatar_nick,
 .egg_userinfo .egg_avatar .egg_avatar_img {
   height: 5rem;
   width: 5rem;
@@ -227,7 +246,6 @@
   overflow: hidden;
   white-space: nowrap;
   max-width: 10rem;
-  font-size: 1.6rem;
 }
 .egg_score_item .egg_scoreinfo {
   display: flex;
@@ -296,15 +314,34 @@
   justify-content: space-between;
   padding: 0.5rem 0.8rem;
 }
-.egg_setting_item {
+.egg_task_list {
+  position: relative;
+}
+.egg_task_item {
+  user-select: none;
+}
+.egg_task_item.drag {
+  position: absolute;
+  z-index: 999;
+  border: dashed #ccc 0.1rem;
+  border-radius: 0.1rem;
+  background: #ffffffe6;
+  backdrop-filter: blur(1rem);
+  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;
+  cursor: move;
+  pointer-events: none;
+}
+.egg_task_item.edit {
+  border-radius: 0.5rem;
+}
+.egg_task_content {
   min-height: 3rem;
   min-width: 18rem;
-  font-size: 1.6rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.egg_setting_item .egg_label_wrap {
+.egg_task_content .egg_label_wrap {
   flex-grow: 1;
 }
 .egg_label_wrap .egg_progress {
@@ -331,6 +368,17 @@
   font-size: 1.2rem;
   padding-left: 0.5rem;
   width: 4rem;
+}
+.egg_setting_item {
+  min-height: 3rem;
+  min-width: 18rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+.egg_setting_item .egg_label_wrap {
+  flex-grow: 1;
 }
 .egg_detail {
   background: #ccc;
@@ -379,6 +427,10 @@
 .egg_switch:checked {
   background: var(--themeColor);
 }
+.egg_switch:disabled {
+  opacity: 0.5;
+  background: #ccc;
+}
 .egg_switch:checked::after {
   left: calc(100% - var(--border-padding) - 1.4rem);
 }
@@ -413,6 +465,13 @@
   height: 100%;
   pointer-events: none;
 }
+.egg_tip_wrap * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+}
 .egg_tip_wrap .egg_tip {
   position: absolute;
   bottom: 2rem;
@@ -430,6 +489,9 @@
 .egg_tip_wrap .egg_tip.active {
   opacity: 1;
   transform: scale(1) translateY(0);
+}
+.egg_tip_wrap .egg_tip.active.delay {
+  opacity: 0.5;
 }
 .egg_tip_wrap .egg_tip .egg_countdown {
   display: inline-block;
@@ -449,6 +511,13 @@
   width: 100%;
   height: 100%;
   visibility: visible;
+}
+.egg_frame_wrap * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
 }
 .egg_frame_wrap.hide {
   visibility: hidden;
@@ -532,79 +601,64 @@
   align-items: center;
   justify-content: center;
 }
-.egg_time_input input {
-  outline: none;
-  border: 0.1rem solid #eee;
-  width: 2rem;
-  padding: 0.8rem;
-  text-align: center;
-  background: white;
-  border-radius: 0.2rem;
+.egg_time_input .egg_hour_wrap,
+.egg_time_input .egg_minute_wrap {
+  width: 4rem;
 }
-.egg_time_input input::placeholder {
-  color: #ccc;
-}
-.egg_time_input span {
+.egg_time_input .egg_separator {
   padding: 0 0.5rem;
   font-size: 1.5rem;
 }
-.egg_list {
-  max-height: 12rem;
-  overflow: auto;
-  border-radius: 0 0 0.2rem 0.2rem;
-  box-shadow: 0.1rem 0.1rem 0.1rem 0.1rem #eee;
+.egg_settings_item {
   position: absolute;
-  background: white;
-  z-index: 9;
-  scroll-behavior: smooth;
-  user-select: none;
-  transition: 100ms ease;
-  opacity: 1;
-  scrollbar-width: thin;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 1rem;
 }
-.egg_list.hide {
-  opacity: 0;
-  visibility: hidden;
-}
-.egg_list::-webkit-scrollbar {
-  width: 0.4rem;
-  background: white;
-  border-radius: 0.2rem;
-}
-.egg_list::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 0.2rem;
-}
-.egg_list .egg_time {
-  padding: 0.6rem 1rem;
-  border-bottom: 0.1rem solid #eee;
-  cursor: pointer;
-  color: #333;
-  transition: 100ms ease;
-}
-.egg_list .egg_time.focus {
-  font-weight: bold;
-  background: #eee;
-}
-.egg_list .egg_time:hover {
-  background: #eee;
-}
-.egg_schedule {
+.egg_settings_item .egg_settings {
   display: inline-flex;
   flex-direction: column;
   font-size: 1.4rem;
   background: white;
   border-radius: 1rem;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+  transform: translateX(100%);
+  transition: transform 300ms ease;
+  padding-top: 1rem;
 }
-.egg_schedule .egg_schedule_label {
-  padding: 1rem 0;
+.egg_settings_item .egg_settings.active {
+  transform: translateX(0);
+}
+.egg_settings .egg_settings_label {
+  padding-bottom: 1rem;
   user-select: none;
 }
-.egg_schedule .egg_schedule_token_wrap {
-  padding: 1.5rem 2rem 0 2rem;
+.egg_settings .egg_settings_read_time_wrap,
+.egg_settings .egg_settings_watch_time_wrap {
+  padding: 1rem 2rem 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.egg_schedule_token_wrap .egg_schedule_token_input {
+.egg_settings_read_time_wrap .egg_settings_label,
+.egg_settings_watch_time_wrap .egg_settings_label {
+  padding: 0.5rem 0;
+}
+.egg_settings_read_time_wrap .egg_select,
+.egg_settings_watch_time_wrap .egg_select {
+  width: 6rem;
+}
+.egg_settings .egg_settings_token_wrap {
+  padding: 1rem 2rem 0 2rem;
+}
+.egg_settings_token_wrap .egg_settings_token_input {
   outline: none;
   border: 0.1rem solid #eee;
   padding: 1rem;
@@ -614,21 +668,21 @@
   box-sizing: border-box;
   color: #ccc;
 }
-.egg_schedule_token_wrap .egg_schedule_token_input.active {
+.egg_settings_token_wrap .egg_settings_token_input.active {
   color: #333;
 }
-.egg_schedule_token_input::placeholder {
+.egg_settings_token_input::placeholder {
   color: #ccc;
 }
-.egg_schedule .egg_schedule_submit_btn_wrap {
+.egg_settings .egg_settings_submit_btn_wrap {
   text-align: right;
   padding-top: 1rem;
   display: none;
 }
-.egg_schedule .egg_schedule_submit_btn_wrap.active {
+.egg_settings .egg_settings_submit_btn_wrap.active {
   display: block;
 }
-.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn {
+.egg_settings_submit_btn_wrap .egg_settings_submit_btn {
   outline: none;
   border: 0.1rem solid #eee;
   padding: 0.5rem 1rem;
@@ -637,19 +691,23 @@
   border-radius: 0.2rem;
   cursor: pointer;
 }
-.egg_schedule_submit_btn_wrap .egg_schedule_submit_btn:active {
+.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {
   background: #eee;
 }
-.egg_schedule_add {
+.egg_schedule {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 .egg_schedule_time_wrap {
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
   border-bottom: 0.1rem solid #eee;
 }
-.egg_schedule_time_input_wrap {
+.egg_schedule_time .egg_schedule_label {
+  padding-bottom: 1rem;
+  user-select: none;
+}
+.egg_schedule_time .egg_schedule_time_input_wrap {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -729,23 +787,65 @@
 .egg_schedule_list_none_text {
   padding-top: 1rem;
 }
-.egg_schedule_settings_item {
+.egg_select {
+  position: relative;
+}
+.egg_select .egg_select_input {
+  outline: none;
+  border: 0.1rem solid #eee;
+  padding: 0.8rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.egg_select .egg_select_input::placeholder {
+  color: #ccc;
+}
+.egg_select_list {
+  max-height: 12rem;
+  border-radius: 0 0 0.2rem 0.2rem;
+  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;
+  background: white;
+  user-select: none;
+  transition: 100ms ease;
+  scrollbar-width: thin;
+  overflow: auto;
+  opacity: 1;
+  z-index: 9;
+  width: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: 1rem;
 }
-.egg_schedule_settings_item .egg_schedule {
-  width: 100%;
-  height: 100%;
-  pointer-events: all;
-  transform: translateX(100%);
+.egg_select_list.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+.egg_select_list::-webkit-scrollbar {
+  width: 0.4rem;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_select_list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2rem;
+}
+.egg_select_list .egg_select_item {
+  padding: 0.6rem 1rem;
+  border-bottom: 0.1rem solid #eee;
+  cursor: pointer;
+  color: #333;
   transition: 300ms ease;
+  text-align: center;
 }
-.egg_schedule_settings_item .egg_schedule.active {
-  transform: translateX(0);
+.egg_select_list .egg_select_item.selected {
+  font-weight: bold;
+  background: #f6f6f6;
+}
+.egg_select_list .egg_select_item.active {
+  background: #eee;
+}
+.egg_select_list .egg_select_item:hover {
+  background: #eee;
 }

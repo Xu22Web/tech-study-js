@@ -10,7 +10,7 @@ const API_CONFIG = {
   todayScore: 'https://pc-proxy-api.xuexi.cn/delegate/score/today/query',
   // 任务列表
   taskList:
-    'https://pc-proxy-api.xuexi.cn/api/score/days/listScoreProgress?sence=score&deviceType=2',
+    'https://pc-proxy-api.xuexi.cn/delegate/score/days/listScoreProgress?sence=score&deviceType=2',
   // 新闻数据
   todayNews: [
     'https://www.xuexi.cn/lgdata/35il6fpn0ohq.json',
@@ -33,7 +33,7 @@ const API_CONFIG = {
   // 文本服务器保存答案
   answerSave: 'https://a6.qikekeji.com/txt/data/save',
   // 文本服务器获取答案
-  answerSearch: 'https://api.answer.redfish.top/answer/search',
+  answerSearch: 'https://a6.qikekeji.com/txt/data/detail',
   // 推送
   push: 'https://www.pushplus.plus/send',
   // 生成二维码

@@ -1,19 +1,21 @@
 import { getAnswer, saveAnswer } from '../api/answer';
 import { getExamPaper } from '../api/data';
 import URL_CONFIG from '../config/url';
-import { mainStore } from '../store';
+import {
+  examPause,
+  id,
+  pushToken,
+  settings,
+  taskConfig,
+  userinfo,
+} from '../shared';
 import { SettingType, TaskType } from '../types';
 import { $$ } from '../utils/element';
 import { log } from '../utils/log';
 import { pushModal } from '../utils/push';
 import { createRandomPath, createRandomPoint } from '../utils/random';
-import {
-  examPauseLock,
-  hasMobile,
-  sleep,
-  studyPauseLock,
-} from '../utils/utils';
-import { closeTaskWin, waitTaskWin } from './frame';
+import { hasMobile, sleep, studyPauseLock } from '../utils/utils';
+import { handleCloseTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
 import { refreshScoreInfo, refreshTaskList } from './user';
 
@@ -344,6 +346,45 @@ async function handleBlankInputRand() {
 }
 
 /**
+ * @description 暂停锁
+ */
+function examPauseLock(callback?: (status: boolean) => void) {
+  return new Promise<boolean>((resolve) => {
+    // 学习暂停
+    const pauseStudy = <boolean>(GM_getValue('pauseStudy') || false);
+    // 全局暂停
+    if (pauseStudy) {
+      examPause.value = true;
+    }
+    // 暂停
+    if (examPause.value) {
+      // 创建提示
+      createTip('已暂停, 手动开启自动答题! ', 10);
+      const doing = setInterval(() => {
+        if (!examPause.value) {
+          // 停止定时器
+          clearInterval(doing);
+          log('答题等待结束!');
+          if (callback && callback instanceof Function) {
+            // 创建提示
+            createTip('已开启, 自动答题!');
+            callback(true);
+          }
+          resolve(true);
+          return;
+        }
+        if (callback && callback instanceof Function) {
+          callback(false);
+        }
+        log('答题等待...');
+      }, 500);
+      return;
+    }
+    resolve(true);
+  });
+}
+
+/**
  * @description 答题
  */
 async function doingExam(type: ExamType) {
@@ -402,8 +443,13 @@ async function doingExam(type: ExamType) {
         }
         // 创建提示
         createTip('答案异常, 尝试网络题库获取!');
+        log('正在获取答案...');
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
+        log(`获取答案${answersNetwork.length ? '成功' : '失败'}!`, {
+          question,
+          answersNetwork,
+        });
         // 根据题库作答
         if (answersNetwork.length) {
           const res = handleBlankInput(answersNetwork);
@@ -413,10 +459,7 @@ async function doingExam(type: ExamType) {
           }
         }
         // 随机作答
-        if (
-          type === ExamType.PRACTICE ||
-          mainStore.settings[SettingType.RANDOM_EXAM]
-        ) {
+        if (type === ExamType.PRACTICE || settings[SettingType.RANDOM_EXAM]) {
           log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
@@ -426,14 +469,15 @@ async function doingExam(type: ExamType) {
           const res = await pushModal(
             {
               title: '学习推送',
+              to: userinfo.nick,
               content: '答题存在异常, 已暂停答题!',
               type: 'fail',
             },
-            mainStore.pushToken
+            pushToken.value
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
           // 暂停
-          mainStore.examPause.value = true;
+          examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -475,8 +519,13 @@ async function doingExam(type: ExamType) {
         }
         // 创建提示
         createTip('答案异常, 尝试网络题库获取!');
+        log('正在获取答案...');
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
+        log(`获取答案${answersNetwork.length ? '成功' : '失败'}!`, {
+          question,
+          answersNetwork,
+        });
         // 答案存在
         if (answersNetwork.length) {
           const res = handleChoiceBtn(answersNetwork);
@@ -486,10 +535,7 @@ async function doingExam(type: ExamType) {
           }
         }
         // 随机作答
-        if (
-          type === ExamType.PRACTICE ||
-          mainStore.settings[SettingType.RANDOM_EXAM]
-        ) {
+        if (type === ExamType.PRACTICE || settings[SettingType.RANDOM_EXAM]) {
           log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
@@ -499,14 +545,15 @@ async function doingExam(type: ExamType) {
           const res = await pushModal(
             {
               title: '学习推送',
+              to: userinfo.nick,
               content: '答题存在异常, 已暂停答题!',
               type: 'fail',
             },
-            mainStore.pushToken
+            pushToken.value
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
           // 暂停
-          mainStore.examPause.value = true;
+          examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -553,8 +600,13 @@ async function doingExam(type: ExamType) {
         }
         // 创建提示
         createTip('答案异常, 尝试网络题库获取!');
+        log('正在获取答案...');
         // 尝试题库获取
         const answersNetwork = await getAnswer(question);
+        log(`获取答案${answersNetwork.length ? '成功' : '失败'}!`, {
+          question,
+          answersNetwork,
+        });
         // 存在答案
         if (answersNetwork.length) {
           // 单答案单选项
@@ -584,10 +636,7 @@ async function doingExam(type: ExamType) {
           }
         }
         // 随机作答
-        if (
-          type === ExamType.PRACTICE ||
-          mainStore.settings[SettingType.RANDOM_EXAM]
-        ) {
+        if (type === ExamType.PRACTICE || settings[SettingType.RANDOM_EXAM]) {
           log('答案不存在, 随机作答!');
           // 创建提示
           createTip('答案不存在, 随机作答!');
@@ -597,14 +646,15 @@ async function doingExam(type: ExamType) {
           const res = await pushModal(
             {
               title: '学习推送',
+              to: userinfo.nick,
               content: '答题存在异常, 已暂停答题!',
               type: 'fail',
             },
-            mainStore.pushToken
+            pushToken.value
           );
           createTip(`学习推送${res ? '成功' : '失败'}!`);
           // 暂停
-          mainStore.examPause.value = true;
+          examPause.value = true;
           // 提交答案
           shouldSaveAnswer = true;
         }
@@ -619,8 +669,6 @@ async function doingExam(type: ExamType) {
     nextText = nextButton.innerText.replaceAll(' ', '');
     // 需要提交答案
     if (shouldSaveAnswer) {
-      // 获取key
-      const key = md5(question);
       // 答案
       const answers: string[] = [];
       if (questionType === '填空题') {
@@ -645,16 +693,15 @@ async function doingExam(type: ExamType) {
       const answer = answers.join(';');
       // 存在答案
       if (answer.length) {
-        log('上传答案', { answer, key, question });
-        // 保存答案
-        await saveAnswer(key, answer);
-        // 答案
-        log('上传答案成功!');
+        log('正在上传答案...');
+        // 上传答案
+        const res = await saveAnswer(question, answer);
+        log(`上传答案${res ? '成功' : '失败'}!`, { question, answer });
       }
       // 重置
       shouldSaveAnswer = false;
     }
-    // 确认
+    // 确定
     if (nextText === '确定') {
       // 确认
       nextButton.click();
@@ -666,19 +713,17 @@ async function doingExam(type: ExamType) {
       const answerBox = $$('.answer')[0];
       // 答题错误
       if (answerBox) {
-        // 获取key
-        const key = md5(question);
         const answerTemp = answerBox.innerText;
         // 从字符串中拿出答案
         const [, answerText] = answerTemp.split('：');
         if (answerText && answerText.length) {
           const answer = answerText.replaceAll(' ', ';');
-          log('上传答案', { answer, key, question });
-          await saveAnswer(key, answer);
+          log('正在上传答案...');
+          // 上传答案
+          const res = await saveAnswer(question, answer);
+          log(`上传答案${res ? '成功' : '失败'}!`, { question, answer });
         }
       }
-      // 滑动验证
-      await handleSlideVerify();
     }
     // 获取按钮
     nextButton = await getNextButton();
@@ -690,20 +735,22 @@ async function doingExam(type: ExamType) {
       // 下一题
       nextButton.click();
     }
+    // 滑动验证
+    await handleSlideVerify();
   }
   // 关闭任务窗口
-  closeTaskWin(mainStore.id);
+  handleCloseTaskWin();
 }
 
 /**
- * @description 做每日答题
+ * @description 每日答题
  */
 async function doExamPractice() {
   // 暂停
   await studyPauseLock();
-  log('正在做每日答题...');
+  log('正在每日答题...');
   // 创建提示
-  createTip('正在做每日答题');
+  createTip('正在每日答题');
   // 链接
   const url = URL_CONFIG.examPractice;
   // 等待任务窗口
@@ -718,8 +765,8 @@ async function doExamPractice() {
   await refreshTaskList();
   // 任务完成状况
   if (
-    mainStore.settings[SettingType.PRACTICE] &&
-    !mainStore.tasks[TaskType.PRACTICE].status
+    taskConfig[TaskType.PRACTICE].active &&
+    !taskConfig[TaskType.PRACTICE].status
   ) {
     log('任务未完成, 继续每日答题!');
     // 创建提示
@@ -729,19 +776,19 @@ async function doExamPractice() {
 }
 
 /**
- * @description 做专项练习
+ * @description 专项练习
  */
 async function doExamPaper() {
-  // 创建提示
-  createTip('正在寻找未做的专项练习');
+  // 暂停
+  await studyPauseLock();
   // id
   const examPaperId = await findExamPaper();
   if (examPaperId) {
     // 暂停
     await studyPauseLock();
-    log('正在做专项练习...');
+    log('正在专项练习...');
     // 创建提示
-    createTip('正在做专项练习');
+    createTip('正在专项练习');
     // 链接
     const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
     log(`链接: ${url}`);
@@ -756,8 +803,8 @@ async function doExamPaper() {
     // 刷新任务数据
     await refreshTaskList();
     if (
-      mainStore.settings[SettingType.PAPER] &&
-      !mainStore.tasks[TaskType.PAPER].status
+      taskConfig[TaskType.PAPER].active &&
+      !taskConfig[TaskType.PAPER].status
     ) {
       log('任务未完成, 继续专项练习!');
       // 创建提示
@@ -787,19 +834,15 @@ async function initExam() {
  * @description 查询专项练习列表
  */
 async function findExamPaper() {
-  log('正在寻找未完成的专项练习...');
   // 获取总页数
   const total = await initExam();
   // 专项逆序
-  const paperReverse = mainStore.settings[SettingType.PAPER_REVERSE];
+  const paperReverse = settings[SettingType.PAPER_REVERSE];
   // 当前页数
   let current = paperReverse ? total : 1;
-  if (paperReverse) {
-    log('专项练习, 开启逆序模式, 从最早的题目开始答题');
-  } else {
-    log('专项练习, 开启顺序模式, 从最近的题目开始答题');
-  }
-  log('正在寻找未完成的专项练习...');
+  log(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
+  // 创建提示
+  createTip(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
   while (current <= total && current) {
     // 请求数据
     const data = await getExamPaper(current);
@@ -817,7 +860,7 @@ async function findExamPaper() {
           return examPapers[i].id;
         }
       }
-      // 增加页码 (若开启逆序翻页, 则减少页码)
+      // 增加(减少)页码
       current += paperReverse ? -1 : 1;
       // 等待
       await sleep(3000);

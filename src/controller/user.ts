@@ -102,6 +102,8 @@ async function refreshTaskList(): Promise<boolean> {
       taskConfig[i].percent = rate;
       // 分数
       taskConfig[i].score = currentScore;
+      // 完成状态
+      taskConfig[i].status = rate === 100;
     }
     return true;
   }

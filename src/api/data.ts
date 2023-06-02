@@ -2,6 +2,20 @@ import API_CONFIG from '../config/api';
 /* 数据 API */
 
 /**
+ * @description 新闻列表
+ */
+type NewsVideoList = {
+  publishTime: string;
+  title: string;
+  type: string;
+  url: string;
+  showSource: string;
+  auditTime: string;
+  dataValid: boolean;
+  itemType: string;
+}[];
+
+/**
  * @description 获取新闻数据
  */
 async function getNewsList() {
@@ -14,7 +28,7 @@ async function getNewsList() {
     });
     // 请求成功
     if (res.ok) {
-      const data = await res.json();
+      const data = <NewsVideoList>await res.json();
       return data;
     }
   } catch (err) {}
@@ -33,7 +47,7 @@ async function getVideoList() {
     });
     // 请求成功
     if (res.ok) {
-      const data = await res.json();
+      const data = <NewsVideoList>await res.json();
       return data;
     }
   } catch (err) {}

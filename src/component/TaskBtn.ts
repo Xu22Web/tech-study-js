@@ -1,4 +1,4 @@
-import { doExamPaper, doExamPractice } from '../controller/exam';
+import { doExamPractice } from '../controller/exam';
 import { closeFrame } from '../controller/frame';
 import { readNews, watchVideo } from '../controller/readAndWatch';
 import { createTip } from '../controller/tip';
@@ -6,6 +6,7 @@ import {
   frame,
   login,
   pushToken,
+  running,
   settings,
   taskConfig,
   taskStatus,
@@ -14,9 +15,9 @@ import {
   userinfo,
 } from '../shared';
 import { SettingType, TaskStatusType, TaskType } from '../types';
-import { watch, watchEffectRef } from '../utils/composition';
+import { watch, watchEffectRef, watchRef } from '../utils/composition';
 import { createElementNode, createTextNode } from '../utils/element';
-import { log, error } from '../utils/log';
+import { error, log } from '../utils/log';
 import { getHighlightHTML, getProgressHTML, pushModal } from '../utils/push';
 import { debounce, studyPauseLock } from '../utils/utils';
 
@@ -78,21 +79,6 @@ function TaskBtn() {
           await doExamPractice();
         }
         log('任务三: 每日答题已完成!');
-
-        // 专项练习
-        if (
-          taskConfig[TaskType.PAPER].active &&
-          !taskConfig[TaskType.PAPER].status
-        ) {
-          log('任务四: 专项练习');
-          // 创建提示
-          createTip('任务四: 专项练习');
-          // 暂停
-          await studyPauseLock();
-          // 做专项练习
-          await doExamPaper();
-        }
-        log('任务四: 专项练习已完成!');
       }
       /**
        * @description 暂停任务
@@ -228,18 +214,15 @@ function TaskBtn() {
             class: watchEffectRef(
               () =>
                 `egg_study_btn${
-                  taskStatus.value === TaskStatusType.LOADING ||
-                  taskStatus.value === TaskStatusType.START
-                    ? ' loading'
-                    : taskStatus.value === TaskStatusType.FINISH
-                    ? ' disabled'
-                    : ''
+                  taskStatus.value === TaskStatusType.START ? ' loading' : ''
                 }`
             ),
 
             type: 'button',
-            disabled: watchEffectRef(
+            disabled: watchRef(
+              () => [running.value, taskStatus.value],
               () =>
+                running.value ||
                 taskStatus.value === TaskStatusType.LOADING ||
                 taskStatus.value === TaskStatusType.FINISH
             ),

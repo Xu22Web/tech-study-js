@@ -1,15 +1,20 @@
+import { doExamPaper } from '../controller/exam';
 import { createTip } from '../controller/tip';
-import { frame, settings } from '../shared';
-import { SettingType } from '../types';
+import { frame, running, settings, taskStatus } from '../shared';
+import { SettingType, TaskStatusType } from '../types';
 import { ref, watchEffectRef, watchRef } from '../utils/composition';
-import { createElementNode, createNSElementNode } from '../utils/element';
+import {
+  createElementNode,
+  createNSElementNode,
+  createTextNode,
+} from '../utils/element';
 import { debounce, hasMobile } from '../utils/utils';
 import { Hr } from './Hr';
 import { InfoItem } from './InfoItem';
 import { LoginItem } from './LoginItem';
 import { NomalItem } from './NoramlItem';
-import { SettingsPanel } from './SettingsPanel';
 import { ScoreItem } from './ScoreItem';
+import { SettingsPanel } from './SettingsPanel';
 import { TaskBtn } from './TaskBtn';
 import { TaskList } from './TaskList';
 
@@ -40,6 +45,11 @@ function Panel() {
       tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
       type: SettingType.SCHEDULE_RUN,
     },
+    {
+      title: '全屏运行',
+      tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
+      type: SettingType.SCHEDULE_RUN,
+    },
   ];
   // 运行设置标签
   const examLabels = [
@@ -48,11 +58,6 @@ function Panel() {
       tip: '无答案时, 随机选择或者填入答案, 不保证正确',
       type: SettingType.RANDOM_EXAM,
     },
-    {
-      title: '专项逆序',
-      tip: '专项答题时, 逆序作答',
-      type: SettingType.PAPER_REVERSE,
-    },
   ];
   // 推送设置标签
   const pushLabels = [
@@ -60,7 +65,6 @@ function Panel() {
       title: '远程推送',
       tip: '利用 pushplus 推送, 将登录二维码直接推送到微信公众号',
       type: SettingType.REMOTE_PUSH,
-      handler() {},
     },
   ];
   // 处理设置变化
@@ -109,20 +113,16 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_run_list' },
-          watchEffectRef(() => {
-            return runLabels.map((label) => {
-              // 处理变化
-              const handleChange = debounce(handleSettingsChange, 300);
-              return NomalItem({
-                title: label.title,
-                tip: label.tip,
-                checked: settings[label.type],
-                onChange: (e) => {
-                  handleChange(e, label.type, label.title);
-                },
-              });
-            });
-          })
+          runLabels.map((label) =>
+            NomalItem({
+              title: label.title,
+              tip: label.tip,
+              checked: settings[label.type],
+              onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+              },
+            })
+          )
         ),
         // 答题部分
         Hr({ text: '答题' }),
@@ -130,20 +130,16 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_exam_list' },
-          watchEffectRef(() => {
-            return examLabels.map((label) => {
-              // 处理变化
-              const handleChange = debounce(handleSettingsChange, 300);
-              return NomalItem({
-                title: label.title,
-                tip: label.tip,
-                checked: settings[label.type],
-                onChange: (e) => {
-                  handleChange(e, label.type, label.title);
-                },
-              });
-            });
-          })
+          examLabels.map((label) =>
+            NomalItem({
+              title: label.title,
+              tip: label.tip,
+              checked: settings[label.type],
+              onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+              },
+            })
+          )
         ),
         // 推送部分
         Hr({ text: '推送' }),
@@ -151,21 +147,39 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_push_list' },
-          watchEffectRef(() => {
-            return pushLabels.map((label) => {
-              // 处理变化
-              const handleChange = debounce(handleSettingsChange, 300);
-              return NomalItem({
-                title: label.title,
-                tip: label.tip,
-                checked: settings[label.type],
-                onChange: (e) => {
-                  handleChange(e, label.type, label.title);
-                },
-              });
-            });
-          })
+          pushLabels.map((label) =>
+            NomalItem({
+              title: label.title,
+              tip: label.tip,
+              checked: settings[label.type],
+              onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+              },
+            })
+          )
         ),
+        // 提示部分
+        Hr({ text: '提示' }),
+        createElementNode('div', undefined, { class: 'egg_tip_list' }, [
+          createTextNode('专项练习已被移除, 如需使用, 请点击'),
+          createElementNode(
+            'button',
+            undefined,
+            {
+              class: 'egg_tip_btn',
+              type: 'button',
+              onclick: debounce(doExamPaper, 300),
+              disabled: watchRef(
+                () => [running.value, taskStatus.value],
+                () =>
+                  running.value ||
+                  taskStatus.value === TaskStatusType.START ||
+                  taskStatus.value === TaskStatusType.PAUSE
+              ),
+            },
+            createTextNode('去完成')
+          ),
+        ]),
         // 按钮集合
         createElementNode(
           'div',

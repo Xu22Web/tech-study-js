@@ -93,17 +93,22 @@ async function reading(type: number) {
   let time = 30;
   // 文章选读
   if (type === 0) {
-    // maxRead.value 秒后关闭页面, 看文章
-    time = maxRead.value;
+    // 章节
+    const sections = $$<HTMLVideoElement>('section');
+    // 预计时间
+    const predictTime =
+      ~~(60 * Math.max(...[...sections].map((s) => s.innerText.length))) / 1000;
+    // min(predictTime,  maxWatch.value) 秒后关闭页面
+    time = Math.min(predictTime, maxRead.value);
   }
   // 视听学习
   if (type === 1) {
     // 视频
     const video = $$<HTMLVideoElement>('video')[0];
-    // 总时长
-    const { duration } = video;
-    // min(duration,  maxWatch.value) 秒后关闭页面, 看文章
-    time = duration > maxWatch.value ? maxWatch.value : ~~duration;
+    // 预计时间
+    const predictTime = ~~video.duration;
+    // min(predictTime,  maxWatch.value) 秒后关闭页面
+    time = Math.min(predictTime, maxWatch.value);
   }
   // 随机
   time = time - ~~(Math.random() * 10) + 5;
@@ -180,68 +185,75 @@ async function reading(type: number) {
 /**
  * @description 获取新闻列表
  */
-function getNews() {
-  return new Promise(async (resolve) => {
-    // 需要学习的新闻数量
-    const need =
-      taskConfig[TaskType.READ].need < maxNewsNum
-        ? taskConfig[TaskType.READ].need
-        : maxNewsNum;
-    log(`剩余 ${need} 个新闻`);
-    // 获取重要新闻
-    const data = await getNewsList();
-    if (data && data.length) {
-      // 数量补足需要数量
-      while (news.length < need) {
-        // 随便取
-        const randomIndex = ~~(Math.random() * data.length);
-        // 新闻
-        const item = data[randomIndex];
-        // 是否存在新闻
-        if (item.dataValid && item.type === 'tuwen') {
-          news.push(item);
-        }
+async function getNews() {
+  // 需要学习的新闻数量
+  const need =
+    taskConfig[TaskType.READ].need < maxNewsNum
+      ? taskConfig[TaskType.READ].need
+      : maxNewsNum;
+  log(`剩余 ${need} 个新闻`);
+  // 获取新闻
+  const data = await getNewsList();
+  if (data && data.length) {
+    // 查找今年新闻
+    for (const i in data) {
+      if (news.length === need) {
+        return;
       }
-    } else {
-      news = [];
+      // 新闻
+      const item = data[i];
+      // 是否存在
+      if (
+        item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+        item.type === 'tuwen'
+      ) {
+        news.push(item);
+      }
     }
-    resolve('done');
-  });
+    // 补足新闻数
+    if (news.length < need) {
+      await getNews();
+    }
+  } else {
+    news = [];
+  }
 }
 
 /**
  * @description 获取视频列表
  */
-function getVideos() {
-  return new Promise(async (resolve) => {
-    // 需要学习的视频数量
-    const need =
-      taskConfig[TaskType.WATCH].need < maxVideoNum
-        ? taskConfig[TaskType.WATCH].need
-        : maxVideoNum;
-    log(`剩余 ${need} 个视频`);
-    // 获取重要视频
-    const data = await getVideoList();
-    if (data && data.length) {
-      // 数量补足需要数量
-      while (videos.length < need) {
-        // 随便取
-        const randomIndex = ~~(Math.random() * data.length);
-        // 视频
-        const item = data[randomIndex];
-        // 是否存在视频
-        if (
-          item.dataValid &&
-          (item.type === 'shipin' || item.type === 'juji')
-        ) {
-          videos.push(item);
-        }
+async function getVideos() {
+  // 需要学习的视频数量
+  const need =
+    taskConfig[TaskType.WATCH].need < maxVideoNum
+      ? taskConfig[TaskType.WATCH].need
+      : maxVideoNum;
+  log(`剩余 ${need} 个视频`);
+  // 获取视频
+  const data = await getVideoList();
+  if (data && data.length) {
+    // 查找今年视频
+    for (const i in data) {
+      if (videos.length === need) {
+        return;
       }
-    } else {
-      videos = [];
+      // 新闻
+      const item = data[i];
+      // 是否存在
+      if (
+        item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+        (item.type === 'shipin' || item.type === 'juji')
+      ) {
+        videos.push(item);
+      }
     }
-    resolve('done');
-  });
+    // 补足视频数
+    if (videos.length < need) {
+      await getVideos();
+    }
+  } else {
+    videos = [];
+  }
 }
 
 /**

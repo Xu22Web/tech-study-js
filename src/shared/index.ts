@@ -14,6 +14,18 @@ const href = window.location.href;
  */
 const taskConfig = reactive([
   {
+    title: '登录',
+    currentScore: 0,
+    dayMaxScore: 0,
+    need: 0,
+    status: false,
+    tip: '每日首次登录积1分。',
+    percent: 0,
+    score: 0,
+    active: true,
+    immutable: true,
+  },
+  {
     title: '文章选读',
     currentScore: 0,
     dayMaxScore: 0,
@@ -22,8 +34,8 @@ const taskConfig = reactive([
     tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
     percent: 0,
     score: 0,
-    index: TaskType.READ,
     active: true,
+    immutable: false,
   },
   {
     title: '视听学习',
@@ -34,8 +46,8 @@ const taskConfig = reactive([
     tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
     percent: 0,
     score: 0,
-    index: TaskType.WATCH,
     active: true,
+    immutable: false,
   },
   {
     title: '每日答题',
@@ -46,35 +58,15 @@ const taskConfig = reactive([
     tip: '每组答题每答对1道积1分。每日上限积5分。',
     percent: 0,
     score: 0,
-    index: TaskType.PRACTICE,
     active: false,
-  },
-  {
-    title: '专项练习',
-    currentScore: 0,
-    dayMaxScore: 0,
-    need: 0,
-    status: false,
-    tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
-    percent: 0,
-    score: 0,
-    index: TaskType.PAPER,
-    active: false,
+    immutable: false,
   },
 ]);
 
 /**
  * @description 设置
  */
-const settings = reactive<Settings>([
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-]);
+const settings = reactive<Settings>([false, false, false, false, false, false]);
 
 /**
  * @description 总分
@@ -168,6 +160,11 @@ const maxRead = ref(100);
  */
 const maxWatch = ref(120);
 
+/**
+ * @description 运行其他任务
+ */
+const running = ref(false);
+
 export {
   href,
   taskConfig,
@@ -187,4 +184,5 @@ export {
   page,
   maxRead,
   maxWatch,
+  running,
 };

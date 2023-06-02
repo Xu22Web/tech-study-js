@@ -1,4 +1,4 @@
-import { Reactive, Ref, watchEffectRef, watchRef } from '../utils/composition';
+import { Ref, watchEffectRef } from '../utils/composition';
 import { createElementNode, createTextNode } from '../utils/element';
 
 /**
@@ -9,57 +9,22 @@ function TaskItem({
   title,
   tip,
   checked,
-  onchange,
-  onmousedown,
-  onmousemove,
-  onmouseup,
   percent,
-  edit,
-  drag,
-  position,
-  onMounted,
+  onchange,
+  immutable,
 }: {
   title: string;
   tip: string;
   checked: Ref<boolean>;
-  onchange: (e: Event) => void;
-  onmousedown: (e: MouseEvent) => void;
-  onmousemove: (e: MouseEvent) => void;
-  onmouseup: (e: MouseEvent) => void;
   percent: Ref<number>;
-  edit: Ref<boolean>;
-  drag: Ref<boolean>;
-  position: Reactive<{
-    x: number;
-    y: number;
-  }>;
-  onMounted: () => void;
+  onchange: (...args: any[]) => void;
+  immutable: boolean;
 }) {
   return createElementNode(
     'div',
     undefined,
     {
-      class: watchRef(
-        [drag, edit],
-        () =>
-          `egg_task_item${
-            edit.value ? (drag.value ? ' edit drag' : ' edit') : ''
-          }`
-      ),
-      onmousedown: watchRef(drag, () => (e) => {
-        onmousedown(e);
-        window.addEventListener('mousemove', onmousemove);
-        const handleMouseUp = (e: MouseEvent) => {
-          onmouseup(e);
-          window.removeEventListener('mouseup', handleMouseUp);
-          window.removeEventListener('mousemove', onmousemove);
-        };
-        window.addEventListener('mouseup', handleMouseUp);
-      }),
-      style: watchRef(
-        () => [drag.value, position.x, position.y],
-        () => (drag.value ? `left: ${position.x}px;top: ${position.y}px;` : '')
-      ),
+      class: 'egg_task_item',
     },
     [
       createElementNode(
@@ -98,14 +63,13 @@ function TaskItem({
             title: tip,
             class: 'egg_switch',
             type: 'checkbox',
-            disabled: edit,
             checked,
             onchange,
+            disabled: immutable,
           }),
         ]
       ),
-    ],
-    { onMounted }
+    ]
   );
 }
 

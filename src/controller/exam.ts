@@ -3,19 +3,20 @@ import { getExamPaper } from '../api/data';
 import URL_CONFIG from '../config/url';
 import {
   examPause,
-  id,
+  frame,
   pushToken,
+  running,
   settings,
   taskConfig,
   userinfo,
 } from '../shared';
 import { SettingType, TaskType } from '../types';
-import { $$ } from '../utils/element';
+import { $$, $_ } from '../utils/element';
 import { log } from '../utils/log';
 import { pushModal } from '../utils/push';
 import { createRandomPath, createRandomPoint } from '../utils/random';
 import { hasMobile, sleep, studyPauseLock } from '../utils/utils';
-import { handleCloseTaskWin, waitTaskWin } from './frame';
+import { closeFrame, handleCloseTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
 import { refreshScoreInfo, refreshTaskList } from './user';
 
@@ -63,9 +64,9 @@ function handleSlideVerify() {
       // 提高层级
       mask.style.zIndex = '999';
       // 轨道
-      const track = $$<HTMLElement>('.nc_scale')[0];
+      const track = (await $_<HTMLElement>('.nc_scale', undefined, 3000))[0];
       // 滑块
-      const slide = $$<HTMLElement>('.btn_slide')[0];
+      const slide = (await $_<HTMLElement>('.btn_slide', undefined, 3000))[0];
       const rectTrack = track.getBoundingClientRect();
       const rectSlide = slide.getBoundingClientRect();
       // 窗口
@@ -779,16 +780,13 @@ async function doExamPractice() {
  * @description 专项练习
  */
 async function doExamPaper() {
-  // 暂停
-  await studyPauseLock();
+  running.value = true;
+  log('正在专项练习...');
+  // 创建提示
+  createTip('正在专项练习');
   // id
   const examPaperId = await findExamPaper();
   if (examPaperId) {
-    // 暂停
-    await studyPauseLock();
-    log('正在专项练习...');
-    // 创建提示
-    createTip('正在专项练习');
     // 链接
     const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
     log(`链接: ${url}`);
@@ -796,23 +794,17 @@ async function doExamPaper() {
     await waitTaskWin(url, '专项练习');
     // 创建提示
     createTip('完成专项练习!');
-    // 等待一段时间
-    await sleep(1500);
-    // 刷新分数数据
-    await refreshScoreInfo();
-    // 刷新任务数据
-    await refreshTaskList();
-    if (
-      taskConfig[TaskType.PAPER].active &&
-      !taskConfig[TaskType.PAPER].status
-    ) {
-      log('任务未完成, 继续专项练习!');
-      // 创建提示
-      createTip('任务未完成, 继续专项练习!');
-      doExamPaper();
+    running.value = false;
+    // 同屏任务
+    if (settings[SettingType.SAME_TAB]) {
+      // 关闭窗口
+      closeFrame();
+      // 窗口不存在
+      frame.exist = false;
     }
     return;
   }
+  running.value = false;
   // 创建提示
   createTip('专项练习均已完成!');
 }
@@ -836,23 +828,17 @@ async function initExam() {
 async function findExamPaper() {
   // 获取总页数
   const total = await initExam();
-  // 专项逆序
-  const paperReverse = settings[SettingType.PAPER_REVERSE];
   // 当前页数
-  let current = paperReverse ? total : 1;
-  log(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
+  let current = 1;
+  log(`正在寻找的专项练习...`);
   // 创建提示
-  createTip(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
+  createTip(`正在寻找的专项练习...`);
   while (current <= total && current) {
     // 请求数据
     const data = await getExamPaper(current);
     if (data) {
       // 获取专项练习的列表
       const examPapers = data.list;
-      if (paperReverse) {
-        // 若开启逆序答题, 则反转专项练习列表
-        examPapers.reverse();
-      }
       for (const i in examPapers) {
         // 遍历查询有没有没做过的
         if (examPapers[i].status === 1) {
@@ -860,8 +846,8 @@ async function findExamPaper() {
           return examPapers[i].id;
         }
       }
-      // 增加(减少)页码
-      current += paperReverse ? -1 : 1;
+      // 增加页码
+      current += 1;
       // 等待
       await sleep(3000);
     } else {

@@ -74,40 +74,29 @@ async function refreshTaskList(): Promise<boolean> {
   // 原始任务进度
   const taskProgress = await getTaskList();
   if (taskProgress) {
+    // 登录
+    taskConfig[TaskType.LOGIN].currentScore = taskProgress[2].currentScore;
+    taskConfig[TaskType.LOGIN].dayMaxScore = taskProgress[2].dayMaxScore;
+    taskConfig[TaskType.LOGIN].need =
+      taskProgress[2].dayMaxScore - taskProgress[2].currentScore;
     // 文章选读
-    taskConfig[TaskType.READ].currentScore = taskProgress[0].currentScore;
-    taskConfig[TaskType.READ].dayMaxScore = taskProgress[0].dayMaxScore;
-    taskConfig[TaskType.READ].need =
-      taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
+    taskConfig[TaskType.READ].currentScore = 0;
+    taskConfig[TaskType.READ].dayMaxScore = 12;
+    taskConfig[TaskType.READ].need = 12;
     // 视听学习
-    taskConfig[TaskType.WATCH].currentScore =
-      taskProgress[1].currentScore + taskProgress[2].currentScore;
-    taskConfig[TaskType.WATCH].dayMaxScore =
-      taskProgress[1].dayMaxScore + taskProgress[2].dayMaxScore;
+    taskConfig[TaskType.WATCH].currentScore = taskProgress[1].currentScore;
+    taskConfig[TaskType.WATCH].dayMaxScore = taskProgress[1].dayMaxScore;
     taskConfig[TaskType.WATCH].need =
-      taskProgress[1].dayMaxScore +
-      taskProgress[2].dayMaxScore -
-      (taskProgress[1].currentScore + taskProgress[2].currentScore);
+      taskProgress[1].dayMaxScore - taskProgress[1].currentScore;
     // 每日答题
-    taskConfig[TaskType.PRACTICE].currentScore = taskProgress[5].currentScore;
-    taskConfig[TaskType.PRACTICE].dayMaxScore = taskProgress[5].dayMaxScore;
-    taskConfig[TaskType.PRACTICE].need =
-      taskProgress[5].dayMaxScore - taskProgress[5].currentScore;
-    // 专项练习
-    taskConfig[TaskType.PAPER].currentScore = taskProgress[4].currentScore;
-    taskConfig[TaskType.PAPER].dayMaxScore = taskProgress[4].dayMaxScore;
-    taskConfig[TaskType.PAPER].need =
-      taskProgress[4].dayMaxScore - taskProgress[4].currentScore;
+    taskConfig[TaskType.PRACTICE].currentScore = taskProgress[3].currentScore;
+    taskConfig[TaskType.PRACTICE].dayMaxScore = taskProgress[3].dayMaxScore;
+    taskConfig[TaskType.PRACTICE].need = taskProgress[3].dayMaxScore;
     // 更新数据
     for (const i in taskConfig) {
       const { currentScore, dayMaxScore } = taskConfig[i];
       // 进度
-      let rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
-      // 修复专项练习成组做完, 进度条显示异常
-      if (dayMaxScore <= currentScore) {
-        rate = 100;
-        taskConfig[i].status = true;
-      }
+      const rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
       // 百分比
       taskConfig[i].percent = rate;
       // 分数

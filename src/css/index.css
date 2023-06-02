@@ -320,20 +320,6 @@
 .egg_task_item {
   user-select: none;
 }
-.egg_task_item.drag {
-  position: absolute;
-  z-index: 999;
-  border: dashed #ccc 0.1rem;
-  border-radius: 0.1rem;
-  background: #ffffffe6;
-  backdrop-filter: blur(1rem);
-  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;
-  cursor: move;
-  pointer-events: none;
-}
-.egg_task_item.edit {
-  border-radius: 0.5rem;
-}
 .egg_task_content {
   min-height: 3rem;
   min-width: 18rem;
@@ -434,6 +420,21 @@
 .egg_switch:checked::after {
   left: calc(100% - var(--border-padding) - 1.4rem);
 }
+.egg_tip_list {
+  font-size: 1.2rem;
+  max-width: 18rem;
+  line-height: 2rem;
+  color: var(--themeColor);
+}
+.egg_tip_list .egg_tip_btn {
+  padding: 0.2rem 0.4rem;
+  background: #f1f1f1;
+  color: #333;
+}
+.egg_tip_list .egg_tip_btn:disabled {
+  opacity: 0.5;
+  background: #ccc;
+}
 .egg_study_item {
   display: flex;
   justify-content: center;
@@ -447,13 +448,13 @@
   color: white;
   transition: 80ms ease;
 }
-.egg_study_item .egg_study_btn:not(.loading, .disabled):active {
+.egg_study_item .egg_study_btn:not(.loading):active {
   opacity: 0.8;
 }
 .egg_study_item .egg_study_btn.loading {
   animation: fade 2s ease infinite alternate;
 }
-.egg_study_item .egg_study_btn.disabled {
+.egg_study_item .egg_study_btn:disabled {
   background: #ccc;
 }
 .egg_tip_wrap {

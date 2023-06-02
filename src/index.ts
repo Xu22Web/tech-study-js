@@ -63,7 +63,7 @@ load(
     // 初始化主页面
     initMainListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 渲染面板
     renderPanel();
     // 渲染窗口
@@ -86,7 +86,7 @@ load(
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 处理文章
     handleNews();
   }
@@ -107,7 +107,7 @@ load(
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 处理视频
     handleVideo();
   }
@@ -126,7 +126,7 @@ load(
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 创建答题按钮
     await renderExamBtn();
     // 开始答题
@@ -147,7 +147,7 @@ load(
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 创建答题按钮
     await renderExamBtn();
     // 开始答题
@@ -176,7 +176,6 @@ function initTaskConfig() {
     if (configTemp && configTemp.length === taskConfig.length) {
       taskConfig.forEach((task, i) => {
         task.active = configTemp[i].active;
-        task.index = configTemp[i].index;
       });
       return;
     }
@@ -245,7 +244,7 @@ function initMaxWatch() {
 /**
  * @description 渲染提示
  */
-function reanderTip() {
+function renderTip() {
   const tipWrap = createElementNode('div', undefined, {
     class: 'egg_tip_wrap',
   });

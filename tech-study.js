@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   1.6.0
+// @version   1.6.2
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -20,7 +20,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @supportURL   https://github.com/Xu22Web
 // ==/UserScript==
-const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;}.egg_task_item.drag {  position: absolute;  z-index: 999;  border: dashed #ccc 0.1rem;  border-radius: 0.1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  cursor: move;  pointer-events: none;}.egg_task_item.edit {  border-radius: 0.5rem;}.egg_task_content {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_task_content .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading, .disabled):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn.disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
+const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;}.egg_task_content {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_task_content .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_tip_list {  font-size: 1.2rem;  max-width: 18rem;  line-height: 2rem;  color: var(--themeColor);}.egg_tip_list .egg_tip_btn {  padding: 0.2rem 0.4rem;  background: #f1f1f1;  color: #333;}.egg_tip_list .egg_tip_btn:disabled {  opacity: 0.5;  background: #ccc;}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn:disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
 /**
  * @description 嵌入样式
  */
@@ -39,7 +39,7 @@ load((href) => href.match(URL_CONFIG.home), () => {
     // 初始化主页面
     initMainListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 渲染面板
     renderPanel();
     // 渲染窗口
@@ -57,7 +57,7 @@ load((href) => href === GM_getValue('readingUrl'), async () => {
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 处理文章
     handleNews();
 });
@@ -73,7 +73,7 @@ load((href) => href === GM_getValue('watchingUrl'), async () => {
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 处理视频
     handleVideo();
 });
@@ -87,7 +87,7 @@ load((href) => href === URL_CONFIG.examPractice, async () => {
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 创建答题按钮
     await renderExamBtn();
     // 开始答题
@@ -103,7 +103,7 @@ load((href) => href.includes(URL_CONFIG.examPaper), async () => {
     // 初始化子页面
     initChildListener();
     // 初始化提示
-    reanderTip();
+    renderTip();
     // 创建答题按钮
     await renderExamBtn();
     // 开始答题
@@ -125,7 +125,6 @@ function initTaskConfig() {
         if (configTemp && configTemp.length === taskConfig.length) {
             taskConfig.forEach((task, i) => {
                 task.active = configTemp[i].active;
-                task.index = configTemp[i].index;
             });
             return;
         }
@@ -193,7 +192,7 @@ function initMaxWatch() {
 /**
  * @description 渲染提示
  */
-function reanderTip() {
+function renderTip() {
     const tipWrap = createElementNode('div', undefined, {
         class: 'egg_tip_wrap',
     });
@@ -297,7 +296,6 @@ async function saveAnswer(question, answer) {
     }
     catch (error) { }
 }
-/* 数据 API */
 /**
  * @description 获取新闻数据
  */
@@ -648,16 +646,16 @@ const API_CONFIG = {
 /**
  * @description 版本号
  */
-const version = '1.6.0';
+const version = '1.6.2';
 /**
  * @description 任务类型
  */
 var TaskType;
 (function (TaskType) {
-    TaskType[TaskType["READ"] = 0] = "READ";
-    TaskType[TaskType["WATCH"] = 1] = "WATCH";
-    TaskType[TaskType["PRACTICE"] = 2] = "PRACTICE";
-    TaskType[TaskType["PAPER"] = 3] = "PAPER";
+    TaskType[TaskType["LOGIN"] = 0] = "LOGIN";
+    TaskType[TaskType["READ"] = 1] = "READ";
+    TaskType[TaskType["WATCH"] = 2] = "WATCH";
+    TaskType[TaskType["PRACTICE"] = 3] = "PRACTICE";
 })(TaskType || (TaskType = {}));
 /**
  * @description 设置类型
@@ -669,8 +667,7 @@ var SettingType;
     SettingType[SettingType["SILENT_RUN"] = 2] = "SILENT_RUN";
     SettingType[SettingType["SCHEDULE_RUN"] = 3] = "SCHEDULE_RUN";
     SettingType[SettingType["RANDOM_EXAM"] = 4] = "RANDOM_EXAM";
-    SettingType[SettingType["PAPER_REVERSE"] = 5] = "PAPER_REVERSE";
-    SettingType[SettingType["REMOTE_PUSH"] = 6] = "REMOTE_PUSH";
+    SettingType[SettingType["REMOTE_PUSH"] = 5] = "REMOTE_PUSH";
 })(SettingType || (SettingType = {}));
 /**
  * @description 进度类型
@@ -2487,6 +2484,18 @@ const href = window.location.href;
  */
 const taskConfig = reactive([
     {
+        title: '登录',
+        currentScore: 0,
+        dayMaxScore: 0,
+        need: 0,
+        status: false,
+        tip: '每日首次登录积1分。',
+        percent: 0,
+        score: 0,
+        active: true,
+        immutable: true,
+    },
+    {
         title: '文章选读',
         currentScore: 0,
         dayMaxScore: 0,
@@ -2495,8 +2504,8 @@ const taskConfig = reactive([
         tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
         percent: 0,
         score: 0,
-        index: TaskType.READ,
         active: true,
+        immutable: false,
     },
     {
         title: '视听学习',
@@ -2507,8 +2516,8 @@ const taskConfig = reactive([
         tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
         percent: 0,
         score: 0,
-        index: TaskType.WATCH,
         active: true,
+        immutable: false,
     },
     {
         title: '每日答题',
@@ -2519,34 +2528,14 @@ const taskConfig = reactive([
         tip: '每组答题每答对1道积1分。每日上限积5分。',
         percent: 0,
         score: 0,
-        index: TaskType.PRACTICE,
         active: false,
-    },
-    {
-        title: '专项练习',
-        currentScore: 0,
-        dayMaxScore: 0,
-        need: 0,
-        status: false,
-        tip: '每组答题每答对1道积1分，同组答题不重复积分；每日仅可获得一组答题积分，5道题一组的上限5分，10道题一组的上限10分。',
-        percent: 0,
-        score: 0,
-        index: TaskType.PAPER,
-        active: false,
+        immutable: false,
     },
 ]);
 /**
  * @description 设置
  */
-const settings = reactive([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-]);
+const settings = reactive([false, false, false, false, false, false]);
 /**
  * @description 总分
  */
@@ -2618,6 +2607,10 @@ const maxRead = ref(100);
  */
 const maxWatch = ref(120);
 /**
+ * @description 运行其他任务
+ */
+const running = ref(false);
+/**
  * @description  考试类型
  */
 var ExamType;
@@ -2658,9 +2651,9 @@ function handleSlideVerify() {
             // 提高层级
             mask.style.zIndex = '999';
             // 轨道
-            const track = $$('.nc_scale')[0];
+            const track = (await $_('.nc_scale', undefined, 3000))[0];
             // 滑块
-            const slide = $$('.btn_slide')[0];
+            const slide = (await $_('.btn_slide', undefined, 3000))[0];
             const rectTrack = track.getBoundingClientRect();
             const rectSlide = slide.getBoundingClientRect();
             // 窗口
@@ -3356,16 +3349,13 @@ async function doExamPractice() {
  * @description 专项练习
  */
 async function doExamPaper() {
-    // 暂停
-    await studyPauseLock();
+    running.value = true;
+    log('正在专项练习...');
+    // 创建提示
+    createTip('正在专项练习');
     // id
     const examPaperId = await findExamPaper();
     if (examPaperId) {
-        // 暂停
-        await studyPauseLock();
-        log('正在专项练习...');
-        // 创建提示
-        createTip('正在专项练习');
         // 链接
         const url = `${URL_CONFIG.examPaper}?id=${examPaperId}`;
         log(`链接: ${url}`);
@@ -3373,21 +3363,17 @@ async function doExamPaper() {
         await waitTaskWin(url, '专项练习');
         // 创建提示
         createTip('完成专项练习!');
-        // 等待一段时间
-        await sleep(1500);
-        // 刷新分数数据
-        await refreshScoreInfo();
-        // 刷新任务数据
-        await refreshTaskList();
-        if (taskConfig[TaskType.PAPER].active &&
-            !taskConfig[TaskType.PAPER].status) {
-            log('任务未完成, 继续专项练习!');
-            // 创建提示
-            createTip('任务未完成, 继续专项练习!');
-            doExamPaper();
+        running.value = false;
+        // 同屏任务
+        if (settings[SettingType.SAME_TAB]) {
+            // 关闭窗口
+            closeFrame();
+            // 窗口不存在
+            frame.exist = false;
         }
         return;
     }
+    running.value = false;
     // 创建提示
     createTip('专项练习均已完成!');
 }
@@ -3409,23 +3395,17 @@ async function initExam() {
 async function findExamPaper() {
     // 获取总页数
     const total = await initExam();
-    // 专项逆序
-    const paperReverse = settings[SettingType.PAPER_REVERSE];
     // 当前页数
-    let current = paperReverse ? total : 1;
-    log(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
+    let current = 1;
+    log(`正在寻找的专项练习...`);
     // 创建提示
-    createTip(`正在${paperReverse ? '逆序' : '顺序'}寻找的专项练习...`);
+    createTip(`正在寻找的专项练习...`);
     while (current <= total && current) {
         // 请求数据
         const data = await getExamPaper(current);
         if (data) {
             // 获取专项练习的列表
             const examPapers = data.list;
-            if (paperReverse) {
-                // 若开启逆序答题, 则反转专项练习列表
-                examPapers.reverse();
-            }
             for (const i in examPapers) {
                 // 遍历查询有没有没做过的
                 if (examPapers[i].status === 1) {
@@ -3433,8 +3413,8 @@ async function findExamPaper() {
                     return examPapers[i].id;
                 }
             }
-            // 增加(减少)页码
-            current += paperReverse ? -1 : 1;
+            // 增加页码
+            current += 1;
             // 等待
             await sleep(3000);
         }
@@ -3923,17 +3903,21 @@ async function reading(type) {
     let time = 30;
     // 文章选读
     if (type === 0) {
-        // maxRead.value 秒后关闭页面, 看文章
-        time = maxRead.value;
+        // 章节
+        const sections = $$('section');
+        // 预计时间
+        const predictTime = ~~(60 * Math.max(...[...sections].map((s) => s.innerText.length))) / 1000;
+        // min(predictTime,  maxWatch.value) 秒后关闭页面
+        time = Math.min(predictTime, maxRead.value);
     }
     // 视听学习
     if (type === 1) {
         // 视频
         const video = $$('video')[0];
-        // 总时长
-        const { duration } = video;
-        // min(duration,  maxWatch.value) 秒后关闭页面, 看文章
-        time = duration > maxWatch.value ? maxWatch.value : ~~duration;
+        // 预计时间
+        const predictTime = ~~video.duration;
+        // min(predictTime,  maxWatch.value) 秒后关闭页面
+        time = Math.min(predictTime, maxWatch.value);
     }
     // 随机
     time = time - ~~(Math.random() * 10) + 5;
@@ -4009,65 +3993,70 @@ async function reading(type) {
 /**
  * @description 获取新闻列表
  */
-function getNews() {
-    return new Promise(async (resolve) => {
-        // 需要学习的新闻数量
-        const need = taskConfig[TaskType.READ].need < maxNewsNum
-            ? taskConfig[TaskType.READ].need
-            : maxNewsNum;
-        log(`剩余 ${need} 个新闻`);
-        // 获取重要新闻
-        const data = await getNewsList();
-        if (data && data.length) {
-            // 数量补足需要数量
-            while (news.length < need) {
-                // 随便取
-                const randomIndex = ~~(Math.random() * data.length);
-                // 新闻
-                const item = data[randomIndex];
-                // 是否存在新闻
-                if (item.dataValid && item.type === 'tuwen') {
-                    news.push(item);
-                }
+async function getNews() {
+    // 需要学习的新闻数量
+    const need = taskConfig[TaskType.READ].need < maxNewsNum
+        ? taskConfig[TaskType.READ].need
+        : maxNewsNum;
+    log(`剩余 ${need} 个新闻`);
+    // 获取新闻
+    const data = await getNewsList();
+    if (data && data.length) {
+        // 查找今年新闻
+        for (const i in data) {
+            if (news.length === need) {
+                return;
+            }
+            // 新闻
+            const item = data[i];
+            // 是否存在
+            if (item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+                item.type === 'tuwen') {
+                news.push(item);
             }
         }
-        else {
-            news = [];
+        // 补足新闻数
+        if (news.length < need) {
+            await getNews();
         }
-        resolve('done');
-    });
+    }
+    else {
+        news = [];
+    }
 }
 /**
  * @description 获取视频列表
  */
-function getVideos() {
-    return new Promise(async (resolve) => {
-        // 需要学习的视频数量
-        const need = taskConfig[TaskType.WATCH].need < maxVideoNum
-            ? taskConfig[TaskType.WATCH].need
-            : maxVideoNum;
-        log(`剩余 ${need} 个视频`);
-        // 获取重要视频
-        const data = await getVideoList();
-        if (data && data.length) {
-            // 数量补足需要数量
-            while (videos.length < need) {
-                // 随便取
-                const randomIndex = ~~(Math.random() * data.length);
-                // 视频
-                const item = data[randomIndex];
-                // 是否存在视频
-                if (item.dataValid &&
-                    (item.type === 'shipin' || item.type === 'juji')) {
-                    videos.push(item);
-                }
+async function getVideos() {
+    // 需要学习的视频数量
+    const need = taskConfig[TaskType.WATCH].need < maxVideoNum
+        ? taskConfig[TaskType.WATCH].need
+        : maxVideoNum;
+    log(`剩余 ${need} 个视频`);
+    // 获取视频
+    const data = await getVideoList();
+    if (data && data.length) {
+        // 查找今年视频
+        for (const i in data) {
+            if (videos.length === need) {
+                return;
+            }
+            // 新闻
+            const item = data[i];
+            // 是否存在
+            if (item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+                (item.type === 'shipin' || item.type === 'juji')) {
+                videos.push(item);
             }
         }
-        else {
-            videos = [];
+        // 补足视频数
+        if (videos.length < need) {
+            await getVideos();
         }
-        resolve('done');
-    });
+    }
+    else {
+        videos = [];
+    }
 }
 /**
  * @description 阅读文章
@@ -4384,40 +4373,29 @@ async function refreshTaskList() {
     // 原始任务进度
     const taskProgress = await getTaskList();
     if (taskProgress) {
+        // 登录
+        taskConfig[TaskType.LOGIN].currentScore = taskProgress[2].currentScore;
+        taskConfig[TaskType.LOGIN].dayMaxScore = taskProgress[2].dayMaxScore;
+        taskConfig[TaskType.LOGIN].need =
+            taskProgress[2].dayMaxScore - taskProgress[2].currentScore;
         // 文章选读
-        taskConfig[TaskType.READ].currentScore = taskProgress[0].currentScore;
-        taskConfig[TaskType.READ].dayMaxScore = taskProgress[0].dayMaxScore;
-        taskConfig[TaskType.READ].need =
-            taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
+        taskConfig[TaskType.READ].currentScore = 0;
+        taskConfig[TaskType.READ].dayMaxScore = 12;
+        taskConfig[TaskType.READ].need = 12;
         // 视听学习
-        taskConfig[TaskType.WATCH].currentScore =
-            taskProgress[1].currentScore + taskProgress[2].currentScore;
-        taskConfig[TaskType.WATCH].dayMaxScore =
-            taskProgress[1].dayMaxScore + taskProgress[2].dayMaxScore;
+        taskConfig[TaskType.WATCH].currentScore = taskProgress[1].currentScore;
+        taskConfig[TaskType.WATCH].dayMaxScore = taskProgress[1].dayMaxScore;
         taskConfig[TaskType.WATCH].need =
-            taskProgress[1].dayMaxScore +
-                taskProgress[2].dayMaxScore -
-                (taskProgress[1].currentScore + taskProgress[2].currentScore);
+            taskProgress[1].dayMaxScore - taskProgress[1].currentScore;
         // 每日答题
-        taskConfig[TaskType.PRACTICE].currentScore = taskProgress[5].currentScore;
-        taskConfig[TaskType.PRACTICE].dayMaxScore = taskProgress[5].dayMaxScore;
-        taskConfig[TaskType.PRACTICE].need =
-            taskProgress[5].dayMaxScore - taskProgress[5].currentScore;
-        // 专项练习
-        taskConfig[TaskType.PAPER].currentScore = taskProgress[4].currentScore;
-        taskConfig[TaskType.PAPER].dayMaxScore = taskProgress[4].dayMaxScore;
-        taskConfig[TaskType.PAPER].need =
-            taskProgress[4].dayMaxScore - taskProgress[4].currentScore;
+        taskConfig[TaskType.PRACTICE].currentScore = taskProgress[3].currentScore;
+        taskConfig[TaskType.PRACTICE].dayMaxScore = taskProgress[3].dayMaxScore;
+        taskConfig[TaskType.PRACTICE].need = taskProgress[3].dayMaxScore;
         // 更新数据
         for (const i in taskConfig) {
             const { currentScore, dayMaxScore } = taskConfig[i];
             // 进度
-            let rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
-            // 修复专项练习成组做完, 进度条显示异常
-            if (dayMaxScore <= currentScore) {
-                rate = 100;
-                taskConfig[i].status = true;
-            }
+            const rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
             // 百分比
             taskConfig[i].percent = rate;
             // 分数
@@ -4895,20 +4873,9 @@ function NomalItem({ title, tip, checked, onChange, }) {
  * @description 设置任务项
  * @returns
  */
-function TaskItem({ title, tip, checked, onchange, onmousedown, onmousemove, onmouseup, percent, edit, drag, position, onMounted, }) {
+function TaskItem({ title, tip, checked, percent, onchange, immutable, }) {
     return createElementNode('div', undefined, {
-        class: watchRef([drag, edit], () => `egg_task_item${edit.value ? (drag.value ? ' edit drag' : ' edit') : ''}`),
-        onmousedown: watchRef(drag, () => (e) => {
-            onmousedown(e);
-            window.addEventListener('mousemove', onmousemove);
-            const handleMouseUp = (e) => {
-                onmouseup(e);
-                window.removeEventListener('mouseup', handleMouseUp);
-                window.removeEventListener('mousemove', onmousemove);
-            };
-            window.addEventListener('mouseup', handleMouseUp);
-        }),
-        style: watchRef(() => [drag.value, position.x, position.y], () => (drag.value ? `left: ${position.x}px;top: ${position.y}px;` : '')),
+        class: 'egg_task_item',
     }, [
         createElementNode('div', undefined, {
             class: 'egg_task_content',
@@ -4932,12 +4899,12 @@ function TaskItem({ title, tip, checked, onchange, onmousedown, onmousemove, onm
                 title: tip,
                 class: 'egg_switch',
                 type: 'checkbox',
-                disabled: edit,
                 checked,
                 onchange,
+                disabled: immutable,
             }),
         ]),
-    ], { onMounted });
+    ]);
 }
 /**
  * @description 任务
@@ -4972,82 +4939,25 @@ function TaskList() {
             taskStatus.value = TaskStatusType.FINISH;
         }
     }, true);
-    // 编辑模式
-    const edit = ref(false);
-    // 当前拖拽
-    const current = ref(-1);
-    const block = [];
     return createElementNode('div', undefined, {
         class: 'egg_task_list',
-        onmouseup: watchRef(edit, () => edit.value
-            ? (e) => {
-                const { clientY } = e;
-                block.reduce((p, n, i) => {
-                    if (p[1] < clientY && n[1] > clientY) {
-                        console.log(i);
-                    }
-                    return n;
-                });
-                edit.value = false;
-            }
-            : undefined),
-        ondblclick() {
-            // edit.value = true;
-        },
-    }, watchRef(() => taskConfig.map((v) => v.index), () => {
-        // 任务标签
-        const taskLabels = taskConfig.sort((pre, next) => pre.index - next.index);
-        const taskList = taskLabels.map((label, i) => {
-            // 处理变化
-            const handleChange = debounce(handleTaskChange, 300);
-            const drag = watchEffectRef(() => current.value === i);
-            const position = reactive({ x: 0, y: 0 });
-            let deltaX = 0;
-            let deltaY = 0;
-            const ele = TaskItem({
-                title: label.title,
-                tip: label.tip,
-                checked: watchEffectRef(() => label.active),
-                percent: watchEffectRef(() => label.percent),
-                drag,
-                edit,
-                position,
-                onchange(e) {
-                    handleChange(e, i, label.title);
-                },
-                onmousedown(e) {
-                    const { offsetLeft, offsetTop } = e.currentTarget;
-                    const { clientX, clientY } = e;
-                    current.value = i;
-                    position.x = offsetLeft;
-                    position.y = offsetTop;
-                    deltaX = clientX;
-                    deltaY = clientY;
-                },
-                onmousemove(e) {
-                    const { clientX, clientY } = e;
-                    position.x += clientX - deltaX;
-                    position.y += clientY - deltaY;
-                    deltaX = clientX;
-                    deltaY = clientY;
-                },
-                onmouseup() {
-                    current.value = -1;
-                    position.x = 0;
-                    position.y = 0;
-                },
-                onMounted() {
-                    const rect = ele.ele.getBoundingClientRect();
-                    const topLine = rect.y;
-                    const middleLine = rect.y + rect.height / 2;
-                    const bottomLine = rect.y + rect.height;
-                    block.push([topLine, middleLine, bottomLine]);
-                },
-            });
-            return ele;
-        });
-        return taskList;
-    }));
+    }, taskConfig.map((label, i) => label.immutable
+        ? TaskItem({
+            title: label.title,
+            tip: label.tip,
+            checked: watchEffectRef(() => label.active),
+            percent: watchEffectRef(() => label.percent),
+            onchange: debounce(handleTaskChange, 300),
+            immutable: label.immutable,
+        })
+        : TaskItem({
+            title: label.title,
+            tip: label.tip,
+            checked: watchEffectRef(() => label.active),
+            percent: watchEffectRef(() => label.percent),
+            onchange: debounce(handleTaskChange, 300),
+            immutable: label.immutable,
+        })));
 }
 /**
  * @description 任务按钮
@@ -5099,18 +5009,6 @@ function TaskBtn() {
                     await doExamPractice();
                 }
                 log('任务三: 每日答题已完成!');
-                // 专项练习
-                if (taskConfig[TaskType.PAPER].active &&
-                    !taskConfig[TaskType.PAPER].status) {
-                    log('任务四: 专项练习');
-                    // 创建提示
-                    createTip('任务四: 专项练习');
-                    // 暂停
-                    await studyPauseLock();
-                    // 做专项练习
-                    await doExamPaper();
-                }
-                log('任务四: 专项练习已完成!');
             }
             /**
              * @description 暂停任务
@@ -5224,14 +5122,10 @@ function TaskBtn() {
                 });
             });
             return createElementNode('div', undefined, { class: 'egg_study_item' }, createElementNode('button', undefined, {
-                class: watchEffectRef(() => `egg_study_btn${taskStatus.value === TaskStatusType.LOADING ||
-                    taskStatus.value === TaskStatusType.START
-                    ? ' loading'
-                    : taskStatus.value === TaskStatusType.FINISH
-                        ? ' disabled'
-                        : ''}`),
+                class: watchEffectRef(() => `egg_study_btn${taskStatus.value === TaskStatusType.START ? ' loading' : ''}`),
                 type: 'button',
-                disabled: watchEffectRef(() => taskStatus.value === TaskStatusType.LOADING ||
+                disabled: watchRef(() => [running.value, taskStatus.value], () => running.value ||
+                    taskStatus.value === TaskStatusType.LOADING ||
                     taskStatus.value === TaskStatusType.FINISH),
                 onclick: watchEffectRef(() => taskStatus.value === TaskStatusType.LOADED
                     ? debounce(startTask, 300)
@@ -5687,6 +5581,11 @@ function Panel() {
             tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
             type: SettingType.SCHEDULE_RUN,
         },
+        {
+            title: '全屏运行',
+            tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
+            type: SettingType.SCHEDULE_RUN,
+        },
     ];
     // 运行设置标签
     const examLabels = [
@@ -5695,11 +5594,6 @@ function Panel() {
             tip: '无答案时, 随机选择或者填入答案, 不保证正确',
             type: SettingType.RANDOM_EXAM,
         },
-        {
-            title: '专项逆序',
-            tip: '专项答题时, 逆序作答',
-            type: SettingType.PAPER_REVERSE,
-        },
     ];
     // 推送设置标签
     const pushLabels = [
@@ -5707,7 +5601,6 @@ function Panel() {
             title: '远程推送',
             tip: '利用 pushplus 推送, 将登录二维码直接推送到微信公众号',
             type: SettingType.REMOTE_PUSH,
-            handler() { },
         },
     ];
     // 处理设置变化
@@ -5742,52 +5635,47 @@ function Panel() {
         TaskList(),
         // 运行部分
         Hr({ text: '运行' }),
-        createElementNode('div', undefined, { class: 'egg_run_list' }, watchEffectRef(() => {
-            return runLabels.map((label) => {
-                // 处理变化
-                const handleChange = debounce(handleSettingsChange, 300);
-                return NomalItem({
-                    title: label.title,
-                    tip: label.tip,
-                    checked: settings[label.type],
-                    onChange: (e) => {
-                        handleChange(e, label.type, label.title);
-                    },
-                });
-            });
-        })),
+        createElementNode('div', undefined, { class: 'egg_run_list' }, runLabels.map((label) => NomalItem({
+            title: label.title,
+            tip: label.tip,
+            checked: settings[label.type],
+            onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+            },
+        }))),
         // 答题部分
         Hr({ text: '答题' }),
-        createElementNode('div', undefined, { class: 'egg_exam_list' }, watchEffectRef(() => {
-            return examLabels.map((label) => {
-                // 处理变化
-                const handleChange = debounce(handleSettingsChange, 300);
-                return NomalItem({
-                    title: label.title,
-                    tip: label.tip,
-                    checked: settings[label.type],
-                    onChange: (e) => {
-                        handleChange(e, label.type, label.title);
-                    },
-                });
-            });
-        })),
+        createElementNode('div', undefined, { class: 'egg_exam_list' }, examLabels.map((label) => NomalItem({
+            title: label.title,
+            tip: label.tip,
+            checked: settings[label.type],
+            onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+            },
+        }))),
         // 推送部分
         Hr({ text: '推送' }),
-        createElementNode('div', undefined, { class: 'egg_push_list' }, watchEffectRef(() => {
-            return pushLabels.map((label) => {
-                // 处理变化
-                const handleChange = debounce(handleSettingsChange, 300);
-                return NomalItem({
-                    title: label.title,
-                    tip: label.tip,
-                    checked: settings[label.type],
-                    onChange: (e) => {
-                        handleChange(e, label.type, label.title);
-                    },
-                });
-            });
-        })),
+        createElementNode('div', undefined, { class: 'egg_push_list' }, pushLabels.map((label) => NomalItem({
+            title: label.title,
+            tip: label.tip,
+            checked: settings[label.type],
+            onChange: (e) => {
+                debounce(handleSettingsChange, 300)(e, label.type, label.title);
+            },
+        }))),
+        // 提示部分
+        Hr({ text: '提示' }),
+        createElementNode('div', undefined, { class: 'egg_tip_list' }, [
+            createTextNode('专项练习已被移除, 如需使用, 请点击'),
+            createElementNode('button', undefined, {
+                class: 'egg_tip_btn',
+                type: 'button',
+                onclick: debounce(doExamPaper, 300),
+                disabled: watchRef(() => [running.value, taskStatus.value], () => running.value ||
+                    taskStatus.value === TaskStatusType.START ||
+                    taskStatus.value === TaskStatusType.PAUSE),
+            }, createTextNode('去完成')),
+        ]),
         // 按钮集合
         createElementNode('div', undefined, {
             class: 'egg_btns_wrap',

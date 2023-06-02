@@ -2,10 +2,10 @@
  * @description 任务类型
  */
 enum TaskType {
+  LOGIN,
   READ,
   WATCH,
   PRACTICE,
-  PAPER,
 }
 
 /**
@@ -17,14 +17,13 @@ enum SettingType {
   SILENT_RUN,
   SCHEDULE_RUN,
   RANDOM_EXAM,
-  PAPER_REVERSE,
   REMOTE_PUSH,
 }
 
 /**
  * @description 设置
  */
-type Settings = [boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+type Settings = [boolean, boolean, boolean, boolean, boolean, boolean];
 
 /**
  * @description 定时信息

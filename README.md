@@ -78,7 +78,7 @@
 
 1. 修复'等待中'，专项练习被移除的问题
 
-2. 更改文章选读逻辑，阅读日期从最近开始, 阅读时间介于 `60 * 文章总字数 / 1000` 以及最大阅读时间之间（采纳 [msnpersonone](https://github.com/Xu22Web/tech-study-js/issues/30#issuecomment-1545445375) 的建议）
+2. 更改文章选读逻辑，阅读日期从最近开始，阅读时间介于 `60 * 文章总字数 / 1000` 以及最大阅读时间之间（采纳 [msnpersonone](https://github.com/Xu22Web/tech-study-js/issues/30#issuecomment-1545445375) 的建议）
 
 3. 修复滑动验证的问题，还是有一定机率失败
 

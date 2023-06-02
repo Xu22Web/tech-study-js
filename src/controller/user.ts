@@ -80,9 +80,10 @@ async function refreshTaskList(): Promise<boolean> {
     taskConfig[TaskType.LOGIN].need =
       taskProgress[2].dayMaxScore - taskProgress[2].currentScore;
     // 文章选读
-    taskConfig[TaskType.READ].currentScore = 0;
-    taskConfig[TaskType.READ].dayMaxScore = 12;
-    taskConfig[TaskType.READ].need = 12;
+    taskConfig[TaskType.READ].currentScore = taskProgress[0].currentScore;
+    taskConfig[TaskType.READ].dayMaxScore = taskProgress[0].dayMaxScore;
+    taskConfig[TaskType.READ].need =
+      taskProgress[0].dayMaxScore - taskProgress[0].currentScore;
     // 视听学习
     taskConfig[TaskType.WATCH].currentScore = taskProgress[1].currentScore;
     taskConfig[TaskType.WATCH].dayMaxScore = taskProgress[1].dayMaxScore;

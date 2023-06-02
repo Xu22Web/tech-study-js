@@ -278,6 +278,7 @@ async function saveAnswer(question, answer) {
 }
 
 
+/* 数据 API */
 /**
  * @description 获取新闻数据
  */
@@ -4033,7 +4034,7 @@ async function getNews() {
             // 新闻
             const item = data[i];
             // 是否存在
-            if (item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+            if (item.publishTime.startsWith(new Date().getFullYear().toString()) &&
                 item.type === 'tuwen') {
                 news.push(item);
             }
@@ -4067,7 +4068,7 @@ async function getVideos() {
             // 新闻
             const item = data[i];
             // 是否存在
-            if (item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+            if (item.publishTime.startsWith(new Date().getFullYear().toString()) &&
                 (item.type === 'shipin' || item.type === 'juji')) {
                 videos.push(item);
             }

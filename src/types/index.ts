@@ -54,7 +54,6 @@ type NewsVideoList = {
   type: string;
   url: string;
   showSource: string;
-  auditTime: string;
   dataValid: boolean;
   itemType: string;
 }[];

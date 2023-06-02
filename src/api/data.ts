@@ -1,19 +1,6 @@
 import API_CONFIG from '../config/api';
+import { NewsVideoList } from '../types';
 /* 数据 API */
-
-/**
- * @description 新闻列表
- */
-type NewsVideoList = {
-  publishTime: string;
-  title: string;
-  type: string;
-  url: string;
-  showSource: string;
-  auditTime: string;
-  dataValid: boolean;
-  itemType: string;
-}[];
 
 /**
  * @description 获取新闻数据

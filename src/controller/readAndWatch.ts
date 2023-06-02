@@ -204,7 +204,7 @@ async function getNews() {
       const item = data[i];
       // 是否存在
       if (
-        item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+        item.publishTime.startsWith(new Date().getFullYear().toString()) &&
         item.type === 'tuwen'
       ) {
         news.push(item);
@@ -241,7 +241,7 @@ async function getVideos() {
       const item = data[i];
       // 是否存在
       if (
-        item.auditTime.startsWith(new Date().getFullYear().toString()) &&
+        item.publishTime.startsWith(new Date().getFullYear().toString()) &&
         (item.type === 'shipin' || item.type === 'juji')
       ) {
         videos.push(item);

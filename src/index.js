@@ -3426,8 +3426,8 @@ async function findExamPaper() {
             const examPapers = data.list;
             for (const i in examPapers) {
                 // 遍历查询有没有没做过的
-                if (examPapers[i].status === 1) {
-                    // status： 1为"开始答题" , 2为"重新答题"
+                if (examPapers[i].status !== 2) {
+                    // status： 1 开始答题, 2 已满分/重新答题, 3 继续答题
                     return examPapers[i].id;
                 }
             }

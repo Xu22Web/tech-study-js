@@ -2528,6 +2528,7 @@ const taskConfig = reactive([
         score: 0,
         active: true,
         immutable: true,
+        type: TaskType.LOGIN,
     },
     {
         title: '文章选读',
@@ -2540,6 +2541,7 @@ const taskConfig = reactive([
         score: 0,
         active: true,
         immutable: false,
+        type: TaskType.READ,
     },
     {
         title: '视听学习',
@@ -2552,6 +2554,7 @@ const taskConfig = reactive([
         score: 0,
         active: true,
         immutable: false,
+        type: TaskType.WATCH,
     },
     {
         title: '每日答题',
@@ -2564,6 +2567,7 @@ const taskConfig = reactive([
         score: 0,
         active: false,
         immutable: false,
+        type: TaskType.PRACTICE,
     },
 ]);
 /**
@@ -4620,10 +4624,6 @@ function ExamBtn() {
 function Frame() {
     // 最大化
     const max = ref(false);
-    // 随设置变化
-    watch(() => settings[SettingType.SILENT_RUN], () => {
-        frame.show = !settings[SettingType.SILENT_RUN];
-    });
     // 容器
     return createElementNode('div', undefined, {
         class: watchEffectRef(() => `egg_frame_wrap${frame.show ? '' : ' hide'}`),
@@ -4710,11 +4710,16 @@ function Frame() {
                     onMounted() {
                         // 隐藏窗口
                         watch(() => [
+                            taskStatus.value,
+                            running.value,
                             settings[SettingType.SAME_TAB],
                             settings[SettingType.SILENT_RUN],
                         ], () => {
                             // 同屏任务
-                            if (settings[SettingType.SAME_TAB]) {
+                            if (settings[SettingType.SAME_TAB] &&
+                                (taskStatus.value === TaskStatusType.START ||
+                                    taskStatus.value === TaskStatusType.PAUSE ||
+                                    running.value)) {
                                 // 设置窗口显示
                                 frame.show = !settings[SettingType.SILENT_RUN];
                             }
@@ -4898,7 +4903,7 @@ function ScoreItem() {
  * @description 设置普通项
  * @returns
  */
-function NomalItem({ title, tip, checked, onChange, }) {
+function NomalItem({ title, tip, checked, onchange, }) {
     return createElementNode('div', undefined, { class: 'egg_setting_item' }, [
         createElementNode('div', undefined, { class: 'egg_label_wrap' }, [
             createElementNode('label', undefined, { class: 'egg_task_title' }, [
@@ -4914,7 +4919,7 @@ function NomalItem({ title, tip, checked, onChange, }) {
             class: 'egg_switch',
             type: 'checkbox',
             checked,
-            onChange,
+            onchange,
         }),
     ]);
 }
@@ -4996,7 +5001,9 @@ function TaskList() {
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
-            onchange: debounce(handleTaskChange, 300),
+            onchange: debounce((e) => {
+                handleTaskChange(e, label.type, label.title);
+            }, 300),
             immutable: label.immutable,
         })
         : TaskItem({
@@ -5004,7 +5011,9 @@ function TaskList() {
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
-            onchange: debounce(handleTaskChange, 300),
+            onchange: debounce((e) => {
+                handleTaskChange(e, label.type, label.title);
+            }, 300),
             immutable: label.immutable,
         })));
 }
@@ -5738,34 +5747,40 @@ function Panel() {
         TaskList(),
         // 运行部分
         Hr({ text: '运行' }),
-        createElementNode('div', undefined, { class: 'egg_run_list' }, runLabels.map((label) => NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: settings[label.type],
-            onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-            },
-        }))),
+        createElementNode('div', undefined, { class: 'egg_run_list' }, runLabels.map((label) => {
+            return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onchange: debounce((e) => {
+                    handleSettingsChange(e, label.type, label.title);
+                }, 300),
+            });
+        })),
         // 答题部分
         Hr({ text: '答题' }),
-        createElementNode('div', undefined, { class: 'egg_exam_list' }, examLabels.map((label) => NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: settings[label.type],
-            onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-            },
-        }))),
+        createElementNode('div', undefined, { class: 'egg_exam_list' }, examLabels.map((label) => {
+            return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onchange: debounce((e) => {
+                    handleSettingsChange(e, label.type, label.title);
+                }, 300),
+            });
+        })),
         // 推送部分
         Hr({ text: '推送' }),
-        createElementNode('div', undefined, { class: 'egg_push_list' }, pushLabels.map((label) => NomalItem({
-            title: label.title,
-            tip: label.tip,
-            checked: settings[label.type],
-            onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-            },
-        }))),
+        createElementNode('div', undefined, { class: 'egg_push_list' }, pushLabels.map((label) => {
+            return NomalItem({
+                title: label.title,
+                tip: label.tip,
+                checked: settings[label.type],
+                onchange: debounce((e) => {
+                    handleSettingsChange(e, label.type, label.title);
+                }, 300),
+            });
+        })),
         // 提示部分
         Hr({ text: '提示' }),
         createElementNode('div', undefined, { class: 'egg_tip_list' }, [

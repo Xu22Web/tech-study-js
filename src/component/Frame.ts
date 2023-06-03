@@ -1,6 +1,6 @@
 import { closeFrame, closeTaskWin, closeWin } from '../controller/frame';
-import { frame, login, settings } from '../shared';
-import { SettingType } from '../types';
+import { frame, login, running, settings, taskStatus } from '../shared';
+import { SettingType, TaskStatusType, TaskType } from '../types';
 import { ref, watch, watchEffectRef, watchRef } from '../utils/composition';
 import { createElementNode, createNSElementNode } from '../utils/element';
 import { debounce } from '../utils/utils';
@@ -12,13 +12,6 @@ import { debounce } from '../utils/utils';
 function Frame() {
   // 最大化
   const max = ref(false);
-  // 随设置变化
-  watch(
-    () => settings[SettingType.SILENT_RUN],
-    () => {
-      frame.show = !settings[SettingType.SILENT_RUN];
-    }
-  );
   // 容器
   return createElementNode(
     'div',
@@ -171,12 +164,19 @@ function Frame() {
                   // 隐藏窗口
                   watch(
                     () => [
+                      taskStatus.value,
+                      running.value,
                       settings[SettingType.SAME_TAB],
                       settings[SettingType.SILENT_RUN],
                     ],
                     () => {
                       // 同屏任务
-                      if (settings[SettingType.SAME_TAB]) {
+                      if (
+                        settings[SettingType.SAME_TAB] &&
+                        (taskStatus.value === TaskStatusType.START ||
+                          taskStatus.value === TaskStatusType.PAUSE ||
+                          running.value)
+                      ) {
                         // 设置窗口显示
                         frame.show = !settings[SettingType.SILENT_RUN];
                       }

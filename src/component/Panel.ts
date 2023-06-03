@@ -108,16 +108,16 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_run_list' },
-          runLabels.map((label) =>
-            NomalItem({
+          runLabels.map((label) => {
+            return NomalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],
-              onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-              },
-            })
-          )
+              onchange: debounce((e) => {
+                handleSettingsChange(e, label.type, label.title);
+              }, 300),
+            });
+          })
         ),
         // 答题部分
         Hr({ text: '答题' }),
@@ -125,16 +125,16 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_exam_list' },
-          examLabels.map((label) =>
-            NomalItem({
+          examLabels.map((label) => {
+            return NomalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],
-              onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-              },
-            })
-          )
+              onchange: debounce((e) => {
+                handleSettingsChange(e, label.type, label.title);
+              }, 300),
+            });
+          })
         ),
         // 推送部分
         Hr({ text: '推送' }),
@@ -142,16 +142,16 @@ function Panel() {
           'div',
           undefined,
           { class: 'egg_push_list' },
-          pushLabels.map((label) =>
-            NomalItem({
+          pushLabels.map((label) => {
+            return NomalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],
-              onChange: (e) => {
-                debounce(handleSettingsChange, 300)(e, label.type, label.title);
-              },
-            })
-          )
+              onchange: debounce((e) => {
+                handleSettingsChange(e, label.type, label.title);
+              }, 300),
+            });
+          })
         ),
         // 提示部分
         Hr({ text: '提示' }),

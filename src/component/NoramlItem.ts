@@ -8,12 +8,12 @@ function NomalItem({
   title,
   tip,
   checked,
-  onChange,
+  onchange,
 }: {
   title: string;
   tip: string;
   checked: boolean;
-  onChange: (e: Event) => void;
+  onchange: (e: Event) => void;
 }) {
   return createElementNode('div', undefined, { class: 'egg_setting_item' }, [
     createElementNode('div', undefined, { class: 'egg_label_wrap' }, [
@@ -35,7 +35,7 @@ function NomalItem({
       class: 'egg_switch',
       type: 'checkbox',
       checked,
-      onChange,
+      onchange,
     }),
   ]);
 }

@@ -24,6 +24,7 @@ const taskConfig = reactive([
     score: 0,
     active: true,
     immutable: true,
+    type: TaskType.LOGIN,
   },
   {
     title: '文章选读',
@@ -36,6 +37,7 @@ const taskConfig = reactive([
     score: 0,
     active: true,
     immutable: false,
+    type: TaskType.READ,
   },
   {
     title: '视听学习',
@@ -48,6 +50,7 @@ const taskConfig = reactive([
     score: 0,
     active: true,
     immutable: false,
+    type: TaskType.WATCH,
   },
   {
     title: '每日答题',
@@ -60,6 +63,7 @@ const taskConfig = reactive([
     score: 0,
     active: false,
     immutable: false,
+    type: TaskType.PRACTICE,
   },
 ]);
 

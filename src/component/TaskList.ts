@@ -57,7 +57,9 @@ function TaskList() {
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
-            onchange: debounce(handleTaskChange, 300),
+            onchange: debounce((e) => {
+              handleTaskChange(e, label.type, label.title);
+            }, 300),
             immutable: label.immutable,
           })
         : TaskItem({
@@ -65,7 +67,9 @@ function TaskList() {
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
-            onchange: debounce(handleTaskChange, 300),
+            onchange: debounce((e) => {
+              handleTaskChange(e, label.type, label.title);
+            }, 300),
             immutable: label.immutable,
           })
     )

@@ -5748,11 +5748,6 @@ function Panel() {
             tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
             type: SettingType.SCHEDULE_RUN,
         },
-        {
-            title: '全屏运行',
-            tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
-            type: SettingType.SCHEDULE_RUN,
-        },
     ];
     // 运行设置标签
     const examLabels = [

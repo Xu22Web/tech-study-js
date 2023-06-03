@@ -655,8 +655,9 @@
 }
 .egg_settings_theme_color_wrap .egg_settings_theme_color {
   border-radius: 50%;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: currentColor;
 }
 .egg_settings .egg_settings_read_time_wrap,
 .egg_settings .egg_settings_watch_time_wrap {

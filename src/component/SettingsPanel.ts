@@ -103,7 +103,15 @@ function SettingsPanel({ show }: { show: Ref<boolean> }) {
                   createElementNode('button', undefined, {
                     class: 'egg_settings_theme_color',
                     type: 'button',
-                    style: `background: ${color.value}`,
+                    style: watchEffectRef(
+                      () =>
+                        `color: ${color.value};${
+                          themeColor.value === color.value
+                            ? ''
+                            : ` box-shadow: 0rem 0.4rem 0.1rem 0.1rem ${color.value}30;`
+                        }`
+                    ),
+
                     title: color.title,
                     onclick: debounce(() => {
                       if (themeColor.value !== color.value) {

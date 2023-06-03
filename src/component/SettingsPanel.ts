@@ -6,9 +6,10 @@ import {
   pushToken,
   scheduleList,
   settings,
+  themeColor,
 } from '../shared';
 import { SettingType } from '../types';
-import { ref, Ref, watch, watchEffectRef } from '../utils/composition';
+import { Ref, ref, watch, watchEffectRef } from '../utils/composition';
 import {
   $$,
   createElementNode,
@@ -39,6 +40,85 @@ function SettingsPanel({ show }: { show: Ref<boolean> }) {
       class: watchEffectRef(() => `egg_settings${show.value ? ' active' : ''}`),
     },
     [
+      createElementNode(
+        'div',
+        undefined,
+        { class: 'egg_settings_theme_wrap' },
+        [
+          createElementNode('div', undefined, { class: 'egg_settings_theme' }, [
+            createElementNode(
+              'div',
+              undefined,
+              { class: 'egg_settings_label' },
+              createTextNode('主题预设')
+            ),
+            createElementNode(
+              'div',
+              undefined,
+              { class: 'egg_settings_theme_colors' },
+              [
+                {
+                  value: '#fa3333',
+                  title: '强国红',
+                  detail: 'XueXi Red',
+                  code: 'none',
+                },
+                {
+                  value: '#bb2649',
+                  title: '非凡洋红',
+                  detail: 'Viva Magenta',
+                  code: '18-1750',
+                },
+                {
+                  value: '#f36f63',
+                  title: '经典蓝',
+                  detail: 'Classic Blue',
+                  code: '19-4052',
+                },
+                {
+                  value: '#35548a',
+                  title: '活珊瑚橘',
+                  detail: 'Living Coral',
+                  code: '16-1546',
+                },
+                {
+                  value: '#6d5b97',
+                  title: '紫外光色',
+                  detail: 'Ultra Violet',
+                  code: '18-3838',
+                },
+                {
+                  value: '#86af49',
+                  title: '草木绿',
+                  detail: 'Greenery',
+                  code: '15-0343',
+                },
+              ].map((color) =>
+                createElementNode(
+                  'div',
+                  undefined,
+                  {
+                    class: 'egg_settings_theme_color_wrap',
+                  },
+                  createElementNode('button', undefined, {
+                    class: 'egg_settings_theme_color',
+                    type: 'button',
+                    style: `background: ${color.value}`,
+                    title: color.title,
+                    onclick: debounce(() => {
+                      if (themeColor.value !== color.value) {
+                        themeColor.value = color.value;
+                        // 存储
+                        GM_setValue('themeColor', themeColor.value);
+                      }
+                    }, 300),
+                  })
+                )
+              )
+            ),
+          ]),
+        ]
+      ),
       createElementNode(
         'div',
         undefined,

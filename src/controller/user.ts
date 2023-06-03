@@ -65,7 +65,7 @@ async function refreshScoreInfo() {
 /**
  * @description 刷新任务列表
  */
-async function refreshTaskList(): Promise<boolean> {
+async function refreshTaskList() {
   // 未登录
   if (!login.value) {
     throw new Error('用户未登录!');
@@ -105,11 +105,12 @@ async function refreshTaskList(): Promise<boolean> {
       // 完成状态
       taskConfig[i].status = rate === 100;
     }
-    return true;
+    return;
   }
   // 重试
   await sleep(2000);
-  return refreshTaskList();
+  refreshTaskList();
+  return;
 }
 
 export { refreshUserInfo, refreshScoreInfo, refreshTaskList };

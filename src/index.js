@@ -1,4 +1,4 @@
-const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;}.egg_task_content {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_task_content .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_tip_list {  font-size: 1.2rem;  max-width: 18rem;  line-height: 2rem;  color: var(--themeColor);}.egg_tip_list .egg_tip_btn {  padding: 0.2rem 0.4rem;  background: #f1f1f1;  color: #333;}.egg_tip_list .egg_tip_btn:disabled {  opacity: 0.5;  background: #ccc;}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn:disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
+const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;}.egg_task_content {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_task_content .egg_label_wrap {  flex-grow: 1;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_progress .egg_percent {  font-size: 1.2rem;  padding-left: 0.5rem;  width: 4rem;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_tip_list {  font-size: 1.2rem;  max-width: 18rem;  line-height: 2rem;  color: var(--themeColor);}.egg_tip_list .egg_tip_btn {  padding: 0.2rem 0.4rem;  background: #f1f1f1;  color: #333;}.egg_tip_list .egg_tip_btn:disabled {  opacity: 0.5;  background: #ccc;}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn:disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings_item .egg_settings_theme_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_theme_wrap .egg_settings_theme {}.egg_settings_theme .egg_settings_theme_colors {  display: flex;  align-items: center;}.egg_settings_theme_colors .egg_settings_theme_color_wrap {  padding-right: 0.8rem;}.egg_settings_theme_color_wrap .egg_settings_theme_color {  border-radius: 50%;  width: 1.5rem;  height: 1.5rem;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
 /**
  * @description 嵌入样式
  */
@@ -8,6 +8,8 @@ load((href) => href.match(URL_CONFIG.home), () => {
     initLogo();
     // 页面提示
     log('进入主页面!');
+    // 初始化主题
+    initThemeColor();
     // 初始化任务配置
     initTaskConfig();
     // 初始化设置
@@ -26,6 +28,8 @@ load((href) => href.match(URL_CONFIG.home), () => {
 load((href) => href === GM_getValue('readingUrl'), async () => {
     // 页面提示
     log('进入文章选读页面!');
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -42,6 +46,8 @@ load((href) => href === GM_getValue('readingUrl'), async () => {
 load((href) => href === GM_getValue('watchingUrl'), async () => {
     // 页面提示
     log('进入视听学习页面!');
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -58,6 +64,8 @@ load((href) => href === GM_getValue('watchingUrl'), async () => {
 load((href) => href === URL_CONFIG.examPractice, async () => {
     // 页面提示
     log('进入每日答题页面!');
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -74,6 +82,8 @@ load((href) => href === URL_CONFIG.examPractice, async () => {
 load((href) => href.includes(URL_CONFIG.examPaper), async () => {
     // 页面提示
     log('进入专项练习页面!');
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -163,6 +173,26 @@ function initMaxWatch() {
         const maxWatchTemp = GM_getValue('maxWatch');
         if (maxWatchTemp) {
             maxWatch.value = maxWatchTemp;
+        }
+    }
+    catch (error) { }
+}
+/**
+ * @description 初始化主题色
+ */
+function initThemeColor() {
+    try {
+        // 监听主题变化
+        watch(themeColor, () => {
+            // 文档对象
+            const doc = $$(':root')[0];
+            // 设置主题
+            doc.style.setProperty('--themeColor', themeColor.value);
+        });
+        // 主题色
+        const themeColorTemp = GM_getValue('themeColor');
+        if (themeColorTemp) {
+            themeColor.value = themeColorTemp;
         }
     }
     catch (error) { }
@@ -643,7 +673,7 @@ const API_CONFIG = {
 /**
  * @description 版本号
  */
-const version = '1.6.2';
+const version = '1.6.5';
 
 
 /**
@@ -2422,13 +2452,16 @@ function hasMobile() {
  * @returns
  */
 function sleep(time) {
-    if (!Number.isInteger(time)) {
-        time = 1000;
+    // 延时
+    let timeDelay = Number(time);
+    if (!Number.isInteger(timeDelay)) {
+        timeDelay = 1000;
     }
+    timeDelay += Math.random() * 500 - 250;
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve('done');
-        }, time);
+            resolve(undefined);
+        }, timeDelay);
     });
 }
 /**
@@ -2626,6 +2659,10 @@ const maxWatch = ref(120);
  * @description 运行其他任务
  */
 const running = ref(false);
+/**
+ * @description 主题色
+ */
+const themeColor = ref('#fa3333');
 
 
 /**
@@ -2672,7 +2709,11 @@ function handleSlideVerify() {
             const track = (await $_('.nc_scale', undefined, 3000))[0];
             // 滑块
             const slide = (await $_('.btn_slide', undefined, 3000))[0];
+            // 延时
+            await sleep(2000);
+            // 矩形范围
             const rectTrack = track.getBoundingClientRect();
+            // 矩形范围
             const rectSlide = slide.getBoundingClientRect();
             // 窗口
             const window = unsafeWindow;
@@ -3177,9 +3218,11 @@ async function doingExam(type) {
                             '/',
                         ];
                         // 可能的答案
-                        const answersLike = seperator.map((s) => answers.join(s));
+                        const answersLike = seperator
+                            .map((s) => answers.join(s).trim())
+                            .filter((answer) => answer.length);
                         // 答案存在
-                        if (answersLike.every((answer) => answer.length)) {
+                        if (answersLike.length) {
                             // 可能答案是否正确
                             const res = answersLike.some((answer) => {
                                 // 尝试查找点击
@@ -3384,8 +3427,6 @@ async function doExamPaper() {
         running.value = false;
         // 同屏任务
         if (settings[SettingType.SAME_TAB]) {
-            // 关闭窗口
-            closeFrame();
             // 窗口不存在
             frame.exist = false;
         }
@@ -3929,8 +3970,10 @@ async function reading(type) {
     if (type === 0) {
         // 章节
         const sections = $$('section');
+        // 最大字数
+        const maxTextCount = Math.max(...sections.map((s) => s.innerText.length), 200);
         // 预计时间
-        const predictTime = ~~(60 * Math.max(...[...sections].map((s) => s.innerText.length))) / 1000;
+        const predictTime = ~~((60 * maxTextCount) / 1000);
         // min(predictTime,  maxWatch.value) 秒后关闭页面
         time = Math.min(predictTime, maxRead.value);
     }
@@ -4026,22 +4069,22 @@ async function getNews() {
     // 获取新闻
     const data = await getNewsList();
     if (data && data.length) {
+        // 索引
+        let i = 0;
+        // 最新新闻
+        const latestItems = data.slice(0, 100);
+        // 当前年份
+        const currentYear = new Date().getFullYear().toString();
         // 查找今年新闻
-        for (const i in data) {
-            if (news.length === need) {
-                return;
-            }
+        while (i < need) {
+            const randomIndex = ~~(Math.random() * latestItems.length);
             // 新闻
-            const item = data[i];
+            const item = latestItems[randomIndex];
             // 是否存在
-            if (item.publishTime.startsWith(new Date().getFullYear().toString()) &&
-                item.type === 'tuwen') {
-                news.push(item);
+            if (item.publishTime.startsWith(currentYear) && item.type === 'tuwen') {
+                news[i] = item;
+                i++;
             }
-        }
-        // 补足新闻数
-        if (news.length < need) {
-            await getNews();
         }
     }
     else {
@@ -4060,22 +4103,23 @@ async function getVideos() {
     // 获取视频
     const data = await getVideoList();
     if (data && data.length) {
+        // 索引
+        let i = 0;
+        // 最新视频
+        const latestItems = data.slice(0, 100);
+        // 当前年份
+        const currentYear = new Date().getFullYear().toString();
         // 查找今年视频
-        for (const i in data) {
-            if (videos.length === need) {
-                return;
-            }
+        while (i < need) {
+            const randomIndex = ~~(Math.random() * latestItems.length);
             // 新闻
-            const item = data[i];
+            const item = latestItems[randomIndex];
             // 是否存在
-            if (item.publishTime.startsWith(new Date().getFullYear().toString()) &&
+            if (item.publishTime.startsWith(currentYear) &&
                 (item.type === 'shipin' || item.type === 'juji')) {
-                videos.push(item);
+                videos[i] = item;
+                i++;
             }
-        }
-        // 补足视频数
-        if (videos.length < need) {
-            await getVideos();
         }
     }
     else {
@@ -4270,7 +4314,7 @@ function createTip(text, delay = 2, countShow = false, callback) {
                 delayShow.value = false;
             }
             // 倒计时结束
-            if (!count) {
+            if (count <= 0) {
                 done = true;
                 operate.destroy();
             }
@@ -4434,11 +4478,12 @@ async function refreshTaskList() {
             // 完成状态
             taskConfig[i].status = rate === 100;
         }
-        return true;
+        return;
     }
     // 重试
     await sleep(2000);
-    return refreshTaskList();
+    refreshTaskList();
+    return;
 }
 
 
@@ -5368,6 +5413,63 @@ function SettingsPanel({ show }) {
     return createElementNode('div', undefined, {
         class: watchEffectRef(() => `egg_settings${show.value ? ' active' : ''}`),
     }, [
+        createElementNode('div', undefined, { class: 'egg_settings_theme_wrap' }, [
+            createElementNode('div', undefined, { class: 'egg_settings_theme' }, [
+                createElementNode('div', undefined, { class: 'egg_settings_label' }, createTextNode('主题预设')),
+                createElementNode('div', undefined, { class: 'egg_settings_theme_colors' }, [
+                    {
+                        value: '#fa3333',
+                        title: '强国红',
+                        detail: 'XueXi Red',
+                        code: 'none',
+                    },
+                    {
+                        value: '#bb2649',
+                        title: '非凡洋红',
+                        detail: 'Viva Magenta',
+                        code: '18-1750',
+                    },
+                    {
+                        value: '#f36f63',
+                        title: '经典蓝',
+                        detail: 'Classic Blue',
+                        code: '19-4052',
+                    },
+                    {
+                        value: '#35548a',
+                        title: '活珊瑚橘',
+                        detail: 'Living Coral',
+                        code: '16-1546',
+                    },
+                    {
+                        value: '#6d5b97',
+                        title: '紫外光色',
+                        detail: 'Ultra Violet',
+                        code: '18-3838',
+                    },
+                    {
+                        value: '#86af49',
+                        title: '草木绿',
+                        detail: 'Greenery',
+                        code: '15-0343',
+                    },
+                ].map((color) => createElementNode('div', undefined, {
+                    class: 'egg_settings_theme_color_wrap',
+                }, createElementNode('button', undefined, {
+                    class: 'egg_settings_theme_color',
+                    type: 'button',
+                    style: `background: ${color.value}`,
+                    title: color.title,
+                    onclick: debounce(() => {
+                        if (themeColor.value !== color.value) {
+                            themeColor.value = color.value;
+                            // 存储
+                            GM_setValue('themeColor', themeColor.value);
+                        }
+                    }, 300),
+                })))),
+            ]),
+        ]),
         createElementNode('div', undefined, {
             class: 'egg_settings_read_time_wrap',
         }, [

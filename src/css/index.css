@@ -641,6 +641,23 @@
   padding-bottom: 1rem;
   user-select: none;
 }
+.egg_settings_item .egg_settings_theme_wrap {
+  padding: 1rem 2rem 0 2rem;
+}
+.egg_settings_theme_wrap .egg_settings_theme {
+}
+.egg_settings_theme .egg_settings_theme_colors {
+  display: flex;
+  align-items: center;
+}
+.egg_settings_theme_colors .egg_settings_theme_color_wrap {
+  padding-right: 0.8rem;
+}
+.egg_settings_theme_color_wrap .egg_settings_theme_color {
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+}
 .egg_settings .egg_settings_read_time_wrap,
 .egg_settings .egg_settings_watch_time_wrap {
   padding: 1rem 2rem 0 2rem;

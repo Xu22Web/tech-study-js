@@ -94,10 +94,14 @@ async function reading(type: number) {
   // 文章选读
   if (type === 0) {
     // 章节
-    const sections = $$<HTMLVideoElement>('section');
+    const sections = $$('section');
+    // 最大字数
+    const maxTextCount = Math.max(
+      ...sections.map((s) => s.innerText.length),
+      200
+    );
     // 预计时间
-    const predictTime =
-      ~~(60 * Math.max(...[...sections].map((s) => s.innerText.length))) / 1000;
+    const predictTime = ~~((60 * maxTextCount) / 1000);
     // min(predictTime,  maxWatch.value) 秒后关闭页面
     time = Math.min(predictTime, maxRead.value);
   }
@@ -195,24 +199,22 @@ async function getNews() {
   // 获取新闻
   const data = await getNewsList();
   if (data && data.length) {
+    // 索引
+    let i = 0;
+    // 最新新闻
+    const latestItems = data.slice(0, 100);
+    // 当前年份
+    const currentYear = new Date().getFullYear().toString();
     // 查找今年新闻
-    for (const i in data) {
-      if (news.length === need) {
-        return;
-      }
+    while (i < need) {
+      const randomIndex = ~~(Math.random() * latestItems.length);
       // 新闻
-      const item = data[i];
+      const item = latestItems[randomIndex];
       // 是否存在
-      if (
-        item.publishTime.startsWith(new Date().getFullYear().toString()) &&
-        item.type === 'tuwen'
-      ) {
-        news.push(item);
+      if (item.publishTime.startsWith(currentYear) && item.type === 'tuwen') {
+        news[i] = item;
+        i++;
       }
-    }
-    // 补足新闻数
-    if (news.length < need) {
-      await getNews();
     }
   } else {
     news = [];
@@ -232,24 +234,25 @@ async function getVideos() {
   // 获取视频
   const data = await getVideoList();
   if (data && data.length) {
+    // 索引
+    let i = 0;
+    // 最新视频
+    const latestItems = data.slice(0, 100);
+    // 当前年份
+    const currentYear = new Date().getFullYear().toString();
     // 查找今年视频
-    for (const i in data) {
-      if (videos.length === need) {
-        return;
-      }
+    while (i < need) {
+      const randomIndex = ~~(Math.random() * latestItems.length);
       // 新闻
-      const item = data[i];
+      const item = latestItems[randomIndex];
       // 是否存在
       if (
-        item.publishTime.startsWith(new Date().getFullYear().toString()) &&
+        item.publishTime.startsWith(currentYear) &&
         (item.type === 'shipin' || item.type === 'juji')
       ) {
-        videos.push(item);
+        videos[i] = item;
+        i++;
       }
-    }
-    // 补足视频数
-    if (videos.length < need) {
-      await getVideos();
     }
   } else {
     videos = [];

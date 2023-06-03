@@ -100,14 +100,17 @@ function hasMobile() {
  * @param time
  * @returns
  */
-function sleep(time) {
-  if (!Number.isInteger(time)) {
-    time = 1000;
+function sleep(time: number) {
+  // 延时
+  let timeDelay = Number(time);
+  if (!Number.isInteger(timeDelay)) {
+    timeDelay = 1000;
   }
+  timeDelay += Math.random() * 500 - 250;
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve('done');
-    }, time);
+      resolve(undefined);
+    }, timeDelay);
   });
 }
 

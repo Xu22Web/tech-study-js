@@ -16,7 +16,7 @@ import { log } from '../utils/log';
 import { pushModal } from '../utils/push';
 import { createRandomPath, createRandomPoint } from '../utils/random';
 import { hasMobile, sleep, studyPauseLock } from '../utils/utils';
-import { closeFrame, handleCloseTaskWin, waitTaskWin } from './frame';
+import { handleCloseTaskWin, waitTaskWin } from './frame';
 import { createTip } from './tip';
 import { refreshScoreInfo, refreshTaskList } from './user';
 
@@ -67,7 +67,11 @@ function handleSlideVerify() {
       const track = (await $_<HTMLElement>('.nc_scale', undefined, 3000))[0];
       // 滑块
       const slide = (await $_<HTMLElement>('.btn_slide', undefined, 3000))[0];
+      // 延时
+      await sleep(2000);
+      // 矩形范围
       const rectTrack = track.getBoundingClientRect();
+      // 矩形范围
       const rectSlide = slide.getBoundingClientRect();
       // 窗口
       const window = unsafeWindow;
@@ -585,9 +589,11 @@ async function doingExam(type: ExamType) {
               '/',
             ];
             // 可能的答案
-            const answersLike = seperator.map((s) => answers.join(s));
+            const answersLike = seperator
+              .map((s) => answers.join(s).trim())
+              .filter((answer) => answer.length);
             // 答案存在
-            if (answersLike.every((answer) => answer.length)) {
+            if (answersLike.length) {
               // 可能答案是否正确
               const res = answersLike.some((answer) => {
                 // 尝试查找点击
@@ -797,8 +803,6 @@ async function doExamPaper() {
     running.value = false;
     // 同屏任务
     if (settings[SettingType.SAME_TAB]) {
-      // 关闭窗口
-      closeFrame();
       // 窗口不存在
       frame.exist = false;
     }

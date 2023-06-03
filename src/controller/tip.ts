@@ -43,7 +43,7 @@ function createTip(
         delayShow.value = false;
       }
       // 倒计时结束
-      if (!count) {
+      if (count <= 0) {
         done = true;
         operate.destroy();
       }

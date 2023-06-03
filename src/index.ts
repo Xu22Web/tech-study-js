@@ -7,15 +7,15 @@ import {} from './config/task';
 import URL_CONFIG from './config/url';
 import {} from './config/api';
 import { version } from './config/version';
-import { Settings, SettingType } from './types';
-import {} from './utils/composition';
+import { Settings } from './types';
+import { watch } from './utils/composition';
 import { $$, $_, createElementNode, mountElement } from './utils/element';
 import { log } from './utils/log';
 import {} from './utils/push';
 import {} from './utils/random';
 import {} from './utils/time';
 import { hasMobile, load } from './utils/utils';
-import { id, maxRead, maxWatch, settings, taskConfig } from './shared';
+import { maxRead, maxWatch, settings, taskConfig, themeColor } from './shared';
 import { doingExam, ExamType } from './controller/exam';
 import { initChildListener, initMainListener } from './controller/frame';
 import {} from './controller/login';
@@ -54,6 +54,8 @@ load(
     // 页面提示
     log('进入主页面!');
 
+    // 初始化主题
+    initThemeColor();
     // 初始化任务配置
     initTaskConfig();
     // 初始化设置
@@ -77,6 +79,8 @@ load(
     // 页面提示
     log('进入文章选读页面!');
 
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -98,6 +102,8 @@ load(
     // 页面提示
     log('进入视听学习页面!');
 
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -119,6 +125,8 @@ load(
     // 页面提示
     log('进入每日答题页面!');
 
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -140,6 +148,8 @@ load(
     // 页面提示
     log('进入专项练习页面!');
 
+    // 初始化主题
+    initThemeColor();
     // 初始化设置
     initSettings();
     // 设置字体
@@ -237,6 +247,26 @@ function initMaxWatch() {
     const maxWatchTemp = <number>GM_getValue('maxWatch');
     if (maxWatchTemp) {
       maxWatch.value = maxWatchTemp;
+    }
+  } catch (error) {}
+}
+
+/**
+ * @description 初始化主题色
+ */
+function initThemeColor() {
+  try {
+    // 监听主题变化
+    watch(themeColor, () => {
+      // 文档对象
+      const doc = $$(':root')[0];
+      // 设置主题
+      doc.style.setProperty('--themeColor', themeColor.value);
+    });
+    // 主题色
+    const themeColorTemp = <string>GM_getValue('themeColor');
+    if (themeColorTemp) {
+      themeColor.value = themeColorTemp;
     }
   } catch (error) {}
 }

@@ -165,6 +165,11 @@ const maxWatch = ref(120);
  */
 const running = ref(false);
 
+/**
+ * @description 主题色
+ */
+const themeColor = ref('#fa3333');
+
 export {
   href,
   taskConfig,
@@ -185,4 +190,5 @@ export {
   maxRead,
   maxWatch,
   running,
+  themeColor,
 };

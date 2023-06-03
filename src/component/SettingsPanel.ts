@@ -70,13 +70,13 @@ function SettingsPanel({ show }: { show: Ref<boolean> }) {
                   code: '18-1750',
                 },
                 {
-                  value: '#f36f63',
+                  value: '#35548a',
                   title: '经典蓝',
                   detail: 'Classic Blue',
                   code: '19-4052',
                 },
                 {
-                  value: '#35548a',
+                  value: '#f36f63',
                   title: '活珊瑚橘',
                   detail: 'Living Coral',
                   code: '16-1546',

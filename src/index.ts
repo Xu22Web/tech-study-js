@@ -183,11 +183,13 @@ function initLogo() {
 function initTaskConfig() {
   try {
     const configTemp = JSON.parse(GM_getValue('taskConfig'));
-    if (configTemp && configTemp.length === taskConfig.length) {
-      taskConfig.forEach((task, i) => {
-        task.active = configTemp[i].active;
-      });
-      return;
+    if (configTemp && Array.isArray(configTemp)) {
+      if (configTemp.length === taskConfig.length) {
+        taskConfig.forEach((task, i) => {
+          task.active = configTemp[i].active;
+        });
+        return;
+      }
     }
   } catch (e) {}
 }
@@ -258,10 +260,11 @@ function initThemeColor() {
   try {
     // 监听主题变化
     watch(themeColor, () => {
-      // 文档对象
-      const doc = $$(':root')[0];
       // 设置主题
-      doc.style.setProperty('--themeColor', themeColor.value);
+      document.documentElement.style.setProperty(
+        '--themeColor',
+        themeColor.value
+      );
     });
     // 主题色
     const themeColorTemp = <string>GM_getValue('themeColor');

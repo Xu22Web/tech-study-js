@@ -61,7 +61,7 @@ const taskConfig = reactive([
     tip: '每组答题每答对1道积1分。每日上限积5分。',
     percent: 0,
     score: 0,
-    active: false,
+    active: true,
     immutable: false,
     type: TaskType.PRACTICE,
   },

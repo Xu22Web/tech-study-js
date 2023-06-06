@@ -1,3 +1,4 @@
+import { version } from '../config/version';
 import { clearScheduleTask, refreshScheduleTask } from '../controller/schedule';
 import { createTip } from '../controller/tip';
 import {
@@ -43,88 +44,142 @@ function SettingsPanel({ show }: { show: Ref<boolean> }) {
       createElementNode(
         'div',
         undefined,
-        { class: 'egg_settings_theme_wrap' },
+        { class: 'egg_settings_version_wrap' },
         [
-          createElementNode('div', undefined, { class: 'egg_settings_theme' }, [
-            createElementNode(
-              'div',
-              undefined,
-              { class: 'egg_settings_label' },
-              createTextNode('主题预设')
-            ),
-            createElementNode(
-              'div',
-              undefined,
-              { class: 'egg_settings_theme_colors' },
-              [
+          createElementNode(
+            'div',
+            undefined,
+            { class: 'egg_settings_label' },
+            createTextNode('版本信息')
+          ),
+          createElementNode(
+            'div',
+            undefined,
+            {
+              class: 'egg_settings_version',
+            },
+            [
+              createTextNode(`v${version}`),
+
+              createElementNode(
+                'a',
+                undefined,
                 {
-                  value: '#fa3333',
-                  title: '强国红',
-                  detail: 'XueXi Red',
-                  code: 'none',
+                  class: 'egg_settings_version_detail',
+                  title: 'GitHub Xu22Web/tech-study-js',
+                  href: 'https://github.com/Xu22Web/tech-study-js',
                 },
-                {
-                  value: '#bb2649',
-                  title: '非凡洋红',
-                  detail: 'Viva Magenta',
-                  code: '18-1750',
-                },
-                {
-                  value: '#35548a',
-                  title: '经典蓝',
-                  detail: 'Classic Blue',
-                  code: '19-4052',
-                },
-                {
-                  value: '#f36f63',
-                  title: '活珊瑚橘',
-                  detail: 'Living Coral',
-                  code: '16-1546',
-                },
-                {
-                  value: '#6d5b97',
-                  title: '紫外光色',
-                  detail: 'Ultra Violet',
-                  code: '18-3838',
-                },
-                {
-                  value: '#86af49',
-                  title: '草木绿',
-                  detail: 'Greenery',
-                  code: '15-0343',
-                },
-              ].map((color) =>
-                createElementNode(
-                  'div',
+                createNSElementNode(
+                  'svg',
                   undefined,
                   {
-                    class: 'egg_settings_theme_color_wrap',
+                    viewBox: '0 0 16 16',
+                    class: 'egg_icon',
                   },
-                  createElementNode('button', undefined, {
-                    class: 'egg_settings_theme_color',
-                    type: 'button',
-                    style: watchEffectRef(
-                      () =>
-                        `color: ${color.value};${
-                          themeColor.value === color.value
-                            ? ''
-                            : ` box-shadow: 0rem 0.4rem 0.1rem 0.1rem ${color.value}30;`
-                        }`
-                    ),
-
-                    title: color.title,
-                    onclick: debounce(() => {
-                      if (themeColor.value !== color.value) {
-                        themeColor.value = color.value;
-                        // 存储
-                        GM_setValue('themeColor', themeColor.value);
-                      }
-                    }, 300),
+                  createNSElementNode('path', undefined, {
+                    d: 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z',
                   })
                 )
+              ),
+            ]
+          ),
+        ]
+      ),
+      createElementNode(
+        'div',
+        undefined,
+        { class: 'egg_settings_theme_wrap' },
+        [
+          createElementNode(
+            'div',
+            undefined,
+            { class: 'egg_settings_label' },
+            createTextNode('主题预设')
+          ),
+          createElementNode(
+            'div',
+            undefined,
+            { class: 'egg_settings_theme_colors' },
+            [
+              {
+                value: '#fa3333',
+                title: '强国红',
+                detail: 'XueXi Red',
+                code: 'none',
+              },
+              {
+                value: '#bb2649',
+                title: '非凡洋红',
+                detail: 'Viva Magenta',
+                code: '18-1750',
+              },
+              {
+                value: '#35548a',
+                title: '经典蓝',
+                detail: 'Classic Blue',
+                code: '19-4052',
+              },
+              {
+                value: '#f36f63',
+                title: '活珊瑚橘',
+                detail: 'Living Coral',
+                code: '16-1546',
+              },
+              {
+                value: '#6d5b97',
+                title: '紫外光色',
+                detail: 'Ultra Violet',
+                code: '18-3838',
+              },
+              {
+                value: '#86af49',
+                title: '草木绿',
+                detail: 'Greenery',
+                code: '15-0343',
+              },
+              {
+                value: '#fc8bab',
+                title: 'B站粉',
+                detail: 'Bilibili Pink',
+                code: 'none',
+              },
+              {
+                value: '#056de8',
+                title: '知乎蓝',
+                detail: 'Zhihu Blue',
+                code: 'none',
+              },
+            ].map((color) =>
+              createElementNode(
+                'div',
+                undefined,
+                {
+                  class: 'egg_settings_theme_color_wrap',
+                },
+                createElementNode('button', undefined, {
+                  class: 'egg_settings_theme_color',
+                  type: 'button',
+                  style: watchEffectRef(
+                    () =>
+                      `color: ${color.value};${
+                        themeColor.value === color.value
+                          ? ''
+                          : ` box-shadow: 0rem 0.4rem 0.1rem 0.1rem ${color.value}30;`
+                      }`
+                  ),
+
+                  title: color.title,
+                  onclick: debounce(() => {
+                    if (themeColor.value !== color.value) {
+                      themeColor.value = color.value;
+                      // 存储
+                      GM_setValue('themeColor', themeColor.value);
+                    }
+                  }, 300),
+                })
               )
-            ),
-          ]),
+            )
+          ),
         ]
       ),
       createElementNode(

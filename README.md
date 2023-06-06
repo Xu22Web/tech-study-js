@@ -76,17 +76,21 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 修复文章选读时间出现小数的问题，优化文章选读逻辑
+1. 新增重置配置，修复版本迭代造成配置不一致的问题
 
-2. 等待时间更加随机，降低被监控风险
+2. 新增`B站粉`和`知乎蓝`主题色，缤纷颜色，多彩体验
 
-3. 新增主题色搭配，潘通流行色随意挑选
+3. 新增版本号显示，直观展示版本信息
 
 4. 与此同时，提供更加便捷的版本选择
 
    - [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版')
 
    - [Docker 版](https://github.com/Xu22Web/tech-study-docker 'Docker 版')
+
+Tips:
+
+> 尝试安装 [uBlock Origin](https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak) 插件，屏蔽上传鼠标点击位置、前端截图等请求，降低被封风险
 
 ### 关于开发 Development
 

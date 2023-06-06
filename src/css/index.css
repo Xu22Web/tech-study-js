@@ -167,6 +167,13 @@
 .egg_panel .egg_settings_show_btn.active {
   background: var(--themeColor);
 }
+.egg_panel .egg_settings_reset_btn {
+  background: #ccc;
+  margin-top: 1rem;
+}
+.egg_panel .egg_settings_reset_btn:active {
+  background: var(--themeColor);
+}
 .egg_login_item {
   display: flex;
   justify-content: center;
@@ -319,22 +326,40 @@
 }
 .egg_task_item {
   user-select: none;
-}
-.egg_task_content {
   min-height: 3rem;
   min-width: 18rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0.5rem 0;
 }
-.egg_task_content .egg_label_wrap {
+.egg_task_item .egg_label_wrap {
   flex-grow: 1;
+  padding-right: 0.5rem;
+}
+.egg_label_wrap .egg_task_title_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_task_title_wrap .egg_task_progress_wrap {
+  display: flex;
+  align-items: center;
+  font-size: 1.4rem;
+  width: 3.5rem;
+}
+.egg_task_progress_wrap .egg_task_current {
+  color: var(--themeColor);
+}
+.egg_task_progress_wrap .egg_task_max {
+  color: #999;
+  font-size: 1.2rem;
 }
 .egg_label_wrap .egg_progress {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  padding-top: 0.8rem;
 }
 .egg_progress .egg_track {
   background: #ccc;
@@ -349,11 +374,6 @@
   border-radius: 1rem;
   width: 0;
   transition: width 0.5s;
-}
-.egg_progress .egg_percent {
-  font-size: 1.2rem;
-  padding-left: 0.5rem;
-  width: 4rem;
 }
 .egg_setting_item {
   min-height: 3rem;
@@ -641,17 +661,31 @@
   padding-bottom: 1rem;
   user-select: none;
 }
-.egg_settings_item .egg_settings_theme_wrap {
+.egg_settings_item .egg_settings_version_wrap {
   padding: 1rem 2rem 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.egg_settings_theme_wrap .egg_settings_theme {
-}
-.egg_settings_theme .egg_settings_theme_colors {
+.egg_settings_version_wrap .egg_settings_version {
+  color: #999;
   display: flex;
   align-items: center;
 }
-.egg_settings_theme_colors .egg_settings_theme_color_wrap {
-  padding-right: 0.8rem;
+.egg_settings_version .egg_settings_version_detail {
+  color: #24292f;
+  font-size: 1.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.4rem;
+}
+.egg_settings_item .egg_settings_theme_wrap {
+  padding: 1rem 2rem 0 2rem;
+}
+.egg_settings_theme_wrap .egg_settings_theme_colors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .egg_settings_theme_color_wrap .egg_settings_theme_color {
   border-radius: 50%;

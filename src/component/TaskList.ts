@@ -50,13 +50,15 @@ function TaskList() {
     {
       class: 'egg_task_list',
     },
-    taskConfig.map((label, i) =>
+    taskConfig.map((label) =>
       label.immutable
         ? TaskItem({
             title: label.title,
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
+            currentScore: watchEffectRef(() => label.currentScore),
+            dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {
               handleTaskChange(e, label.type, label.title);
             }, 300),
@@ -67,6 +69,8 @@ function TaskList() {
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
             percent: watchEffectRef(() => label.percent),
+            currentScore: watchEffectRef(() => label.currentScore),
+            dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {
               handleTaskChange(e, label.type, label.title);
             }, 300),

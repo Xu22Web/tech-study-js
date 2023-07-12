@@ -39,7 +39,7 @@ type ModalType = 'info' | 'warn' | 'fail' | 'success';
  * @param percent
  * @returns
  */
-function getProgressHTML(title: string, percent: number) {
+function getProgressHTML(title: string, current: number, total: number) {
   // html
   const progressHTML = `<div
     style="
@@ -50,7 +50,7 @@ function getProgressHTML(title: string, percent: number) {
     "
   >
     <span>${title}</span>
-    <span>${getHighlightHTML(percent)} %</span>
+    <span>${getHighlightHTML(`${current}`)} / ${total}</span>
   </div>
   <div
     style="
@@ -65,7 +65,7 @@ function getProgressHTML(title: string, percent: number) {
       style="
         background: linear-gradient(to left, #188fff80, #1890ff);
         height: 100%;
-        width: ${percent}%;
+        width: ${((100 * current) / total).toFixed(1)}%;
         border-radius: 10px;
       "
     ></div>
@@ -300,8 +300,8 @@ async function pushModal(
 
 export {
   createModal,
+  getHighlightHTML,
   getImgHTML,
   getProgressHTML,
-  getHighlightHTML,
   pushModal,
 };

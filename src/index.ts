@@ -182,15 +182,27 @@ function initLogo() {
  */
 function initTaskConfig() {
   try {
-    const configTemp = JSON.parse(GM_getValue('taskConfig'));
-    if (configTemp && Array.isArray(configTemp)) {
-      if (configTemp.length === taskConfig.length) {
+    const taskTemp = JSON.parse(GM_getValue('taskConfig'));
+    if (taskTemp && Array.isArray(taskTemp)) {
+      if (taskTemp.length === taskConfig.length) {
         taskConfig.forEach((task, i) => {
-          task.active = configTemp[i].active;
+          task.active = taskTemp[i].active;
         });
-        return;
       }
     }
+    // 监听值变化
+    GM_addValueChangeListener('taskConfig', (key, oldVal, newVal, remote) => {
+      if (remote) {
+        const taskTemp = JSON.parse(newVal);
+        if (taskTemp && Array.isArray(taskTemp)) {
+          if (taskTemp.length === taskConfig.length) {
+            taskConfig.forEach((task, i) => {
+              task.active = taskTemp[i].active;
+            });
+          }
+        }
+      }
+    });
   } catch (e) {}
 }
 
@@ -206,8 +218,23 @@ function initSettings() {
           settings[i] = (<Settings>settingsTemp)[i];
         }
       }
-      return;
     }
+    // 监听值变化
+    GM_addValueChangeListener(
+      'studySettings',
+      (key, oldVal, newVal, remote) => {
+        if (remote) {
+          const settingsTemp = JSON.parse(newVal);
+          if (settingsTemp && Array.isArray(settingsTemp)) {
+            if (settingsTemp.length === settings.length) {
+              for (const i in settingsTemp) {
+                settings[i] = (<Settings>settingsTemp)[i];
+              }
+            }
+          }
+        }
+      }
+    );
   } catch (e) {}
 }
 
@@ -271,6 +298,16 @@ function initThemeColor() {
     if (themeColorTemp) {
       themeColor.value = themeColorTemp;
     }
+    // 监听值变化
+    GM_addValueChangeListener('themeColor', (key, oldVal, newVal, remote) => {
+      if (remote) {
+        // 主题色
+        const themeColorTemp = <string>newVal;
+        if (themeColorTemp) {
+          themeColor.value = themeColorTemp;
+        }
+      }
+    });
   } catch (error) {}
 }
 
@@ -280,6 +317,45 @@ function initThemeColor() {
 function renderTip() {
   const tipWrap = createElementNode('div', undefined, {
     class: 'egg_tip_wrap',
+    onclick(e: Event) {
+      e.stopPropagation();
+    },
+    onmousedown(e: Event) {
+      e.stopPropagation();
+    },
+    onmousemove(e: Event) {
+      e.stopPropagation();
+    },
+    onmouseup(e: Event) {
+      e.stopPropagation();
+    },
+    onmouseenter(e: Event) {
+      e.stopPropagation();
+    },
+    onmouseleave(e: Event) {
+      e.stopPropagation();
+    },
+    onmouseover(e: Event) {
+      e.stopPropagation();
+    },
+    ontouchstart(e: Event) {
+      e.stopPropagation();
+    },
+    ontouchmove(e: Event) {
+      e.stopPropagation();
+    },
+    ontouchend(e: Event) {
+      e.stopPropagation();
+    },
+    oninput(e: Event) {
+      e.stopPropagation();
+    },
+    onchange(e: Event) {
+      e.stopPropagation();
+    },
+    onblur(e: Event) {
+      e.stopPropagation();
+    },
   });
   mountElement(tipWrap);
 }

@@ -1,7 +1,8 @@
 import { getNewsList, getVideoList } from '../api/data';
-import { maxNewsNum, maxVideoNum, muted } from '../config/task';
-import { maxRead, maxWatch, taskConfig } from '../shared';
-import { NewsVideoList, TaskType } from '../types';
+import { maxNewsNum, maxVideoNum } from '../config/task';
+import { maxRead, maxWatch, settings, taskConfig } from '../shared';
+import { NewsVideoList, SettingType, TaskType } from '../types';
+import { watchEffect } from '../utils/composition';
 import { $$, $_ } from '../utils/element';
 import { log } from '../utils/log';
 import { sleep, studyPauseLock } from '../utils/utils';
@@ -50,7 +51,7 @@ async function handleVideo() {
   const playBtn = $$('.prism-play-btn')[0];
   if (video && playBtn) {
     // 设置是否静音
-    video.muted = muted;
+    watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
     log('正在尝试播放视频...');
     // 播放超时
     const timeout = setTimeout(() => {

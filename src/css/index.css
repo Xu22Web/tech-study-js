@@ -54,7 +54,7 @@
   font-size: 1.2rem;
 }
 .egg_exam_btn {
-  transition: background-color 80ms;
+  transition: background 80ms;
   outline: none;
   border: none;
   padding: 1.2rem 2rem;
@@ -64,10 +64,10 @@
   font-weight: bold;
   text-align: center;
   color: #ffffff;
-  background: #666777;
+  background: #ccc;
 }
 .egg_exam_btn.manual {
-  background: #e3484b;
+  background: var(--themeColor);
 }
 .egg_panel_wrap * {
   padding: 0;
@@ -454,6 +454,10 @@
 .egg_tip_list .egg_tip_btn:disabled {
   opacity: 0.5;
   background: #ccc;
+}
+.egg_tip_list .egg_tip_content {
+  text-align: center;
+  padding-top: 0.2rem;
 }
 .egg_study_item {
   display: flex;

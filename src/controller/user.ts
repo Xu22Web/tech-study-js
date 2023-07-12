@@ -98,8 +98,6 @@ async function refreshTaskList() {
       const { currentScore, dayMaxScore } = taskConfig[i];
       // 进度
       const rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
-      // 百分比
-      taskConfig[i].percent = rate;
       // 分数
       taskConfig[i].score = currentScore;
       // 完成状态

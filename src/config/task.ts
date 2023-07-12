@@ -15,15 +15,5 @@ const maxRefreshCount = 10;
  * @description 二维码自动刷新间隔
  */
 const autoRefreshQRCodeInterval = 100000;
-/**
- * @description 视频静音
- */
-const muted = true;
 
-export {
-  maxNewsNum,
-  maxVideoNum,
-  maxRefreshCount,
-  autoRefreshQRCodeInterval,
-  muted,
-};
+export { maxNewsNum, maxVideoNum, maxRefreshCount, autoRefreshQRCodeInterval };

@@ -16,14 +16,25 @@ enum SettingType {
   SAME_TAB,
   SILENT_RUN,
   SCHEDULE_RUN,
+  VIDEO_MUTED,
   RANDOM_EXAM,
+  AUTO_ANSWER,
   REMOTE_PUSH,
 }
 
 /**
  * @description 设置
  */
-type Settings = [boolean, boolean, boolean, boolean, boolean, boolean];
+type Settings = [
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean
+];
 
 /**
  * @description 定时信息

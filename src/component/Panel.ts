@@ -1,6 +1,6 @@
 import { doExamPaper } from '../controller/exam';
 import { createTip } from '../controller/tip';
-import { frame, running, settings, taskStatus } from '../shared';
+import { frame, login, running, settings, taskStatus } from '../shared';
 import { SettingType, TaskStatusType } from '../types';
 import { ref, watchEffectRef, watchRef } from '../utils/composition';
 import {
@@ -45,6 +45,11 @@ function Panel() {
       tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
       type: SettingType.SCHEDULE_RUN,
     },
+    {
+      title: '视频静音',
+      tip: '视听学习时，静音播放视频',
+      type: SettingType.VIDEO_MUTED,
+    },
   ];
   // 运行设置标签
   const examLabels = [
@@ -52,6 +57,11 @@ function Panel() {
       title: '随机作答',
       tip: '无答案时, 随机选择或者填入答案, 不保证正确',
       type: SettingType.RANDOM_EXAM,
+    },
+    {
+      title: '自动答题',
+      tip: '进入答题页面时，自动答题并提交答案',
+      type: SettingType.AUTO_ANSWER,
     },
   ];
   // 推送设置标签
@@ -83,6 +93,45 @@ function Panel() {
     undefined,
     {
       class: `egg_panel_wrap${hasMobile() ? ' mobile' : ''}`,
+      onclick(e: Event) {
+        e.stopPropagation();
+      },
+      onmousedown(e: Event) {
+        e.stopPropagation();
+      },
+      onmousemove(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseup(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseenter(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseleave(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseover(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchstart(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchmove(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchend(e: Event) {
+        e.stopPropagation();
+      },
+      oninput(e: Event) {
+        e.stopPropagation();
+      },
+      onchange(e: Event) {
+        e.stopPropagation();
+      },
+      onblur(e: Event) {
+        e.stopPropagation();
+      },
     },
     createElementNode(
       'div',
@@ -155,26 +204,42 @@ function Panel() {
         ),
         // 提示部分
         Hr({ text: '提示' }),
-        createElementNode('div', undefined, { class: 'egg_tip_list' }, [
-          createTextNode('专项练习已被移除, 如需使用, 请点击'),
-          createElementNode(
-            'button',
-            undefined,
-            {
-              class: 'egg_tip_btn',
-              type: 'button',
-              onclick: debounce(doExamPaper, 300),
-              disabled: watchRef(
-                () => [running.value, taskStatus.value],
-                () =>
-                  running.value ||
-                  taskStatus.value === TaskStatusType.START ||
-                  taskStatus.value === TaskStatusType.PAUSE
-              ),
-            },
-            createTextNode('去完成')
-          ),
-        ]),
+        createElementNode(
+          'div',
+          undefined,
+          { class: 'egg_tip_list' },
+          watchRef(login, () =>
+            login.value
+              ? [
+                  createTextNode('专项练习已被移除, 如需使用, 请点击'),
+                  createElementNode(
+                    'button',
+                    undefined,
+                    {
+                      class: 'egg_tip_btn',
+                      type: 'button',
+                      onclick: debounce(doExamPaper, 300),
+                      disabled: watchRef(
+                        () => [running.value, taskStatus.value],
+                        () =>
+                          running.value ||
+                          taskStatus.value === TaskStatusType.START ||
+                          taskStatus.value === TaskStatusType.PAUSE
+                      ),
+                    },
+                    createTextNode('去完成')
+                  ),
+                ]
+              : [
+                  createElementNode(
+                    'div',
+                    undefined,
+                    { class: 'egg_tip_content' },
+                    createTextNode('请先登录!')
+                  ),
+                ]
+          )
+        ),
         // 按钮集合
         createElementNode(
           'div',

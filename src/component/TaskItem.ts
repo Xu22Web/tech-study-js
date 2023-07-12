@@ -9,7 +9,6 @@ function TaskItem({
   title,
   tip,
   checked,
-  percent,
   currentScore,
   dayMaxScore,
   onchange,
@@ -18,7 +17,6 @@ function TaskItem({
   title: string;
   tip: string;
   checked: Ref<boolean>;
-  percent: Ref<number>;
   currentScore: Ref<number>;
   dayMaxScore: Ref<number>;
   onchange: (...args: any[]) => void;
@@ -70,7 +68,13 @@ function TaskItem({
             { class: 'egg_track' },
             createElementNode('div', undefined, {
               class: 'egg_bar',
-              style: watchEffectRef(() => `width: ${percent.value}%;`),
+              style: watchEffectRef(
+                () =>
+                  `width: ${(
+                    (100 * currentScore.value) /
+                    dayMaxScore.value
+                  ).toFixed(1)}%;`
+              ),
             })
           ),
         ]),
@@ -88,4 +92,3 @@ function TaskItem({
 }
 
 export { TaskItem };
-

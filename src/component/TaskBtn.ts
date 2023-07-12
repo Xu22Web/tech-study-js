@@ -145,7 +145,11 @@ function TaskBtn() {
                 `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
                 `总积分: ${getHighlightHTML(totalScore.value)} 分`,
                 ...taskConfig.map((task) =>
-                  getProgressHTML(task.title, task.percent)
+                  getProgressHTML(
+                    task.title,
+                    task.currentScore,
+                    task.dayMaxScore
+                  )
                 ),
               ],
               type: 'success',

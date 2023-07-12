@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name   不学习何以强国
 // @namespace   http://tampermonkey.net/
-// @version   1.7.0
+// @version   1.7.3
 // @description   有趣的 `学习强国` 油猴插件。读文章,看视频，做习题。问题反馈： https://github.com/Xu22Web/tech-study-js/issues 。
 // @author   原作者：techxuexi 荷包蛋。现作者：Xu22Web
 // @match   https://www.xuexi.cn/*
@@ -15,12 +15,13 @@
 // @grant   GM_setValue
 // @grant   GM_getValue
 // @grant   GM_openInTab
+// @grant   GM_addValueChangeListener
 // @grant   unsafeWindow
 // @updateURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @downloadURL   https://raw.githubusercontent.com/Xu22Web/tech-study-js/master/tech-study.js
 // @supportURL   https://github.com/Xu22Web
 // ==/UserScript==
-const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background-color 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #666777;}.egg_exam_btn.manual {  background: #e3484b;}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_panel .egg_settings_reset_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_reset_btn:active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0;}.egg_task_item .egg_label_wrap {  flex-grow: 1;  padding-right: 0.5rem;}.egg_label_wrap .egg_task_title_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_task_title_wrap .egg_task_progress_wrap {  display: flex;  align-items: center;  font-size: 1.4rem;  width: 3.5rem;}.egg_task_progress_wrap .egg_task_current {  color: var(--themeColor);}.egg_task_progress_wrap .egg_task_max {  color: #999;  font-size: 1.2rem;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding-top: 0.8rem;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_tip_list {  font-size: 1.2rem;  max-width: 18rem;  line-height: 2rem;  color: var(--themeColor);}.egg_tip_list .egg_tip_btn {  padding: 0.2rem 0.4rem;  background: #f1f1f1;  color: #333;}.egg_tip_list .egg_tip_btn:disabled {  opacity: 0.5;  background: #ccc;}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn:disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings_item .egg_settings_version_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_settings_version_wrap .egg_settings_version {  color: #999;  display: flex;  align-items: center;}.egg_settings_version .egg_settings_version_detail {  color: #24292f;  font-size: 1.6rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;}.egg_settings_item .egg_settings_theme_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_theme_wrap .egg_settings_theme_colors {  display: flex;  align-items: center;  justify-content: space-between;}.egg_settings_theme_color_wrap .egg_settings_theme_color {  border-radius: 50%;  width: 1.6rem;  height: 1.6rem;  background: currentColor;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
+const css = '* {  -webkit-tap-highlight-color: transparent;}:root {  --themeColor: #fa3333;  --scale: 1;  font-size: calc(10px * var(--scale));}@media (min-height: 678px) and (max-height: 768px) {  :root {    --scale: 0.8;  }}@media (max-height: 667px) {  :root {    --scale: 0.75;  }}@keyframes fade {  from {    opacity: 0.8;  }  to {    opacity: 0.4;    background: #ccc;  }}.egg_icon {  width: 1em;  height: 1em;  fill: currentColor;}.egg_hr_wrap {  position: relative;  display: flex;  justify-content: center;  color: #ccc;}.egg_hr_wrap .egg_hr {  position: absolute;  top: 50%;  transform: translateY(-50%);  background: currentColor;  height: 0.1rem;  width: 30%;}.egg_hr_wrap .egg_hr:nth-of-type(1) {  left: 0;}.egg_hr_wrap .egg_hr:nth-last-of-type(1) {  right: 0;}.egg_hr_title {  font-size: 1.2rem;}.egg_exam_btn {  transition: background 80ms;  outline: none;  border: none;  padding: 1.2rem 2rem;  border-radius: 1.2rem;  cursor: pointer;  font-size: 1.8rem;  font-weight: bold;  text-align: center;  color: #ffffff;  background: #ccc;}.egg_exam_btn.manual {  background: var(--themeColor);}.egg_panel_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_panel_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 99999;  width: 100%;  height: 100%;  color: #333;  font-size: 1.6rem;  pointer-events: none;}.egg_panel {  position: absolute;  top: 5rem;  left: 1rem;  padding: 1.2rem 2rem;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease-out;  pointer-events: all;}.egg_panel.hide {  left: 0;  transform: translateX(-100%);}.egg_panel_wrap.mobile .egg_panel {  top: 1rem;}@media (min-height: 678px) and (max-height: 768px) {  .egg_panel {    top: 2rem;  }}@media (max-height: 667px) {  .egg_panel {    top: 1rem;  }}.egg_panel button {  outline: none;  border: none;  padding: 0;  cursor: pointer;  background: none;}.egg_panel .egg_btns_wrap {  position: absolute;  left: 100%;  top: 50%;  transform: translate(-50%, -50%);  transition: 80ms ease;  z-index: 9;}.egg_panel.hide .egg_btns_wrap {  left: 100%;  transform: translate(0, -50%);}.egg_panel .egg_btns_wrap button {  border-radius: 50%;  width: 3rem;  height: 3rem;  padding: 0;  overflow: hidden;  border: 0.2rem solid currentColor;  color: white;  display: grid;  place-items: center;  font-size: 1.8rem;}.egg_panel.hide .egg_panel_show_btn {  background: var(--themeColor);}.egg_panel .egg_panel_show_btn {  background: #ccc;}.egg_panel .egg_frame_show_btn {  background: var(--themeColor);  margin-bottom: 1rem;}.egg_panel .egg_frame_show_btn.hide {  display: none;}.egg_panel .egg_settings_show_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_show_btn.active {  background: var(--themeColor);}.egg_panel .egg_settings_reset_btn {  background: #ccc;  margin-top: 1rem;}.egg_panel .egg_settings_reset_btn:active {  background: var(--themeColor);}.egg_login_item {  display: flex;  justify-content: center;  align-items: center;  flex-direction: column;  padding: 0.5rem 0;}.egg_login_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;  background: var(--themeColor);  padding: 0.8rem 2.4rem;}.egg_login_item .egg_login_btn:active {  opacity: 0.8;}.egg_login_item .egg_login_img_wrap {  height: 0;  border-radius: 1rem;  transition: height 80ms ease;  overflow: hidden;}.egg_login_item .egg_login_img_wrap.active {  padding: 0.8rem;  margin-top: 0.8rem;  height: auto;  background: white;}.egg_login_img_wrap .egg_login_img {  width: 15rem;  height: 15rem;}.egg_info_item .egg_login_btn {  font-size: 1.4rem;  border-radius: 1rem;  transition: 80ms ease;  color: white;}.egg_info_item .egg_login_btn:active {  opacity: 0.8;}.egg_info_item .egg_login_btn {  background: #ccc;  padding: 0.4rem 0.8rem;}.egg_info_item {  display: flex;  justify-content: space-between;  align-items: center;}.egg_info_item .egg_userinfo {  display: flex;  justify-content: center;  align-items: center;  padding: 0.5rem 0;}.egg_userinfo .egg_avatar .egg_avatar_nick,.egg_userinfo .egg_avatar .egg_avatar_img {  height: 5rem;  width: 5rem;  border-radius: 50%;  background: var(--themeColor);  display: flex;  justify-content: center;  align-items: center;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  font-size: 2rem;  color: white;}.egg_userinfo .egg_nick {  padding-left: 0.5rem;  text-overflow: ellipsis;  overflow: hidden;  white-space: nowrap;  max-width: 10rem;}.egg_score_item .egg_scoreinfo {  display: flex;  justify-content: space-between;  align-items: center;  padding: 0.5rem 0;}.egg_scoreinfo .egg_totalscore,.egg_scoreinfo .egg_todayscore {  font-size: 1.2rem;  user-select: none;}.egg_scoreinfo .egg_totalscore span,.egg_scoreinfo .egg_todayscore .egg_todayscore_btn span {  padding-left: 0.2rem;}.egg_scoreinfo .egg_totalscore span,.egg_todayscore .egg_todayscore_btn span,.egg_todayscore .egg_score_details span {  color: var(--themeColor);  font-weight: bold;}.egg_scoreinfo .egg_todayscore {  position: relative;}.egg_todayscore .egg_todayscore_btn {  display: flex;  align-items: center;}.egg_todayscore_btn .egg_icon {  opacity: 0.3;}.egg_todayscore .egg_score_details {  position: absolute;  left: calc(100% + 1rem);  top: 0;  background: #fffffff2;  border-radius: 0.5rem;  opacity: 1;  width: 10rem;  box-shadow: 0 0 0.1rem 0.1rem #f1f1f1;  transition: 80ms ease;  z-index: 9;}.egg_todayscore .egg_score_details.hide {  visibility: hidden;  opacity: 0;  left: 100%;}.egg_score_details .egg_score_title {  border-bottom: 0.1rem solid #eee;  padding: 0.5rem 0.8rem;  display: flex;  align-items: center;}.egg_score_details .egg_score_title .egg_icon {  font-size: 1.4rem;}.egg_score_details .egg_score_title .egg_score_title_text {  font-weight: bold;  padding-left: 0.2rem;}.egg_score_details .egg_score_item {  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0.8rem;}.egg_task_list {  position: relative;}.egg_task_item {  user-select: none;  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  padding: 0.5rem 0;}.egg_task_item .egg_label_wrap {  flex-grow: 1;  padding-right: 0.5rem;}.egg_label_wrap .egg_task_title_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_task_title_wrap .egg_task_progress_wrap {  display: flex;  align-items: center;  font-size: 1.4rem;  width: 3.5rem;}.egg_task_progress_wrap .egg_task_current {  color: var(--themeColor);}.egg_task_progress_wrap .egg_task_max {  color: #999;  font-size: 1.2rem;}.egg_label_wrap .egg_progress {  display: flex;  justify-content: space-between;  align-items: center;  padding-top: 0.8rem;}.egg_progress .egg_track {  background: #ccc;  height: 0.5rem;  border-radius: 1rem;  flex: 1 1 auto;  overflow: hidden;}.egg_progress .egg_track .egg_bar {  height: 0.5rem;  background: var(--themeColor);  border-radius: 1rem;  width: 0;  transition: width 0.5s;}.egg_setting_item {  min-height: 3rem;  min-width: 18rem;  display: flex;  align-items: center;  justify-content: space-between;  box-sizing: border-box;}.egg_setting_item .egg_label_wrap {  flex-grow: 1;}.egg_detail {  background: #ccc;  color: white;  border-radius: 10rem;  font-size: 1.2rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;  display: inline-block;  text-align: center;  line-height: 1.6rem;  cursor: pointer;}.egg_switch {  cursor: pointer;  margin: 0;  outline: 0;  appearance: none;  -webkit-appearance: none;  -moz-appearance: none;  position: relative;  width: 4.2rem;  height: 2.2rem;  background: #ccc;  border-radius: 5rem;  transition: background 0.3s;  --border-padding: 0.5rem;  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,    0.1rem 0 0.1rem -0.1rem #999 inset;}.egg_switch::after {  content: \'\';  display: inline-block;  width: 1.4rem;  height: 1.4rem;  border-radius: 50%;  background: #fff;  box-shadow: 0 0 0.2rem #999;  transition: left 0.4s;  position: absolute;  top: calc(50% - (1.4rem / 2));  position: absolute;  left: var(--border-padding);}.egg_switch:checked {  background: var(--themeColor);}.egg_switch:disabled {  opacity: 0.5;  background: #ccc;}.egg_switch:checked::after {  left: calc(100% - var(--border-padding) - 1.4rem);}.egg_tip_list {  font-size: 1.2rem;  max-width: 18rem;  line-height: 2rem;  color: var(--themeColor);}.egg_tip_list .egg_tip_btn {  padding: 0.2rem 0.4rem;  background: #f1f1f1;  color: #333;}.egg_tip_list .egg_tip_btn:disabled {  opacity: 0.5;  background: #ccc;}.egg_tip_list .egg_tip_content {  text-align: center;  padding-top: 0.2rem;}.egg_study_item {  display: flex;  justify-content: center;  padding-top: 0.5rem;}.egg_study_item .egg_study_btn {  background: var(--themeColor);  padding: 0.8rem 2.4rem;  font-size: 1.4rem;  border-radius: 1rem;  color: white;  transition: 80ms ease;}.egg_study_item .egg_study_btn:not(.loading):active {  opacity: 0.8;}.egg_study_item .egg_study_btn.loading {  animation: fade 2s ease infinite alternate;}.egg_study_item .egg_study_btn:disabled {  background: #ccc;}.egg_tip_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999999;  width: 100%;  height: 100%;  pointer-events: none;}.egg_tip_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_tip_wrap .egg_tip {  position: absolute;  bottom: 2rem;  left: 2rem;  padding: 1.2rem 1.4rem;  border: none;  border-radius: 1rem;  background: var(--themeColor);  color: white;  font-size: 1.4rem;  transition: 200ms ease;  opacity: 0;  transform: scale(0.9) translateY(1rem);}.egg_tip_wrap .egg_tip.active {  opacity: 1;  transform: scale(1) translateY(0);}.egg_tip_wrap .egg_tip.active.delay {  opacity: 0.5;}.egg_tip_wrap .egg_tip .egg_countdown {  display: inline-block;  color: var(--themeColor);  background: white;  border-radius: 0.5rem;  padding: 0.2rem 0.4rem;  font-weight: bold;  margin-left: 0.4rem;  font-size: 1.2rem;}.egg_frame_wrap {  position: fixed;  left: 0;  top: 0;  z-index: 999;  width: 100%;  height: 100%;  visibility: visible;}.egg_frame_wrap * {  padding: 0;  margin: 0;  box-sizing: border-box;  outline: none;  border: none;}.egg_frame_wrap.hide {  visibility: hidden;}.egg_frame_wrap.hide .egg_frame_mask,.egg_frame_wrap.hide .egg_frame_content_wrap {  opacity: 0;}.egg_frame_wrap.hide .egg_frame_content_wrap {  transform: scale(0);}.egg_frame_mask {  background: #00000030;  width: 100%;  height: 100%;  opacity: 1;  transition: 200ms ease;}.egg_frame_content_wrap {  position: absolute;  width: 80%;  height: 80%;  top: 10%;  left: 10%;  display: flex;  flex-direction: column;  transition: 200ms ease;  border-radius: 1rem;  background: #ffffffe6;  backdrop-filter: blur(1rem);  overflow: hidden;  transform: scale(1);}.egg_frame_content_wrap.max {  top: 0;  left: 0;  width: 100%;  height: 100%;  border-radius: 0;}.egg_frame_content_wrap .egg_frame_controls_wrap {  width: 100%;  display: flex;  justify-content: space-between;  align-items: center;  box-sizing: border-box;}.egg_frame_controls_wrap .egg_frame_title {  padding: 1rem 2rem;  font-size: 1.6rem;}.egg_frame_controls .egg_frame_btn {  outline: none;  border: none;  background: none;  padding: 1rem 2rem;  transition: 80ms ease;  cursor: pointer;  color: #333;  font-size: 1.8rem;}.egg_frame_controls .egg_frame_btn:active {  opacity: 0.8;}.egg_frame_wrap .egg_frame_content {  width: 100%;  flex-grow: 1;  border-top: 0.1rem solid #ccc;  min-height: 40rem;  min-width: 30rem;  background: white;}.egg_frame_content .egg_frame {  width: 100%;  height: 100%;  outline: none;  border: none;}.egg_time_input {  display: inline-flex;  align-items: center;  justify-content: center;}.egg_time_input .egg_hour_wrap,.egg_time_input .egg_minute_wrap {  width: 4rem;}.egg_time_input .egg_separator {  padding: 0 0.5rem;  font-size: 1.5rem;}.egg_settings_item {  position: absolute;  top: 0;  left: 0;  width: 100%;  height: 100%;  pointer-events: none;  overflow: hidden;  border-radius: 1rem;}.egg_settings_item .egg_settings {  display: inline-flex;  flex-direction: column;  font-size: 1.4rem;  background: white;  border-radius: 1rem;  overflow: hidden;  width: 100%;  height: 100%;  pointer-events: all;  transform: translateX(100%);  transition: transform 300ms ease;  padding-top: 1rem;}.egg_settings_item .egg_settings.active {  transform: translateX(0);}.egg_settings .egg_settings_label {  padding-bottom: 1rem;  user-select: none;}.egg_settings_item .egg_settings_version_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  align-items: center;  justify-content: space-between;}.egg_settings_version_wrap .egg_settings_version {  color: #999;  display: flex;  align-items: center;}.egg_settings_version .egg_settings_version_detail {  color: #24292f;  font-size: 1.6rem;  width: 1.6rem;  height: 1.6rem;  margin-left: 0.4rem;}.egg_settings_item .egg_settings_theme_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_theme_wrap .egg_settings_theme_colors {  display: flex;  align-items: center;  justify-content: space-between;}.egg_settings_theme_color_wrap .egg_settings_theme_color {  border-radius: 50%;  width: 1.6rem;  height: 1.6rem;  background: currentColor;}.egg_settings .egg_settings_read_time_wrap,.egg_settings .egg_settings_watch_time_wrap {  padding: 1rem 2rem 0 2rem;  display: flex;  justify-content: space-between;  align-items: center;}.egg_settings_read_time_wrap .egg_settings_label,.egg_settings_watch_time_wrap .egg_settings_label {  padding: 0.5rem 0;}.egg_settings_read_time_wrap .egg_select,.egg_settings_watch_time_wrap .egg_select {  width: 6rem;}.egg_settings .egg_settings_token_wrap {  padding: 1rem 2rem 0 2rem;}.egg_settings_token_wrap .egg_settings_token_input {  outline: none;  border: 0.1rem solid #eee;  padding: 1rem;  background: white;  border-radius: 0.2rem;  width: 100%;  box-sizing: border-box;  color: #ccc;}.egg_settings_token_wrap .egg_settings_token_input.active {  color: #333;}.egg_settings_token_input::placeholder {  color: #ccc;}.egg_settings .egg_settings_submit_btn_wrap {  text-align: right;  padding-top: 1rem;  display: none;}.egg_settings .egg_settings_submit_btn_wrap.active {  display: block;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {  background: #eee;}.egg_schedule {  height: 100%;  display: flex;  flex-direction: column;}.egg_schedule_time_wrap {  padding: 1rem 2rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_time .egg_schedule_label {  padding-bottom: 1rem;  user-select: none;}.egg_schedule_time .egg_schedule_time_input_wrap {  display: flex;  justify-content: space-between;  align-items: center;}.egg_schedule_time_input_wrap .egg_schedule_add_btn {  outline: none;  border: 0.1rem solid #eee;  padding: 0.5rem 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  cursor: pointer;}.egg_schedule_time_input_wrap .egg_schedule_add_btn:active {  background: #eee;}.egg_schedule_list {  height: 100%;  overflow: auto;}.egg_schedule_list .egg_schedule_item {  display: flex;  justify-content: space-between;  padding: 0.5rem 1.5rem;  font-size: 1.4rem;  border-bottom: 0.1rem solid #eee;}.egg_schedule_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_schedule_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_schedule_detail_time_wrap {  display: flex;  align-items: center;}.egg_schedule_detail_time_wrap.inactive {  color: #ccc;}.egg_schedule_detail_time_wrap .egg_schedule_detail_icon {  padding-right: 0.4rem;  display: flex;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn {  outline: none;  padding: 1rem;  text-align: center;  background: white;  border-radius: 0.2rem;  font-size: 1.4rem;  cursor: pointer;  color: #ccc;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {  color: #333;}.egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {  color: #eee;}.egg_schedule_list .egg_schedule_list_none {  width: 100%;  height: 100%;  display: flex;  flex-direction: column;  justify-content: center;  align-items: center;  color: #ccc;}.egg_schedule_list_none .egg_icon {  font-size: 2.5rem;}.egg_schedule_list_none_text {  padding-top: 1rem;}.egg_select {  position: relative;}.egg_select .egg_select_input {  outline: none;  border: 0.1rem solid #eee;  padding: 0.8rem;  text-align: center;  background: white;  border-radius: 0.2rem;  display: inline-block;  width: 100%;  box-sizing: border-box;}.egg_select .egg_select_input::placeholder {  color: #ccc;}.egg_select_list {  max-height: 12rem;  border-radius: 0 0 0.2rem 0.2rem;  box-shadow: 0 0.1rem 0.1rem 0.1rem #eee;  background: white;  user-select: none;  transition: 100ms ease;  scrollbar-width: thin;  overflow: auto;  opacity: 1;  z-index: 9;  width: 100%;  position: absolute;}.egg_select_list.hide {  opacity: 0;  visibility: hidden;}.egg_select_list::-webkit-scrollbar {  width: 0.4rem;  background: white;  border-radius: 0.2rem;}.egg_select_list::-webkit-scrollbar-thumb {  background: #ccc;  border-radius: 0.2rem;}.egg_select_list .egg_select_item {  padding: 0.6rem 1rem;  border-bottom: 0.1rem solid #eee;  cursor: pointer;  color: #333;  transition: 300ms ease;  text-align: center;}.egg_select_list .egg_select_item.selected {  font-weight: bold;  background: #f6f6f6;}.egg_select_list .egg_select_item.active {  background: #eee;}.egg_select_list .egg_select_item:hover {  background: #eee;}';
 /**
  * @description 嵌入样式
  */
@@ -131,15 +132,27 @@ function initLogo() {
  */
 function initTaskConfig() {
     try {
-        const configTemp = JSON.parse(GM_getValue('taskConfig'));
-        if (configTemp && Array.isArray(configTemp)) {
-            if (configTemp.length === taskConfig.length) {
+        const taskTemp = JSON.parse(GM_getValue('taskConfig'));
+        if (taskTemp && Array.isArray(taskTemp)) {
+            if (taskTemp.length === taskConfig.length) {
                 taskConfig.forEach((task, i) => {
-                    task.active = configTemp[i].active;
+                    task.active = taskTemp[i].active;
                 });
-                return;
             }
         }
+        // 监听值变化
+        GM_addValueChangeListener('taskConfig', (key, oldVal, newVal, remote) => {
+            if (remote) {
+                const taskTemp = JSON.parse(newVal);
+                if (taskTemp && Array.isArray(taskTemp)) {
+                    if (taskTemp.length === taskConfig.length) {
+                        taskConfig.forEach((task, i) => {
+                            task.active = taskTemp[i].active;
+                        });
+                    }
+                }
+            }
+        });
     }
     catch (e) { }
 }
@@ -155,8 +168,20 @@ function initSettings() {
                     settings[i] = settingsTemp[i];
                 }
             }
-            return;
         }
+        // 监听值变化
+        GM_addValueChangeListener('studySettings', (key, oldVal, newVal, remote) => {
+            if (remote) {
+                const settingsTemp = JSON.parse(newVal);
+                if (settingsTemp && Array.isArray(settingsTemp)) {
+                    if (settingsTemp.length === settings.length) {
+                        for (const i in settingsTemp) {
+                            settings[i] = settingsTemp[i];
+                        }
+                    }
+                }
+            }
+        });
     }
     catch (e) { }
 }
@@ -216,6 +241,16 @@ function initThemeColor() {
         if (themeColorTemp) {
             themeColor.value = themeColorTemp;
         }
+        // 监听值变化
+        GM_addValueChangeListener('themeColor', (key, oldVal, newVal, remote) => {
+            if (remote) {
+                // 主题色
+                const themeColorTemp = newVal;
+                if (themeColorTemp) {
+                    themeColor.value = themeColorTemp;
+                }
+            }
+        });
     }
     catch (error) { }
 }
@@ -225,6 +260,45 @@ function initThemeColor() {
 function renderTip() {
     const tipWrap = createElementNode('div', undefined, {
         class: 'egg_tip_wrap',
+        onclick(e) {
+            e.stopPropagation();
+        },
+        onmousedown(e) {
+            e.stopPropagation();
+        },
+        onmousemove(e) {
+            e.stopPropagation();
+        },
+        onmouseup(e) {
+            e.stopPropagation();
+        },
+        onmouseenter(e) {
+            e.stopPropagation();
+        },
+        onmouseleave(e) {
+            e.stopPropagation();
+        },
+        onmouseover(e) {
+            e.stopPropagation();
+        },
+        ontouchstart(e) {
+            e.stopPropagation();
+        },
+        ontouchmove(e) {
+            e.stopPropagation();
+        },
+        ontouchend(e) {
+            e.stopPropagation();
+        },
+        oninput(e) {
+            e.stopPropagation();
+        },
+        onchange(e) {
+            e.stopPropagation();
+        },
+        onblur(e) {
+            e.stopPropagation();
+        },
     });
     mountElement(tipWrap);
 }
@@ -610,10 +684,6 @@ const maxRefreshCount = 10;
  */
 const autoRefreshQRCodeInterval = 100000;
 /**
- * @description 视频静音
- */
-const muted = true;
-/**
  * @description url配置
  */
 const URL_CONFIG = {
@@ -677,7 +747,7 @@ const API_CONFIG = {
 /**
  * @description 版本号
  */
-const version = '1.7.0';
+const version = '1.7.3';
 /**
  * @description 任务类型
  */
@@ -697,8 +767,10 @@ var SettingType;
     SettingType[SettingType["SAME_TAB"] = 1] = "SAME_TAB";
     SettingType[SettingType["SILENT_RUN"] = 2] = "SILENT_RUN";
     SettingType[SettingType["SCHEDULE_RUN"] = 3] = "SCHEDULE_RUN";
-    SettingType[SettingType["RANDOM_EXAM"] = 4] = "RANDOM_EXAM";
-    SettingType[SettingType["REMOTE_PUSH"] = 5] = "REMOTE_PUSH";
+    SettingType[SettingType["VIDEO_MUTED"] = 4] = "VIDEO_MUTED";
+    SettingType[SettingType["RANDOM_EXAM"] = 5] = "RANDOM_EXAM";
+    SettingType[SettingType["AUTO_ANSWER"] = 6] = "AUTO_ANSWER";
+    SettingType[SettingType["REMOTE_PUSH"] = 7] = "REMOTE_PUSH";
 })(SettingType || (SettingType = {}));
 /**
  * @description 进度类型
@@ -1940,7 +2012,7 @@ function printColor(color, ...text) {
  * @param percent
  * @returns
  */
-function getProgressHTML(title, percent) {
+function getProgressHTML(title, current, total) {
     // html
     const progressHTML = `<div
     style="
@@ -1951,7 +2023,7 @@ function getProgressHTML(title, percent) {
     "
   >
     <span>${title}</span>
-    <span>${getHighlightHTML(percent)} %</span>
+    <span>${getHighlightHTML(`${current}`)} / ${total}</span>
   </div>
   <div
     style="
@@ -1966,7 +2038,7 @@ function getProgressHTML(title, percent) {
       style="
         background: linear-gradient(to left, #188fff80, #1890ff);
         height: 100%;
-        width: ${percent}%;
+        width: ${((100 * current) / total).toFixed(1)}%;
         border-radius: 10px;
       "
     ></div>
@@ -2524,7 +2596,6 @@ const taskConfig = reactive([
         need: 0,
         status: false,
         tip: '每日首次登录积1分。',
-        percent: 0,
         score: 0,
         active: true,
         immutable: true,
@@ -2537,7 +2608,6 @@ const taskConfig = reactive([
         need: 0,
         status: false,
         tip: '每有效阅读一篇文章积1分，上限6分。有效阅读文章累计1分钟积1分，上限6分。每日上限积12分。',
-        percent: 0,
         score: 0,
         active: true,
         immutable: false,
@@ -2550,7 +2620,6 @@ const taskConfig = reactive([
         need: 0,
         status: false,
         tip: '每有效一个音频或观看一个视频积1分，上限6分。有效收听音频或观看视频累计1分钟积1分，上限6分。每日上限积12分。',
-        percent: 0,
         score: 0,
         active: true,
         immutable: false,
@@ -2563,7 +2632,6 @@ const taskConfig = reactive([
         need: 0,
         status: false,
         tip: '每组答题每答对1道积1分。每日上限积5分。',
-        percent: 0,
         score: 0,
         active: true,
         immutable: false,
@@ -2573,7 +2641,16 @@ const taskConfig = reactive([
 /**
  * @description 设置
  */
-const settings = reactive([false, false, false, false, false, false]);
+const settings = reactive([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+]);
 /**
  * @description 总分
  */
@@ -3827,7 +3904,7 @@ async function handleLogin() {
                                 '学习强国, 登录成功!',
                                 `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
                                 `总积分: ${getHighlightHTML(totalScore.value)} 分`,
-                                ...taskConfig.map((task) => getProgressHTML(task.title, task.percent)),
+                                ...taskConfig.map((task) => getProgressHTML(task.title, task.currentScore, task.dayMaxScore)),
                             ],
                             type: 'success',
                         }, pushToken.value);
@@ -3863,7 +3940,7 @@ function handleLogout() {
     todayScore.value = 0;
     // 任务进度重置
     taskConfig.forEach((task) => {
-        task.percent = 0;
+        task.currentScore = 0;
     });
     taskStatus.value = TaskStatusType.LOADING;
     // 退出登录
@@ -3907,7 +3984,7 @@ async function handleVideo() {
     const playBtn = $$('.prism-play-btn')[0];
     if (video && playBtn) {
         // 设置是否静音
-        video.muted = muted;
+        watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
         log('正在尝试播放视频...');
         // 播放超时
         const timeout = setTimeout(() => {
@@ -4446,8 +4523,6 @@ async function refreshTaskList() {
             const { currentScore, dayMaxScore } = taskConfig[i];
             // 进度
             const rate = Number(((100 * currentScore) / dayMaxScore).toFixed(1));
-            // 百分比
-            taskConfig[i].percent = rate;
             // 分数
             taskConfig[i].score = currentScore;
             // 完成状态
@@ -4609,11 +4684,50 @@ function Select({ data, maxlength, placeholder = '', onchange, onblur, value, ke
  * @description 答题按钮
  */
 function ExamBtn() {
+    // 设置初始状态
+    watchEffect(() => (examPause.value = !settings[SettingType.AUTO_ANSWER]));
     return createElementNode('button', undefined, {
         class: watchEffectRef(() => `egg_exam_btn${examPause.value ? ' manual' : ''}`),
         type: 'button',
-        onclick: () => {
+        onclick(e) {
+            e.stopPropagation();
             examPause.value = !examPause.value;
+        },
+        onmousedown(e) {
+            e.stopPropagation();
+        },
+        onmousemove(e) {
+            e.stopPropagation();
+        },
+        onmouseup(e) {
+            e.stopPropagation();
+        },
+        onmouseenter(e) {
+            e.stopPropagation();
+        },
+        onmouseleave(e) {
+            e.stopPropagation();
+        },
+        onmouseover(e) {
+            e.stopPropagation();
+        },
+        ontouchstart(e) {
+            e.stopPropagation();
+        },
+        ontouchmove(e) {
+            e.stopPropagation();
+        },
+        ontouchend(e) {
+            e.stopPropagation();
+        },
+        oninput(e) {
+            e.stopPropagation();
+        },
+        onchange(e) {
+            e.stopPropagation();
+        },
+        onblur(e) {
+            e.stopPropagation();
         },
     }, createTextNode(watchEffectRef(() => `${examPause.value ? '开启自动答题' : '关闭自动答题'}`)));
 }
@@ -4627,6 +4741,45 @@ function Frame() {
     // 容器
     return createElementNode('div', undefined, {
         class: watchEffectRef(() => `egg_frame_wrap${frame.show ? '' : ' hide'}`),
+        onclick(e) {
+            e.stopPropagation();
+        },
+        onmousedown(e) {
+            e.stopPropagation();
+        },
+        onmousemove(e) {
+            e.stopPropagation();
+        },
+        onmouseup(e) {
+            e.stopPropagation();
+        },
+        onmouseenter(e) {
+            e.stopPropagation();
+        },
+        onmouseleave(e) {
+            e.stopPropagation();
+        },
+        onmouseover(e) {
+            e.stopPropagation();
+        },
+        ontouchstart(e) {
+            e.stopPropagation();
+        },
+        ontouchmove(e) {
+            e.stopPropagation();
+        },
+        ontouchend(e) {
+            e.stopPropagation();
+        },
+        oninput(e) {
+            e.stopPropagation();
+        },
+        onchange(e) {
+            e.stopPropagation();
+        },
+        onblur(e) {
+            e.stopPropagation();
+        },
     }, watchRef(() => [login.value, settings[SettingType.SAME_TAB]], () => {
         // 同屏任务
         if (login.value && settings[SettingType.SAME_TAB]) {
@@ -4927,7 +5080,7 @@ function NomalItem({ title, tip, checked, onchange, }) {
  * @description 设置任务项
  * @returns
  */
-function TaskItem({ title, tip, checked, percent, currentScore, dayMaxScore, onchange, immutable, }) {
+function TaskItem({ title, tip, checked, currentScore, dayMaxScore, onchange, immutable, }) {
     return createElementNode('div', undefined, {
         class: 'egg_task_item',
     }, [
@@ -4946,7 +5099,8 @@ function TaskItem({ title, tip, checked, percent, currentScore, dayMaxScore, onc
             createElementNode('div', undefined, { class: 'egg_progress' }, [
                 createElementNode('div', undefined, { class: 'egg_track' }, createElementNode('div', undefined, {
                     class: 'egg_bar',
-                    style: watchEffectRef(() => `width: ${percent.value}%;`),
+                    style: watchEffectRef(() => `width: ${((100 * currentScore.value) /
+                        dayMaxScore.value).toFixed(1)}%;`),
                 })),
             ]),
         ]),
@@ -5000,7 +5154,6 @@ function TaskList() {
             title: label.title,
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
-            percent: watchEffectRef(() => label.percent),
             currentScore: watchEffectRef(() => label.currentScore),
             dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {
@@ -5012,7 +5165,6 @@ function TaskList() {
             title: label.title,
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
-            percent: watchEffectRef(() => label.percent),
             currentScore: watchEffectRef(() => label.currentScore),
             dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {
@@ -5136,7 +5288,7 @@ function TaskBtn() {
                             '学习强国, 学习完成!',
                             `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
                             `总积分: ${getHighlightHTML(totalScore.value)} 分`,
-                            ...taskConfig.map((task) => getProgressHTML(task.title, task.percent)),
+                            ...taskConfig.map((task) => getProgressHTML(task.title, task.currentScore, task.dayMaxScore)),
                         ],
                         type: 'success',
                     }, pushToken.value);
@@ -5730,6 +5882,11 @@ function Panel() {
             tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
             type: SettingType.SCHEDULE_RUN,
         },
+        {
+            title: '视频静音',
+            tip: '视听学习时，静音播放视频',
+            type: SettingType.VIDEO_MUTED,
+        },
     ];
     // 运行设置标签
     const examLabels = [
@@ -5737,6 +5894,11 @@ function Panel() {
             title: '随机作答',
             tip: '无答案时, 随机选择或者填入答案, 不保证正确',
             type: SettingType.RANDOM_EXAM,
+        },
+        {
+            title: '自动答题',
+            tip: '进入答题页面时，自动答题并提交答案',
+            type: SettingType.AUTO_ANSWER,
         },
     ];
     // 推送设置标签
@@ -5765,6 +5927,45 @@ function Panel() {
     const panelShow = ref(false);
     return createElementNode('div', undefined, {
         class: `egg_panel_wrap${hasMobile() ? ' mobile' : ''}`,
+        onclick(e) {
+            e.stopPropagation();
+        },
+        onmousedown(e) {
+            e.stopPropagation();
+        },
+        onmousemove(e) {
+            e.stopPropagation();
+        },
+        onmouseup(e) {
+            e.stopPropagation();
+        },
+        onmouseenter(e) {
+            e.stopPropagation();
+        },
+        onmouseleave(e) {
+            e.stopPropagation();
+        },
+        onmouseover(e) {
+            e.stopPropagation();
+        },
+        ontouchstart(e) {
+            e.stopPropagation();
+        },
+        ontouchmove(e) {
+            e.stopPropagation();
+        },
+        ontouchend(e) {
+            e.stopPropagation();
+        },
+        oninput(e) {
+            e.stopPropagation();
+        },
+        onchange(e) {
+            e.stopPropagation();
+        },
+        onblur(e) {
+            e.stopPropagation();
+        },
     }, createElementNode('div', undefined, {
         class: watchEffectRef(() => `egg_panel${panelShow.value ? ' hide' : ''}`),
     }, [
@@ -5815,17 +6016,21 @@ function Panel() {
         })),
         // 提示部分
         Hr({ text: '提示' }),
-        createElementNode('div', undefined, { class: 'egg_tip_list' }, [
-            createTextNode('专项练习已被移除, 如需使用, 请点击'),
-            createElementNode('button', undefined, {
-                class: 'egg_tip_btn',
-                type: 'button',
-                onclick: debounce(doExamPaper, 300),
-                disabled: watchRef(() => [running.value, taskStatus.value], () => running.value ||
-                    taskStatus.value === TaskStatusType.START ||
-                    taskStatus.value === TaskStatusType.PAUSE),
-            }, createTextNode('去完成')),
-        ]),
+        createElementNode('div', undefined, { class: 'egg_tip_list' }, watchRef(login, () => login.value
+            ? [
+                createTextNode('专项练习已被移除, 如需使用, 请点击'),
+                createElementNode('button', undefined, {
+                    class: 'egg_tip_btn',
+                    type: 'button',
+                    onclick: debounce(doExamPaper, 300),
+                    disabled: watchRef(() => [running.value, taskStatus.value], () => running.value ||
+                        taskStatus.value === TaskStatusType.START ||
+                        taskStatus.value === TaskStatusType.PAUSE),
+                }, createTextNode('去完成')),
+            ]
+            : [
+                createElementNode('div', undefined, { class: 'egg_tip_content' }, createTextNode('请先登录!')),
+            ])),
         // 按钮集合
         createElementNode('div', undefined, {
             class: 'egg_btns_wrap',

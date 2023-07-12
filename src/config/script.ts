@@ -51,6 +51,7 @@ const SCRIPT_CONFIG = {
     'GM_setValue',
     'GM_getValue',
     'GM_openInTab',
+    'GM_addValueChangeListener',
     'unsafeWindow',
   ],
   updateURL:

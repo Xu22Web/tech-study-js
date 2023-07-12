@@ -56,7 +56,6 @@ function TaskList() {
             title: label.title,
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
-            percent: watchEffectRef(() => label.percent),
             currentScore: watchEffectRef(() => label.currentScore),
             dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {
@@ -68,7 +67,6 @@ function TaskList() {
             title: label.title,
             tip: label.tip,
             checked: watchEffectRef(() => label.active),
-            percent: watchEffectRef(() => label.percent),
             currentScore: watchEffectRef(() => label.currentScore),
             dayMaxScore: watchEffectRef(() => label.dayMaxScore),
             onchange: debounce((e) => {

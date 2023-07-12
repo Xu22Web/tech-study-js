@@ -178,11 +178,11 @@ function load(
 
 export {
   debounce,
-  sleep,
-  hasMobile,
-  setCookie,
   delCookie,
   getCookie,
-  studyPauseLock,
+  hasMobile,
   load,
+  setCookie,
+  sleep,
+  studyPauseLock,
 };

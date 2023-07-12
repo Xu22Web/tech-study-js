@@ -222,7 +222,7 @@ async function handleLogin() {
                   `当天积分:  ${getHighlightHTML(todayScore.value)} 分`,
                   `总积分: ${getHighlightHTML(totalScore.value)} 分`,
                   ...taskConfig.map((task) =>
-                    getProgressHTML(task.title, task.percent)
+                    getProgressHTML(task.title, task.currentScore,task.dayMaxScore)
                   ),
                 ],
                 type: 'success',
@@ -262,7 +262,7 @@ function handleLogout() {
   todayScore.value = 0;
   // 任务进度重置
   taskConfig.forEach((task) => {
-    task.percent = 0;
+    task.currentScore = 0;
   });
   taskStatus.value = TaskStatusType.LOADING;
   // 退出登录

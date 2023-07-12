@@ -18,6 +18,45 @@ function Frame() {
     undefined,
     {
       class: watchEffectRef(() => `egg_frame_wrap${frame.show ? '' : ' hide'}`),
+      onclick(e: Event) {
+        e.stopPropagation();
+      },
+      onmousedown(e: Event) {
+        e.stopPropagation();
+      },
+      onmousemove(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseup(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseenter(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseleave(e: Event) {
+        e.stopPropagation();
+      },
+      onmouseover(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchstart(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchmove(e: Event) {
+        e.stopPropagation();
+      },
+      ontouchend(e: Event) {
+        e.stopPropagation();
+      },
+      oninput(e: Event) {
+        e.stopPropagation();
+      },
+      onchange(e: Event) {
+        e.stopPropagation();
+      },
+      onblur(e: Event) {
+        e.stopPropagation();
+      },
     },
     watchRef(
       () => [login.value, settings[SettingType.SAME_TAB]],

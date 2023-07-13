@@ -40,8 +40,23 @@ load((href) => href === GM_getValue('readingUrl'), async () => {
     initChildListener();
     // 初始化提示
     renderTip();
-    // 处理文章
-    handleNews();
+    try {
+        // 处理文章
+        await handleNews();
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            // 提示
+            createTip(err.message);
+            // 错误
+            error(err.message);
+            return;
+        }
+        // 提示
+        createTip(String(err));
+        // 错误
+        error(err);
+    }
 });
 load((href) => href === GM_getValue('watchingUrl'), async () => {
     // 页面提示
@@ -58,8 +73,23 @@ load((href) => href === GM_getValue('watchingUrl'), async () => {
     initChildListener();
     // 初始化提示
     renderTip();
-    // 处理视频
-    handleVideo();
+    try {
+        // 处理视频
+        await handleVideo();
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            // 提示
+            createTip(err.message);
+            // 错误
+            error(err.message);
+            return;
+        }
+        // 提示
+        createTip(String(err));
+        // 错误
+        error(err);
+    }
 });
 load((href) => href === URL_CONFIG.examPractice, async () => {
     // 页面提示
@@ -76,8 +106,23 @@ load((href) => href === URL_CONFIG.examPractice, async () => {
     renderTip();
     // 创建答题按钮
     await renderExamBtn();
-    // 开始答题
-    doingExam(ExamType.PRACTICE);
+    try {
+        // 开始答题
+        await doingExam(ExamType.PRACTICE);
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            // 提示
+            createTip(err.message);
+            // 错误
+            error(err.message);
+            return;
+        }
+        // 提示
+        createTip(String(err));
+        // 错误
+        error(err);
+    }
 });
 load((href) => href.includes(URL_CONFIG.examPaper), async () => {
     // 页面提示
@@ -742,7 +787,7 @@ const API_CONFIG = {
 /**
  * @description 版本号
  */
-const version = '1.7.3';
+const version = '1.7.4';
 
 
 /**
@@ -4005,8 +4050,6 @@ async function handleVideo() {
     // 播放按键
     const playBtn = $$('.prism-play-btn')[0];
     if (video && playBtn) {
-        // 设置是否静音
-        watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
         log('正在尝试播放视频...');
         // 播放超时
         const timeout = setTimeout(() => {
@@ -4016,24 +4059,30 @@ async function handleVideo() {
             // 关闭页面
             handleCloseTaskWin();
         }, 20000);
+        // 设置是否静音
+        watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
         // 能播放
         video.addEventListener('canplay', () => {
-            log('正在尝试播放视频...');
-            if (video.paused) {
+            const timer = setInterval(() => {
                 // 尝试使用js的方式播放
                 video.play();
+                // 播放未成功
                 if (video.paused) {
                     // 尝试点击播放按钮播放
                     playBtn.click();
                 }
-            }
-            // 已经播放
-            if (!video.paused) {
+            }, 1000);
+            video.addEventListener('playing', () => {
+                // 清除超时定时器
                 clearTimeout(timeout);
+                // 清除定时器
+                clearInterval(timer);
+                log('播放视频成功!');
                 // 视听学习
                 reading(1);
-            }
-        });
+                return;
+            }, { once: true });
+        }, { once: true });
         return;
     }
     log('未找到视频!');
@@ -5320,7 +5369,7 @@ function TaskBtn() {
                             return;
                         }
                         // 提示
-                        createTip(err);
+                        createTip(String(err));
                         // 错误
                         error(err);
                     }

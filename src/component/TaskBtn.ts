@@ -114,7 +114,7 @@ function TaskBtn() {
               // 窗口不存在
               frame.exist = false;
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
             if (err instanceof Error) {
               // 提示
               createTip(err.message);
@@ -123,7 +123,7 @@ function TaskBtn() {
               return;
             }
             // 提示
-            createTip(err);
+            createTip(String(err));
             // 错误
             error(err);
           }

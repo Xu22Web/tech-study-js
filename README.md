@@ -76,19 +76,13 @@
 
 ### 更新与维护 Update and Maintenance
 
-1. 提升运行稳定性，修复专项答题未登录显示的问题
+1. 修复有声视频播放后，页面倒计时不继续的问题（注：不同标签页的有声视频需要用户交互才能播放，手动播放后会展示倒计时）
 
-2. 新增视频静音、自动答题选项，灵活自由配置，避免被封  
-
-3. 与此同时，提供更加便捷的版本选择
+2. 与此同时，提供更加便捷的版本选择
 
    - [Node.js 版](https://github.com/Xu22Web/tech-study-node 'Node.js 版')
 
    - [Docker 版](https://github.com/Xu22Web/tech-study-docker 'Docker 版')
-
-Tips:
-
-> 尝试安装 [uBlock Origin](https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak) 插件，屏蔽上传鼠标点击位置、前端截图等请求，降低被封风险
 
 ### 关于开发 Development
 

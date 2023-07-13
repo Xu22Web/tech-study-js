@@ -10,7 +10,7 @@ import { version } from './config/version';
 import { Settings } from './types';
 import { watch } from './utils/composition';
 import { $$, $_, createElementNode, mountElement } from './utils/element';
-import { log } from './utils/log';
+import { error, log } from './utils/log';
 import {} from './utils/push';
 import {} from './utils/random';
 import {} from './utils/time';
@@ -21,7 +21,7 @@ import { initChildListener, initMainListener } from './controller/frame';
 import {} from './controller/login';
 import { handleNews, handleVideo } from './controller/readAndWatch';
 import {} from './controller/schedule';
-import {} from './controller/tip';
+import { createTip } from './controller/tip';
 import {} from './controller/user';
 import {} from './component/Tip';
 import {} from './component/Hr';
@@ -91,8 +91,22 @@ load(
     initChildListener();
     // 初始化提示
     renderTip();
-    // 处理文章
-    handleNews();
+    try {
+      // 处理文章
+      await handleNews();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        // 提示
+        createTip(err.message);
+        // 错误
+        error(err.message);
+        return;
+      }
+      // 提示
+      createTip(String(err));
+      // 错误
+      error(err);
+    }
   }
 );
 
@@ -114,8 +128,22 @@ load(
     initChildListener();
     // 初始化提示
     renderTip();
-    // 处理视频
-    handleVideo();
+    try {
+      // 处理视频
+      await handleVideo();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        // 提示
+        createTip(err.message);
+        // 错误
+        error(err.message);
+        return;
+      }
+      // 提示
+      createTip(String(err));
+      // 错误
+      error(err);
+    }
   }
 );
 
@@ -137,8 +165,22 @@ load(
     renderTip();
     // 创建答题按钮
     await renderExamBtn();
-    // 开始答题
-    doingExam(ExamType.PRACTICE);
+    try {
+      // 开始答题
+      await doingExam(ExamType.PRACTICE);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        // 提示
+        createTip(err.message);
+        // 错误
+        error(err.message);
+        return;
+      }
+      // 提示
+      createTip(String(err));
+      // 错误
+      error(err);
+    }
   }
 );
 

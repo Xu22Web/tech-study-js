@@ -50,8 +50,6 @@ async function handleVideo() {
   // 播放按键
   const playBtn = $$('.prism-play-btn')[0];
   if (video && playBtn) {
-    // 设置是否静音
-    watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
     log('正在尝试播放视频...');
     // 播放超时
     const timeout = setTimeout(() => {
@@ -61,24 +59,38 @@ async function handleVideo() {
       // 关闭页面
       handleCloseTaskWin();
     }, 20000);
+    // 设置是否静音
+    watchEffect(() => (video.muted = settings[SettingType.VIDEO_MUTED]));
     // 能播放
-    video.addEventListener('canplay', () => {
-      log('正在尝试播放视频...');
-      if (video.paused) {
-        // 尝试使用js的方式播放
-        video.play();
-        if (video.paused) {
-          // 尝试点击播放按钮播放
-          playBtn.click();
-        }
-      }
-      // 已经播放
-      if (!video.paused) {
-        clearTimeout(timeout);
-        // 视听学习
-        reading(1);
-      }
-    });
+    video.addEventListener(
+      'canplay',
+      () => {
+        const timer = setInterval(() => {
+          // 尝试使用js的方式播放
+          video.play();
+          // 播放未成功
+          if (video.paused) {
+            // 尝试点击播放按钮播放
+            playBtn.click();
+          }
+        }, 1000);
+        video.addEventListener(
+          'playing',
+          () => {
+            // 清除超时定时器
+            clearTimeout(timeout);
+            // 清除定时器
+            clearInterval(timer);
+            log('播放视频成功!');
+            // 视听学习
+            reading(1);
+            return;
+          },
+          { once: true }
+        );
+      },
+      { once: true }
+    );
     return;
   }
   log('未找到视频!');
@@ -365,4 +377,4 @@ async function watchVideo() {
   }
 }
 
-export { readNews, watchVideo, reading, handleVideo, handleNews };
+export { handleNews, handleVideo, readNews, reading, watchVideo };

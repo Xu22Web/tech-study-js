@@ -12,7 +12,7 @@ import { debounce, hasMobile } from '../utils/utils';
 import { Hr } from './Hr';
 import { InfoItem } from './InfoItem';
 import { LoginItem } from './LoginItem';
-import { NomalItem } from './NoramlItem';
+import { NormalItem } from './NoramlItem';
 import { ScoreItem } from './ScoreItem';
 import { SettingsPanel } from './SettingsPanel';
 import { TaskBtn } from './TaskBtn';
@@ -158,7 +158,7 @@ function Panel() {
           undefined,
           { class: 'egg_run_list' },
           runLabels.map((label) => {
-            return NomalItem({
+            return NormalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],
@@ -175,7 +175,7 @@ function Panel() {
           undefined,
           { class: 'egg_exam_list' },
           examLabels.map((label) => {
-            return NomalItem({
+            return NormalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],
@@ -192,7 +192,7 @@ function Panel() {
           undefined,
           { class: 'egg_push_list' },
           pushLabels.map((label) => {
-            return NomalItem({
+            return NormalItem({
               title: label.title,
               tip: label.tip,
               checked: settings[label.type],

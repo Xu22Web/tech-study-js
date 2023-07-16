@@ -4,7 +4,7 @@ import { createElementNode, createTextNode } from '../utils/element';
  * @description 设置普通项
  * @returns
  */
-function NomalItem({
+function NormalItem({
   title,
   tip,
   checked,
@@ -40,4 +40,4 @@ function NomalItem({
   ]);
 }
 
-export { NomalItem };
+export { NormalItem };

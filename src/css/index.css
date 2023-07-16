@@ -213,13 +213,11 @@
   border-radius: 1rem;
   transition: 80ms ease;
   color: white;
+  background: #ccc;
+  padding: 0.4rem 0.8rem;
 }
 .egg_info_item .egg_login_btn:active {
   opacity: 0.8;
-}
-.egg_info_item .egg_login_btn {
-  background: #ccc;
-  padding: 0.4rem 0.8rem;
 }
 .egg_info_item {
   display: flex;

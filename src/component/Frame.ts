@@ -233,9 +233,21 @@ function Frame() {
         // 关闭窗口
         watch(
           () => [login.value, settings[SettingType.SAME_TAB]],
-          () =>
-            login.value &&
-            (settings[SettingType.SAME_TAB] ? closeWin() : closeFrame())
+          () => {
+            if (login.value) {
+              if (settings[SettingType.SAME_TAB]) {
+                frame.exist = true;
+                closeWin();
+              } else {
+                closeFrame();
+                frame.exist = false;
+              }
+            } else {
+              closeWin();
+              closeFrame();
+              frame.exist = false;
+            }
+          }
         );
       },
     }

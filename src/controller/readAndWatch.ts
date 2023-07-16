@@ -66,12 +66,12 @@ async function handleVideo() {
       'canplay',
       () => {
         const timer = setInterval(() => {
-          // 尝试使用js的方式播放
-          video.play();
+          // 尝试点击播放按钮播放
+          playBtn.click();
           // 播放未成功
           if (video.paused) {
-            // 尝试点击播放按钮播放
-            playBtn.click();
+            // 尝试使用js的方式播放
+            video.play();
           }
         }, 1000);
         video.addEventListener(
